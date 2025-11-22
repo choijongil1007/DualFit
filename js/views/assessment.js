@@ -148,20 +148,29 @@ async function runAIRecommendations(deal, forceRefresh = false) {
         icon.className = 'fa-solid fa-circle-notch fa-spin text-primary-500';
     });
 
-    if (forceRefresh) showToast("Updating AI recommendations...", "info");
+    if (forceRefresh) showToast("AI 추천 점수를 계산 중입니다...", "info");
 
     try {
+        // Coupling Logic Rules are explicitly added to the prompt
         const prompt = `
             Task: B2B Deal Scoring recommendation (1-5 scale).
             Language: Korean (Must output strictly in Korean).
             Deal: ${deal.dealName}
             Evidence: ${evidence}
             
+            Apply "Coupling Logic" to ensure consistency between Evidence and Scores:
+            1. **Pain vs Need**: If Pain is described as weak or unclear, 'Need' score MUST be Low (1-2).
+            2. **Champion vs Authority**: If no decision maker or champion is mentioned, 'Authority' score MUST be Low (1-2).
+            3. **Complexity vs Tech Fit**: If environment is complex/legacy, Tech Fit scores (Integration/Arch) should be conservative.
+            4. **Timeline**: If timeline is unrealistic or very tight, 'Timeline' score should be Low (risk is high).
+            
             Return JSON with recommended scores and brief reason for:
             Budget (Exist, Fit), Authority (Access, Power), Need (Fit, Urgent), Timeline (Clear, Easy),
             Tech (Req, UseCase, Arch, Sec, Data, Integ, Impl, Ops).
             
-            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "..."}, ...}}
+            If a Logic Rule is triggered, mention it in the "reason".
+            
+            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "예산이 명확히 확보되어 있습니다."}, ...}}
         `;
 
         const result = await callGemini(prompt);
@@ -170,7 +179,7 @@ async function runAIRecommendations(deal, forceRefresh = false) {
             deal.assessment.recommendations = result.items;
             Store.saveDeal(deal);
             applyAIRecommendations(result.items);
-            if (forceRefresh) showToast("Recommendations updated", "success");
+            if (forceRefresh) showToast("AI 추천이 완료되었습니다.", "success");
         }
 
     } catch (e) {
@@ -211,7 +220,7 @@ function applyAIRecommendations(items) {
             const confColor = rec.confidence === 'High' ? 'text-green-400' : rec.confidence === 'Medium' ? 'text-yellow-400' : 'text-red-400';
             el.querySelector('.tooltip').innerHTML = `
                 <div class="text-left">
-                    <div class="font-bold mb-1 text-white">Rec: ${rec.score} <span class="${confColor} text-[10px]">(${rec.confidence})</span></div>
+                    <div class="font-bold mb-1 text-white">AI 추천: ${rec.score} <span class="${confColor} text-[10px]">(${rec.confidence})</span></div>
                     <div class="leading-tight text-gray-300 text-xs font-normal">${rec.reason}</div>
                 </div>
             `;
@@ -266,9 +275,10 @@ function attachEvents(deal) {
             const recContainer = document.getElementById(`ai-rec-${type}-${itemId}`);
             if (recContainer && recContainer.dataset.recScore) {
                 const recScore = parseInt(recContainer.dataset.recScore);
+                // UI Coupling Logic: Warn if deviation >= 2
                 if (Math.abs(recScore - val) >= 2) {
                     pendingScoreChange = { target: e.target, type, itemId, newValue: val, oldValue: oldValue };
-                    document.getElementById('score-confirm-msg').innerHTML = `AI recommends <strong class="text-gray-900">${recScore}</strong>.<br>Are you sure about <strong class="text-gray-900">${val}</strong>?`;
+                    document.getElementById('score-confirm-msg').innerHTML = `AI는 <strong class="text-gray-900">${recScore}점</strong>을 추천했습니다.<br>선택하신 <strong class="text-gray-900">${val}점</strong>으로 확정하시겠습니까?`;
                     toggleModal(true);
                     return;
                 }
