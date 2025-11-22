@@ -12,32 +12,51 @@ export function renderSummary(container, dealId) {
 
     container.innerHTML = `
         <div class="mb-8 border-b border-gray-100 pb-6">
-            <h2 class="text-2xl font-bold text-gray-900 mb-1">Executive Summary</h2>
-            <p class="text-gray-500 text-sm">Strategic overview and action plan.</p>
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Deal 요약</h2>
+            <p class="text-gray-500 text-sm">전략 개요와 대응 계획</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
             <!-- Left: Quadrant -->
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex flex-col items-center">
-                <h3 class="font-bold text-lg text-gray-900 mb-6">Fit Analysis</h3>
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex flex-col items-center relative overflow-hidden">
+                <h3 class="font-bold text-lg text-gray-900 mb-6 z-10">Fit Analysis</h3>
                 
-                <div class="quadrant-container rounded-2xl mb-8">
+                <div class="quadrant-container rounded-2xl mb-8 z-10">
+                    <!-- Background Zones -->
+                    <div class="quadrant-bg">
+                        <div class="q-zone q-zone-tl">
+                            <span class="q-label-inner">Tech OK<br>Biz Weak</span>
+                        </div>
+                        <div class="q-zone q-zone-tr">
+                            <span class="q-label-inner text-emerald-600">Go</span>
+                        </div>
+                        <div class="q-zone q-zone-bl">
+                            <span class="q-label-inner text-gray-400">No-Go</span>
+                        </div>
+                        <div class="q-zone q-zone-br">
+                            <span class="q-label-inner">Biz OK<br>Tech Weak</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Lines -->
                     <div class="quadrant-line-x"></div>
                     <div class="quadrant-line-y"></div>
-                    <span class="quadrant-label q-top-left">Tech Strong</span>
-                    <span class="quadrant-label q-top-right text-primary-600">Ideal Fit</span>
-                    <span class="quadrant-label q-bottom-left text-red-400">Low Fit</span>
-                    <span class="quadrant-label q-bottom-right">Biz Strong</span>
                     
-                    <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;"></div>
+                    <!-- The Dot -->
+                    <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;">
+                        <div class="quadrant-dot-pulse"></div>
+                        <div class="quadrant-tooltip">
+                            Biz: ${bizScore} / Tech: ${techScore}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="w-full grid grid-cols-2 gap-4">
-                    <div class="bg-purple-50 p-4 rounded-2xl text-center">
+                <div class="w-full grid grid-cols-2 gap-4 z-10">
+                    <div class="bg-purple-50 p-4 rounded-2xl text-center border border-purple-100">
                         <div class="text-[10px] text-purple-600 uppercase font-bold tracking-wider mb-1">Biz Score</div>
                         <div class="text-3xl font-bold text-purple-900">${bizScore}</div>
                     </div>
-                    <div class="bg-blue-50 p-4 rounded-2xl text-center">
+                    <div class="bg-blue-50 p-4 rounded-2xl text-center border border-blue-100">
                         <div class="text-[10px] text-blue-600 uppercase font-bold tracking-wider mb-1">Tech Score</div>
                         <div class="text-3xl font-bold text-blue-900">${techScore}</div>
                     </div>
@@ -48,8 +67,8 @@ export function renderSummary(container, dealId) {
             <div class="flex flex-col h-full">
                 <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex-grow relative overflow-hidden">
                     <div class="flex justify-between items-center mb-6 relative z-10">
-                        <h3 class="font-bold text-lg text-gray-900">AI Advisor Strategy</h3>
-                        <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500">
+                        <h3 class="font-bold text-lg text-gray-900">AI 전략 조언</h3>
+                        <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500 shadow-sm border border-yellow-100">
                             <i class="fa-solid fa-lightbulb"></i>
                         </div>
                     </div>
@@ -60,15 +79,15 @@ export function renderSummary(container, dealId) {
                             <div class="h-2 bg-gray-100 rounded w-5/6"></div>
                             <div class="h-2 bg-gray-100 rounded w-4/6"></div>
                         </div>
-                        <p class="text-xs text-gray-400">Generating strategic insights based on 12 data points...</p>
+                        <p class="text-xs text-gray-400">전략적 인사이트 생성 중...</p>
                     </div>
 
                     <!-- Decorative blob -->
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full -z-0 opacity-50"></div>
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full -z-0 opacity-60 pointer-events-none"></div>
                 </div>
                 
-                <button id="btn-back-discovery" class="mt-4 w-full py-3 bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 rounded-full text-sm font-semibold transition-all shadow-sm btn-pill">
-                    Update Discovery & Recalculate
+                <button id="btn-back-discovery" class="mt-4 w-full py-3 bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 rounded-full text-sm font-semibold transition-all shadow-sm btn-pill group">
+                    <i class="fa-solid fa-rotate-left mr-2 text-gray-400 group-hover:text-gray-600"></i> Discovery 업데이트 및 재계산
                 </button>
             </div>
         </div>
@@ -82,17 +101,19 @@ export function renderSummary(container, dealId) {
              
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 ${lowItems.length > 0 ? lowItems.map(item => `
-                    <div class="p-4 bg-white border border-red-100 rounded-xl shadow-sm flex items-start gap-3">
-                        <i class="fa-solid fa-triangle-exclamation text-red-500 mt-1 text-xs"></i>
+                    <div class="p-4 bg-white border border-red-100 rounded-xl shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow duration-200">
+                        <div class="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fa-solid fa-triangle-exclamation text-red-500 text-[10px]"></i>
+                        </div>
                         <div>
                             <div class="font-bold text-gray-800 text-sm mb-1">${item.catLabel}</div>
-                            <div class="text-xs text-gray-500 mb-2">${item.label}</div>
+                            <div class="text-xs text-gray-500 mb-2 leading-snug">${item.label}</div>
                             <span class="text-[10px] font-bold bg-red-50 text-red-600 px-2 py-1 rounded border border-red-100">
-                                Score: ${item.val} / 5
+                                점수: ${item.val} / 5
                             </span>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-full text-center text-gray-400 py-4">No critical risks identified.</div>'}
+                `).join('') : '<div class="col-span-full text-center text-gray-400 py-8 flex flex-col items-center"><i class="fa-solid fa-check-circle text-3xl text-gray-200 mb-2"></i><span>식별된 주요 위험 요소가 없습니다.</span></div>'}
              </div>
         </div>
     `;
@@ -149,19 +170,35 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
             .map(s => s.result.evidenceSummary)
             .join(' ');
 
-        const lowItemsText = lowItems.map(i => `- ${i.catLabel} (${i.label}): ${i.val}`).join('\n');
+        const lowItemsText = lowItems.map(i => `- ${i.catLabel} (${i.label}): ${i.val}점`).join('\n');
 
         const prompt = `
-            Task: Strategic Deal Review.
+            Role: Sales Strategist.
+            Task: Create a Deal Executive Summary.
             Language: Korean (Must output strictly in Korean).
-            Deal: ${deal.dealName} (Biz: ${bizScore}, Tech: ${techScore})
-            Risks: ${lowItemsText}
-            Evidence: ${evidence}
             
-            Return JSON:
+            Context:
+            - Deal Name: ${deal.dealName}
+            - Biz Score: ${bizScore} / 100
+            - Tech Score: ${techScore} / 100
+            - Risk Factors (Low Scores):
+            ${lowItemsText}
+            
+            Discovery Evidence:
+            ${evidence}
+            
+            Request:
+            Return a JSON object with:
+            1. "health": A 1-2 sentence assessment of the deal health in Korean.
+            2. "actions": An array of 2-3 recommended actions. Each object should have "action" (title) and "reason" (explanation), both in Korean.
+            
+            Format:
             {
-                "health": "Short health check sentence",
-                "actions": [{"action": "Specific Action", "reason": "Why"}]
+                "health": "이 딜은 ... 상태입니다.",
+                "actions": [
+                    {"action": "경영진 미팅 추진", "reason": "Authority 점수가 낮으므로..."},
+                    ...
+                ]
             }
         `;
 
@@ -169,26 +206,27 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
         
         container.innerHTML = `
             <div class="mb-6">
-                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Deal Health</h4>
+                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Deal Health Check</h4>
                 <p class="font-medium text-gray-800 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-                    ${result.health || 'Unable to generate health check.'}
+                    ${result.health || '건강 상태를 진단할 수 없습니다.'}
                 </p>
             </div>
             
             <div>
-                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Strategic Actions</h4>
+                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Action Plan</h4>
                 <ul class="space-y-3">
                     ${result.actions ? result.actions.map(act => `
                         <li class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                             <div class="font-bold text-gray-900 text-sm mb-1">👉 ${act.action}</div>
                             <div class="text-gray-500 text-xs leading-relaxed">${act.reason}</div>
                         </li>
-                    `).join('') : '<li class="text-gray-400 text-sm">No specific actions recommended.</li>'}
+                    `).join('') : '<li class="text-gray-400 text-sm">특별한 권장 액션이 없습니다.</li>'}
                 </ul>
             </div>
         `;
 
     } catch (e) {
-        container.innerHTML = `<div class="text-red-400 text-sm bg-red-50 p-3 rounded-lg border border-red-100">AI Service Unavailable. Please try again.</div>`;
+        console.error(e);
+        container.innerHTML = `<div class="text-red-400 text-sm bg-red-50 p-3 rounded-lg border border-red-100 flex items-center gap-2"><i class="fa-solid fa-circle-exclamation"></i> AI 서비스를 사용할 수 없습니다. 다시 시도해주세요.</div>`;
     }
 }
