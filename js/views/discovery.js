@@ -278,18 +278,18 @@ function attachEvents(deal) {
                 const contentDiv = card.querySelector('.toggle-content');
                 contentDiv.classList.remove('hidden');
 
-                // Define JSON structure instruction clearly to avoid syntax errors in prompt
-                const jsonInstruction = JSON.stringify({
-                    jtbd: "Analyze the underlying Job to be Done (Functional & Emotional).",
-                    sc: ["List 3-5 specific Success Criteria (Measurable outcomes)."],
-                    todo: {
-                        "Presales": "Specific action item",
-                        "Sales": "Specific action item",
-                        "Marketing": "Specific action item",
-                        "CSM": "Specific action item"
-                    },
-                    evidenceSummary: "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage."
-                }, null, 2);
+                // Explicit JSON structure string to avoid template literal issues
+                const jsonStructure = `{
+  "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
+  "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
+  "todo": {
+    "Presales": "Specific action item",
+    "Sales": "Specific action item",
+    "Marketing": "Specific action item",
+    "CSM": "Specific action item"
+  },
+  "evidenceSummary": "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage."
+}`;
 
                 const prompt = `
 Role: B2B Sales Expert.
@@ -308,7 +308,7 @@ User Inputs:
 
 Output Instructions:
 Return a SINGLE JSON object matching this structure:
-${jsonInstruction}
+${jsonStructure}
 `;
 
                 const result = await callGemini(prompt);
@@ -327,9 +327,11 @@ ${jsonInstruction}
 
             } catch (error) {
                 console.error(error);
-                showToast("Analysis failed: " + error.message, 'error');
-                resultAreaContainer.innerHTML = ''; 
-                resultAreaContainer.classList.add('hidden');
+                showToast("Analysis failed. Check console for details.", 'error');
+                resultAreaContainer.innerHTML = `<div class="bg-red-50 p-4 rounded-xl text-red-600 text-sm border border-red-100">
+                    <strong>Analysis Failed:</strong> ${error.message}<br>
+                    <span class="text-xs text-red-400 mt-1 block">Try again or check connection.</span>
+                </div>`;
             } finally {
                 setButtonLoading(btn, false);
             }
