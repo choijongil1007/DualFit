@@ -154,28 +154,43 @@ function renderResult(result, isStale) {
         return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: Invalid result format.</div>`;
     }
 
-    // 3. Render Lists (SC and JTBD)
+    // 3. Render Lists (SC and JTBD) - Small black bullets
     let scItemsHtml = '<li>-</li>';
     if (Array.isArray(result.sc) && result.sc.length > 0) {
         scItemsHtml = result.sc.map(item => 
-            `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5 flex-shrink-0"></i> <span>${item}</span></li>`
+            `<li class="flex items-start gap-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2 flex-shrink-0"></span>
+                <span class="text-gray-700 leading-relaxed">${item}</span>
+            </li>`
         ).join('');
     }
 
     let jtbdItemsHtml = '<li class="text-gray-500">-</li>';
     if (Array.isArray(result.jtbd) && result.jtbd.length > 0) {
         jtbdItemsHtml = result.jtbd.map(item => 
-            `<li class="flex items-start gap-2"><i class="fa-solid fa-bullseye text-blue-400 text-[10px] mt-1.5 flex-shrink-0"></i> <span>${item}</span></li>`
+            `<li class="flex items-start gap-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2 flex-shrink-0"></span>
+                <span class="text-gray-700 leading-relaxed">${item}</span>
+            </li>`
         ).join('');
     } else if (typeof result.jtbd === 'string') {
-         // Fallback if AI returns string despite prompt
-         jtbdItemsHtml = `<li class="flex items-start gap-2"><i class="fa-solid fa-bullseye text-blue-400 text-[10px] mt-1.5 flex-shrink-0"></i> <span>${result.jtbd}</span></li>`;
+         // Fallback if AI returns string
+         jtbdItemsHtml = `
+            <li class="flex items-start gap-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2 flex-shrink-0"></span>
+                <span class="text-gray-700 leading-relaxed">${result.jtbd}</span>
+            </li>`;
     }
 
-    // 4. Render To-Do
+    // 4. Render To-Do (Filter out TechSupport strictly)
     let todoItemsHtml = '<div class="text-sm text-gray-400">No specific actions generated.</div>';
     if (result.todo && typeof result.todo === 'object') {
-        const todos = Object.entries(result.todo);
+        const todos = Object.entries(result.todo)
+            .filter(([role]) => {
+                const r = role.toLowerCase().replace(/\s+/g, '');
+                return r !== 'techsupport' && r !== 'technicalsupport' && r !== '기술지원';
+            });
+
         if (todos.length > 0) {
             todoItemsHtml = todos.map(([role, task]) => `
                 <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
@@ -202,7 +217,7 @@ function renderResult(result, isStale) {
                     <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 relative z-10">
                         <i class="fa-solid fa-bullseye text-blue-500"></i> Jobs to be Done
                     </h4>
-                    <ul class="text-sm text-gray-600 space-y-2 relative z-10">
+                    <ul class="text-sm space-y-2 relative z-10">
                         ${jtbdItemsHtml}
                     </ul>
                 </div>
@@ -213,7 +228,7 @@ function renderResult(result, isStale) {
                     <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 relative z-10">
                         <i class="fa-solid fa-flag-checkered text-emerald-500"></i> Success Criteria
                     </h4>
-                    <ul class="text-sm text-gray-600 space-y-2 relative z-10">
+                    <ul class="text-sm space-y-2 relative z-10">
                          ${scItemsHtml}
                     </ul>
                 </div>
@@ -333,7 +348,7 @@ User Inputs:
 - Problem: ${stageData.problem}
 
 Output Instructions:
-Return a SINGLE JSON object matching this structure (Do not include TechSupport in todo):
+Return a SINGLE JSON object matching this structure (DO NOT include 'Technical Support' or 'TechSupport' in todo):
 ${jsonStructure}
 `;
 
