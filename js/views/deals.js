@@ -3,6 +3,8 @@ import { Store } from '../store.js';
 import { generateId, showToast } from '../utils.js';
 import { navigateTo } from '../app.js';
 
+let deleteTargetId = null; // Store ID to delete
+
 export function renderDeals(container) {
     const deals = Store.getDeals();
 
@@ -22,7 +24,7 @@ export function renderDeals(container) {
             ` : deals.map(deal => createDealCard(deal)).join('')}
         </div>
 
-        <!-- Create Modal (Modern Dark Style) -->
+        <!-- Create Modal (Modern Black Style) -->
         <div id="create-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
             <!-- Backdrop -->
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
@@ -61,7 +63,6 @@ export function renderDeals(container) {
                     </div>
                     <div>
                          <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Target Date</label>
-                         <!-- Date input styling is tricky in dark mode, basic adjustment here -->
                          <input type="date" name="purchaseDate" class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white outline-none transition-all [color-scheme:dark]">
                     </div>
                     <div>
@@ -74,6 +75,30 @@ export function renderDeals(container) {
                         <button type="submit" class="px-5 py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors text-sm shadow-lg shadow-white/5">Create Deal</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal (Modern Black Style) -->
+        <div id="delete-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm delete-modal-backdrop transition-opacity"></div>
+            <div class="relative w-full max-w-sm bg-[#111111] text-white border border-white/10 rounded-xl shadow-2xl p-6 animate-modal-in text-center">
+                <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors btn-close-delete-modal">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                
+                <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 text-red-500">
+                    <i class="fa-solid fa-trash-can text-xl"></i>
+                </div>
+                
+                <h3 class="text-lg font-bold mb-2">Delete Deal?</h3>
+                <p class="text-gray-400 text-sm mb-6">
+                    이 Deal을 삭제하시겠습니까?<br>삭제된 데이터는 복구할 수 없습니다.
+                </p>
+                
+                <div class="flex gap-3 justify-center">
+                    <button type="button" class="btn-close-delete-modal px-4 py-2 bg-[#222] hover:bg-[#333] text-white rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                    <button type="button" id="btn-confirm-delete" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium shadow-lg shadow-red-900/20 transition-colors">Delete</button>
+                </div>
             </div>
         </div>
     `;
@@ -131,28 +156,24 @@ function createDealCard(deal) {
 }
 
 function attachEvents() {
-    const modal = document.getElementById('create-modal');
+    /* --- CREATE MODAL --- */
+    const createModal = document.getElementById('create-modal');
     const createBtn = document.getElementById('btn-create-deal');
-    const form = document.getElementById('create-form');
+    const createForm = document.getElementById('create-form');
 
-    // Open
-    createBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    const openCreateModal = () => createModal.classList.remove('hidden');
+    const closeCreateModal = () => createModal.classList.add('hidden');
 
-    // Close function
-    const closeModal = () => modal.classList.add('hidden');
+    if (createBtn) createBtn.addEventListener('click', openCreateModal);
 
-    // 1. Close on X button and Cancel button
-    modal.querySelectorAll('.btn-close-modal').forEach(btn => {
-        btn.addEventListener('click', closeModal);
+    createModal.querySelectorAll('.btn-close-modal').forEach(btn => {
+        btn.addEventListener('click', closeCreateModal);
     });
-
-    // 2. Close on Backdrop click
-    modal.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    createModal.querySelector('.modal-backdrop').addEventListener('click', closeCreateModal);
     
-    // Create Logic
-    form.addEventListener('submit', (e) => {
+    createForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
+        const formData = new FormData(createForm);
         const newDeal = Store.createEmptyDeal();
         
         newDeal.id = generateId();
@@ -165,29 +186,47 @@ function attachEvents() {
         newDeal.memo = formData.get('memo');
         
         Store.saveDeal(newDeal);
-        closeModal();
+        closeCreateModal();
         showToast('Deal created successfully', 'success');
-        
-        // Reload list
-        const app = document.getElementById('app');
-        renderDeals(app);
+        renderDeals(document.getElementById('app'));
     });
 
+    /* --- DELETE MODAL --- */
+    const deleteModal = document.getElementById('delete-modal');
+    const confirmDeleteBtn = document.getElementById('btn-confirm-delete');
+    
+    const closeDeleteModal = () => {
+        deleteModal.classList.add('hidden');
+        deleteTargetId = null;
+    };
+
+    // Close triggers for delete modal
+    deleteModal.querySelectorAll('.btn-close-delete-modal').forEach(btn => {
+        btn.addEventListener('click', closeDeleteModal);
+    });
+    deleteModal.querySelector('.delete-modal-backdrop').addEventListener('click', closeDeleteModal);
+
+    // Confirm Action
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (deleteTargetId) {
+            Store.deleteDeal(deleteTargetId);
+            showToast('Deal이 삭제되었습니다.', 'success');
+            closeDeleteModal();
+            renderDeals(document.getElementById('app'));
+        }
+    });
+
+    /* --- CARD EVENTS --- */
     // Delete Buttons Logic
     document.querySelectorAll('.btn-delete-deal').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent card click logic
-            const id = btn.dataset.id;
-            if (confirm('이 Deal을 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.')) {
-                Store.deleteDeal(id);
-                showToast('Deal이 삭제되었습니다.', 'success');
-                // Reload list
-                renderDeals(document.getElementById('app'));
-            }
+            e.stopPropagation(); // Prevent card click
+            deleteTargetId = btn.dataset.id;
+            deleteModal.classList.remove('hidden');
         });
     });
 
-    // Card Click Logic
+    // Card Click Logic (Detail View)
     document.querySelectorAll('.deal-card').forEach(card => {
         card.addEventListener('click', () => {
             const id = card.dataset.id;
