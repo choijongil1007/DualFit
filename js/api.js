@@ -1,32 +1,47 @@
 
-import { GoogleGenAI } from "@google/genai";
 import { cleanJSONString } from './utils.js';
+import { API_URL } from './config.js';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-export async function callGemini(prompt) {
+/**
+ * Call Gemini via Google Apps Script Proxy
+ * Ensures no direct API Key usage in frontend
+ */
+export async function callGemini(promptText) {
     try {
-        console.log("Sending Prompt to Gemini:", prompt);
+        console.log("Sending Prompt to Proxy:", promptText);
         
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: 'application/json',
-            }
+        // Construct the payload
+        const payload = {
+            prompt: promptText
+        };
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            // mode: 'no-cors', // DO NOT use no-cors if you want to read the response
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8", // GAS sometimes prefers this or text/plain
+            },
+            body: JSON.stringify(payload)
         });
 
-        const text = response.text;
-        console.log("Gemini Response Text:", text);
-
-        if (!text) {
-            throw new Error("Empty response from Gemini");
+        if (!response.ok) {
+            throw new Error(`Proxy Error: ${response.status} ${response.statusText}`);
         }
 
-        return parseResult(text);
+        const data = await response.json();
+        
+        // The Apps Script should return { text: "..." }
+        if (!data || !data.text) {
+            console.error("Invalid Proxy Response:", data);
+            throw new Error("Invalid response structure from proxy");
+        }
+
+        console.log("Gemini Response Text:", data.text);
+        return parseResult(data.text);
 
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
+        // Fallback or re-throw
         throw error;
     }
 }
