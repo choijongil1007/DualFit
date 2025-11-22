@@ -1,0 +1,5 @@
+{
+  "name": "DualFit",
+  "description": "A Notion-style sales deal management app for Discovery and Assessment (Biz Fit + Tech Fit), powered by Gemini via Google Apps Script.",
+  "requestFramePermissions": []
+}

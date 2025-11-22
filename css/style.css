@@ -1,0 +1,125 @@
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Notion-like Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #e5e5e5;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #d4d4d4;
+}
+
+/* Loader */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #000;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Notion-style Toggle details summary */
+details > summary {
+    list-style: none;
+}
+details > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Quadrant Chart */
+.quadrant-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1 / 1;
+    border: 1px solid #e5e7eb;
+    margin: 0 auto;
+    background: #f9fafb;
+}
+
+.quadrant-line-x {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #d1d5db;
+    z-index: 1;
+}
+
+.quadrant-line-y {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #d1d5db;
+    z-index: 1;
+}
+
+.quadrant-label {
+    position: absolute;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    z-index: 2;
+}
+.q-top-left { top: 10px; left: 10px; }
+.q-top-right { top: 10px; right: 10px; }
+.q-bottom-left { bottom: 10px; left: 10px; }
+.q-bottom-right { bottom: 10px; right: 10px; }
+
+.quadrant-dot {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-color: #2563eb; /* Blue-600 */
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: translate(-50%, 50%); /* Adjust anchor to center, flip Y visually */
+    z-index: 10;
+    transition: all 0.5s ease-out;
+}
+
+/* Tooltip */
+.tooltip {
+    visibility: hidden;
+    position: absolute;
+    z-index: 50;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937;
+    color: white;
+    text-align: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    width: max-content;
+    max-width: 250px;
+    white-space: normal;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.has-tooltip:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
