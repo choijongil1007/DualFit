@@ -1,10 +1,11 @@
+
 export const API_URL = "https://script.google.com/macros/s/AKfycbzcdRKb5yBKr5bu9uvGt28KTQqUkPsAR80GwbURPzFeOmaRY2_i1lA4Kk_GsuNpBZuVRA/exec";
 
 export const DISCOVERY_STAGES = [
-    { id: 'awareness', label: '1. 인식 (Awareness)', color: 'bg-red-50 text-red-700 border-red-200' },
-    { id: 'consideration', label: '2. 고려 (Consideration)', color: 'bg-orange-50 text-orange-700 border-orange-200' },
-    { id: 'evaluation', label: '3. 평가 (Evaluation)', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    { id: 'purchase', label: '4. 구매 (Purchase)', color: 'bg-green-50 text-green-700 border-green-200' }
+    { id: 'awareness', label: '1. 인식 (Awareness)', iconStyle: 'bg-rose-50 text-rose-600' },
+    { id: 'consideration', label: '2. 고려 (Consideration)', iconStyle: 'bg-amber-50 text-amber-600' },
+    { id: 'evaluation', label: '3. 평가 (Evaluation)', iconStyle: 'bg-sky-50 text-sky-600' },
+    { id: 'purchase', label: '4. 구매 (Purchase)', iconStyle: 'bg-emerald-50 text-emerald-600' }
 ];
 
 export const ASSESSMENT_CONFIG = {

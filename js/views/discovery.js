@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
@@ -26,61 +27,58 @@ export function renderDiscovery(container, dealId) {
 function renderStage(stageConfig, data) {
     const isStale = !data.frozen && data.result; 
 
-    // Dynamic classes based on stage config colors (mapped to generic soft styling)
-    // We override config colors to stick to the premium white/gray theme but keep subtle accents
-    
+    // Premium SaaS Style: Clean White Card with Subtle Shadows
     return `
-        <div class="bg-white border border-gray-100 rounded-2xl shadow-card stage-card overflow-hidden transition-all duration-300" data-stage="${stageConfig.id}">
-            <div class="p-5 flex justify-between items-center cursor-pointer toggle-header bg-white hover:bg-gray-50/50 transition-colors select-none">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 stage-card overflow-hidden group" data-stage="${stageConfig.id}">
+            <div class="p-6 flex justify-between items-center cursor-pointer toggle-header hover:bg-gray-50/50 transition-colors select-none">
                 <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 text-gray-500 font-bold text-xs shadow-inner">
+                    <!-- Accent Color applied only to the icon container -->
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-sm ${stageConfig.iconStyle}">
                         ${stageConfig.label.split('.')[0]}
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-900 text-base">${stageConfig.label.split('. ')[1]}</h3>
+                        <h3 class="font-bold text-gray-900 text-base tracking-tight">${stageConfig.label.split('. ')[1]}</h3>
                         ${data.frozen 
-                            ? '<span class="text-xs text-green-600 font-medium flex items-center gap-1 mt-0.5"><i class="fa-solid fa-check-circle"></i> Analysis Complete</span>' 
-                            : '<span class="text-xs text-gray-400 font-medium">Draft</span>'}
+                            ? '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>' 
+                            : '<span class="text-xs text-gray-400 font-medium mt-0.5 block">Not analyzed yet</span>'}
                     </div>
                 </div>
-                <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 transition-transform duration-300 icon-chevron">
-                    <i class="fa-solid fa-chevron-down text-sm"></i>
+                <div class="w-8 h-8 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center transition-transform duration-300 icon-chevron group-hover:bg-white group-hover:shadow-sm group-hover:text-gray-600">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
                 </div>
             </div>
             
             <div class="hidden toggle-content border-t border-gray-50">
-                <div class="p-6 md:p-8 space-y-6">
+                <div class="p-6 md:p-8 space-y-8">
                     
                     ${isStale ? `
-                        <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm">
+                        <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm animate-pulse">
                             <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
                             <div>
                                 <strong class="font-semibold block mb-0.5">Input Changed</strong>
-                                Data has been modified. Please refresh the AI analysis to get updated insights.
+                                Data has been modified. Please regenerate the insights.
                             </div>
                         </div>
                     ` : ''}
 
-                    <!-- Inputs -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        ${renderInput('Behavior', 'behavior', data.behavior, stageConfig.id)}
-                        ${renderInput('Emotion', 'emotion', data.emotion, stageConfig.id)}
-                        ${renderInput('Touchpoint', 'touchpoint', data.touchpoint, stageConfig.id)}
-                        ${renderInput('Problem / Pain', 'problem', data.problem, stageConfig.id)}
+                    <!-- Inputs Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        ${renderInput('Customer Behavior', 'behavior', data.behavior, stageConfig.id)}
+                        ${renderInput('Customer Emotion', 'emotion', data.emotion, stageConfig.id)}
+                        ${renderInput('Touchpoint / Channel', 'touchpoint', data.touchpoint, stageConfig.id)}
+                        ${renderInput('Key Problem / Pain', 'problem', data.problem, stageConfig.id)}
                     </div>
 
-                    <div class="flex justify-end pt-2">
-                         <button class="btn-analyze bg-gray-900 text-white px-5 py-2.5 rounded-full hover:bg-black transition-all text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill" data-stage="${stageConfig.id}">
-                            <i class="fa-solid fa-sparkles text-yellow-400"></i> Generate Insights
+                    <!-- Action Button -->
+                    <div class="flex justify-end pt-2 border-t border-dashed border-gray-100 mt-4">
+                         <button class="btn-analyze bg-gray-900 text-white px-6 py-2.5 rounded-full hover:bg-black transition-all text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill active:scale-95" data-stage="${stageConfig.id}">
+                            <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i> 
+                            ${data.result ? 'Regenerate Analysis' : 'Generate Insights'}
                          </button>
                     </div>
 
-                    <!-- Results -->
-                    <div class="result-area pt-8 ${!data.result && !isStale ? 'hidden' : ''}">
-                        <div class="flex items-center gap-2 mb-4">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">AI Analysis Result</span>
-                            <div class="h-px bg-gray-100 flex-grow"></div>
-                        </div>
+                    <!-- Results Section -->
+                    <div class="result-area pt-4 ${!data.result && !isStale ? 'hidden' : ''}">
                         ${data.result ? renderResult(data.result, isStale) : ''}
                     </div>
                 </div>
@@ -92,66 +90,82 @@ function renderStage(stageConfig, data) {
 function renderInput(label, key, value, stageId) {
     return `
         <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wide">${label}</label>
+            <label class="text-xs font-bold text-gray-500 uppercase ml-1 tracking-wider">${label}</label>
             <textarea 
-                class="input-premium w-full min-h-[100px] resize-none"
+                class="input-premium w-full min-h-[110px] resize-none leading-relaxed text-gray-700"
                 data-stage="${stageId}" 
                 data-key="${key}"
-                placeholder="Type here..."
+                placeholder="Enter details..."
             >${value || ''}</textarea>
         </div>
     `;
 }
 
 function renderResult(result, isStale) {
-    const opacity = isStale ? 'opacity-40 grayscale' : 'opacity-100';
+    const opacity = isStale ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100';
     
     if (typeof result === 'string') {
         return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: ${result}</div>`;
     }
 
     return `
-        <div class="${opacity} space-y-6 transition-all duration-300">
+        <div class="${opacity} space-y-6 transition-all duration-500">
+            
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div class="w-full border-t border-gray-100"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-white px-3 text-xs font-bold text-gray-400 uppercase tracking-widest">AI Insights</span>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 gap-4">
-                <div class="bg-gray-50/50 p-5 rounded-2xl border border-gray-100 hover:border-blue-100 transition-colors group">
-                    <h4 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center text-xs"><i class="fa-solid fa-bullseye"></i></div>
+                <!-- JTBD Card -->
+                <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 hover:border-blue-200 transition-colors group shadow-sm">
+                    <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shadow-sm"><i class="fa-solid fa-bullseye"></i></div>
                         Jobs to be Done
                     </h4>
-                    <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line group-hover:text-gray-800 transition-colors">${result.jtbd || '-'}</p>
+                    <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line group-hover:text-gray-800 transition-colors pl-1">${result.jtbd || '-'}</p>
                 </div>
 
-                <div class="bg-gray-50/50 p-5 rounded-2xl border border-gray-100 hover:border-green-100 transition-colors group">
-                    <h4 class="text-sm font-bold text-gray-900 mb-2 flex items-center gap-2">
-                        <div class="w-6 h-6 rounded bg-green-100 text-green-600 flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></div>
+                <!-- Success Criteria Card -->
+                <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 hover:border-emerald-200 transition-colors group shadow-sm">
+                    <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-sm"><i class="fa-solid fa-check"></i></div>
                         Success Criteria
                     </h4>
-                    <ul class="text-sm text-gray-600 space-y-1 group-hover:text-gray-800 transition-colors list-disc list-inside">
-                         ${Array.isArray(result.sc) ? result.sc.map(item => `<li>${item}</li>`).join('') : '<li>-</li>'}
+                    <ul class="text-sm text-gray-600 space-y-2 pl-1 group-hover:text-gray-800 transition-colors">
+                         ${Array.isArray(result.sc) ? result.sc.map(item => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5"></i> <span>${item}</span></li>`).join('') : '<li>-</li>'}
                     </ul>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <div class="w-6 h-6 rounded bg-purple-100 text-purple-600 flex items-center justify-center text-xs"><i class="fa-solid fa-list-check"></i></div>
-                    To-Do List
+            <!-- To-Do List -->
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center text-xs shadow-sm"><i class="fa-solid fa-list-check"></i></div>
+                    Action Items by Role
                 </h4>
-                <div class="grid grid-cols-1 gap-2">
+                <div class="grid grid-cols-1 gap-3">
                     ${Object.entries(result.todo || {}).map(([role, task]) => `
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                            <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wide min-w-[70px] text-center mt-0.5">${role}</span>
-                            <span class="text-sm text-gray-700 leading-snug">${task}</span>
+                        <div class="flex items-start gap-4 p-3.5 rounded-xl bg-gray-50 border border-gray-100/50 hover:border-gray-200 hover:bg-white transition-all duration-200">
+                            <span class="text-[10px] font-bold bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded-md uppercase tracking-wide min-w-[80px] text-center shadow-sm mt-0.5">${role}</span>
+                            <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
                         </div>
                     `).join('')}
                 </div>
             </div>
 
-            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
-                <i class="fa-solid fa-info-circle text-blue-500 mt-1"></i>
+            <!-- Evidence Summary -->
+            <div class="bg-blue-50/40 p-5 rounded-2xl border border-blue-100/60 flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center">
+                    <i class="fa-solid fa-fingerprint text-blue-500 text-sm"></i>
+                </div>
                 <div>
-                    <h4 class="text-xs font-bold text-blue-700 uppercase mb-1">Evidence Summary</h4>
-                    <p class="text-xs text-blue-800/80 leading-relaxed">${result.evidenceSummary || ''}</p>
+                    <h4 class="text-xs font-bold text-blue-800 uppercase mb-1 tracking-wide">Evidence Signal</h4>
+                    <p class="text-sm text-blue-900/80 leading-relaxed">${result.evidenceSummary || 'No significant signals detected yet.'}</p>
                 </div>
             </div>
         </div>
@@ -168,10 +182,10 @@ function attachEvents(deal) {
             content.classList.toggle('hidden');
             if (content.classList.contains('hidden')) {
                 icon.style.transform = 'rotate(0deg)';
-                header.classList.remove('bg-gray-50');
+                header.classList.remove('bg-gray-50/50');
             } else {
                 icon.style.transform = 'rotate(180deg)';
-                header.classList.add('bg-gray-50');
+                header.classList.add('bg-gray-50/50');
             }
         });
     });
@@ -191,7 +205,7 @@ function attachEvents(deal) {
                 const stageCard = input.closest('.stage-card');
                 const resultArea = stageCard.querySelector('.result-area > div');
                 if (resultArea) {
-                   resultArea.className = 'opacity-40 grayscale space-y-6 transition-all duration-300';
+                   resultArea.className = 'opacity-40 grayscale blur-[1px] space-y-6 transition-all duration-500';
                 }
             } else {
                 Store.saveDeal(deal);
@@ -209,28 +223,36 @@ function attachEvents(deal) {
                 return;
             }
 
-            showLoader('Analyzing...');
+            showLoader('Analyzing Discovery Data...');
 
             try {
                 const prompt = `
                     Role: B2B Sales Expert.
-                    Goal: Extract JTBD, Success Criteria, Action Items, and Evidence Summary based on inputs.
+                    Goal: Analyze customer inputs and extract structured sales insights.
                     
-                    Deal: ${deal.dealName} | Client: ${deal.clientName} | Solution: ${deal.solution}
-                    Stage: ${stageId}
+                    Context:
+                    - Deal: ${deal.dealName} (${deal.clientName})
+                    - Solution: ${deal.solution}
+                    - Stage: ${stageId.toUpperCase()}
                     
-                    Inputs:
-                    Behavior: ${stageData.behavior}
-                    Emotion: ${stageData.emotion}
-                    Touchpoint: ${stageData.touchpoint}
-                    Problem: ${stageData.problem}
+                    User Inputs:
+                    - Behavior: ${stageData.behavior}
+                    - Emotion: ${stageData.emotion}
+                    - Touchpoint: ${stageData.touchpoint}
+                    - Problem: ${stageData.problem}
                     
-                    Output JSON only:
+                    Output Instructions:
+                    Return a SINGLE JSON object with the following keys. Do not include markdown code blocks.
                     {
-                        "jtbd": "String hierarchy of jobs",
-                        "sc": ["String", "String", ...],
-                        "todo": {"Presales": "Action", "Sales": "Action", ...},
-                        "evidenceSummary": "Concise summary of signals"
+                        "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
+                        "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
+                        "todo": {
+                            "Presales": "Specific action item",
+                            "Sales": "Specific action item",
+                            "Marketing": "Specific action item",
+                            "CSM": "Specific action item"
+                        },
+                        "evidenceSummary": "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage. This will be used for scoring later."
                     }
                 `;
 
@@ -241,16 +263,20 @@ function attachEvents(deal) {
                 Store.saveDeal(deal);
                 
                 hideLoader();
-                showToast('Analysis Complete', 'success');
+                showToast('Insights Generated', 'success');
                 renderDiscovery(document.getElementById('app'), currentDealId); 
                 
+                // Re-open the accordion after render
                 setTimeout(() => {
                     const card = document.querySelector(`.stage-card[data-stage="${stageId}"]`);
                     if (card) {
                         card.querySelector('.toggle-content').classList.remove('hidden');
                         card.querySelector('.icon-chevron').style.transform = 'rotate(180deg)';
+                        card.querySelector('.toggle-header').classList.add('bg-gray-50/50');
+                        // Scroll to results
+                        card.querySelector('.result-area').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }
-                }, 50);
+                }, 100);
 
             } catch (error) {
                 hideLoader();
