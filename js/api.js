@@ -30,47 +30,67 @@ export async function callGemini(promptText) {
         const data = await response.json();
         console.log("Proxy Raw Response:", data);
 
+        // --- Strategy 0: Handle Google Apps Script Error Object ---
+        if (data.status === 'error' || data.error) {
+             const msg = data.message || (typeof data.error === 'string' ? data.error : data.error.message) || JSON.stringify(data.error);
+             throw new Error(`Proxy returned error: ${msg}`);
+        }
+
         // --- Strategy 1: Standard Proxy Response { text: "JSON_STRING" } ---
-        if (data && data.text) {
+        if (data && typeof data.text === 'string') {
             return parseResult(data.text);
         }
 
-        // --- Strategy 2: Common Wrapper Keys (result, output, content, response) ---
-        // Some proxies wrap the string in these keys
-        const wrapperKey = ['result', 'output', 'content', 'response', 'answer'].find(key => data[key]);
+        // --- Strategy 2: Common Wrapper Keys ---
+        // Expanded list of keys that proxies might use to wrap the content
+        const wrapperKey = ['result', 'output', 'content', 'response', 'answer', 'data', 'payload', 'message'].find(key => data[key]);
         if (wrapperKey) {
             const content = data[wrapperKey];
             if (typeof content === 'string') {
                 return parseResult(content);
-            } else if (typeof content === 'object') {
+            } else if (typeof content === 'object' && content !== null) {
                 return content; // It's already an object
             }
         }
 
-        // --- Strategy 3: Direct Object Return ---
-        // Check if the data itself is the result (contains expected keys)
-        // Common keys in our app: jtbd, items, health, actions, recommendedScore
-        if (data && (data.jtbd || data.items || data.health || data.recommendedScore || data.actions || data.sc || data.todo)) {
+        // --- Strategy 3: Direct Object Return (Heuristic) ---
+        // Check if the data itself contains domain-specific keys we expect
+        if (data && (data.jtbd || data.items || data.health || data.recommendedScore || data.actions || data.sc || data.todo || data.reason)) {
             console.log("Received direct JSON object from proxy.");
             return data;
         }
 
         // --- Strategy 4: Raw Gemini API Response { candidates: [...] } ---
-        if (data && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-             const text = data.candidates[0].content.parts[0].text;
-             return parseResult(text);
+        if (data && data.candidates && Array.isArray(data.candidates) && data.candidates.length > 0) {
+             const candidate = data.candidates[0];
+             if (candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text) {
+                 return parseResult(candidate.content.parts[0].text);
+             }
         }
         
-        // --- Strategy 5: Error Object from Proxy ---
-        if (data && data.error) {
-             const msg = data.error.message || JSON.stringify(data.error);
-             throw new Error(`Proxy returned error: ${msg}`);
+        // --- Strategy 5: Fallback - Scan for any JSON-like string ---
+        // If the structure is unknown, check if any string value looks like JSON
+        for (const key in data) {
+            if (typeof data[key] === 'string') {
+                const val = data[key].trim();
+                // Check if it starts/ends like an Object or Array
+                if ((val.startsWith('{') && val.endsWith('}')) || (val.startsWith('[') && val.endsWith(']'))) {
+                    console.log(`Found potential JSON in key '${key}', attempting parse.`);
+                    try {
+                        const parsed = JSON.parse(cleanJSONString(val));
+                        return parsed;
+                    } catch (e) {
+                        // ignore and continue searching
+                    }
+                }
+            }
         }
 
         // If we reach here, the structure is unknown.
-        console.error("Unknown Proxy Response Structure. Keys:", Object.keys(data));
-        console.error("Full Data:", JSON.stringify(data, null, 2));
-        throw new Error(`Invalid response structure from proxy. Keys found: ${Object.keys(data).join(', ')}`);
+        // Stringify data to show exactly what we got in the error message
+        const errorMsg = `Invalid response structure from proxy. Keys: [${Object.keys(data).join(', ')}]. Data: ${JSON.stringify(data)}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
 
     } catch (error) {
         console.error("Gemini API Call Failed:", error);

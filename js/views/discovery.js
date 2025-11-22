@@ -138,10 +138,29 @@ function renderSkeleton() {
 function renderResult(result, isStale) {
     const opacity = isStale ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100';
     
+    // 1. Handle String Response (Plain Text / Markdown)
+    // This happens if the model returns text that isn't valid JSON
+    if (typeof result === 'string') {
+        return `
+            <div class="${opacity} transition-all duration-500">
+                <div class="flex items-center gap-3 justify-center mb-6">
+                     <div class="h-px bg-gray-200 flex-1"></div>
+                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-white px-2">Analysis Note</span>
+                     <div class="h-px bg-gray-200 flex-1"></div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
+                    ${result.replace(/<br>/g, '\n')} 
+                </div>
+            </div>
+        `;
+    }
+
+    // 2. Handle Error / Invalid Format
     if (typeof result !== 'object' || result === null) {
         return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: Invalid result format.</div>`;
     }
 
+    // 3. Handle Standard JSON Object Response
     let scItemsHtml = '<li>-</li>';
     if (Array.isArray(result.sc) && result.sc.length > 0) {
         scItemsHtml = result.sc.map(item => 
@@ -278,7 +297,6 @@ function attachEvents(deal) {
                 const contentDiv = card.querySelector('.toggle-content');
                 contentDiv.classList.remove('hidden');
 
-                // Explicit JSON structure string to avoid template literal issues
                 const jsonStructure = `{
   "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
   "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
@@ -327,10 +345,13 @@ ${jsonStructure}
 
             } catch (error) {
                 console.error(error);
-                showToast("Analysis failed. Check console for details.", 'error');
+                // Show more detailed error info in the toast if available
+                const msg = error.message && error.message.includes('Proxy') ? "AI Service Error" : error.message;
+                showToast(msg, 'error');
+                
                 resultAreaContainer.innerHTML = `<div class="bg-red-50 p-4 rounded-xl text-red-600 text-sm border border-red-100">
                     <strong>Analysis Failed:</strong> ${error.message}<br>
-                    <span class="text-xs text-red-400 mt-1 block">Try again or check connection.</span>
+                    <span class="text-xs text-red-400 mt-1 block">Please check the console for details.</span>
                 </div>`;
             } finally {
                 setButtonLoading(btn, false);
