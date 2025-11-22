@@ -27,9 +27,10 @@ export function renderDiscovery(container, dealId) {
 function renderStage(stageConfig, data) {
     const isStale = !data.frozen && data.result; 
 
-    const statusHtml = data.frozen 
-        ? '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>' 
-        : '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Pending Input</span>';
+    let statusHtml = '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Pending Input</span>';
+    if (data.frozen) {
+        statusHtml = '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
+    }
 
     const staleAlert = isStale ? `
         <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm animate-pulse">
@@ -42,6 +43,8 @@ function renderStage(stageConfig, data) {
     ` : '';
 
     const btnText = data.result ? 'Regenerate' : 'Generate Insights';
+    const resultHtml = data.result ? renderResult(data.result, isStale) : '';
+    const resultClass = (!data.result && !isStale) ? 'hidden' : '';
 
     return `
         <div class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 stage-card overflow-hidden group" data-stage="${stageConfig.id}">
@@ -81,8 +84,8 @@ function renderStage(stageConfig, data) {
                         </div>
                     </div>
 
-                    <div class="result-area transition-all duration-500 ${!data.result && !isStale ? 'hidden' : ''}">
-                        ${data.result ? renderResult(data.result, isStale) : ''}
+                    <div class="result-area transition-all duration-500 ${resultClass}">
+                        ${resultHtml}
                     </div>
                 </div>
             </div>
@@ -135,22 +138,29 @@ function renderSkeleton() {
 function renderResult(result, isStale) {
     const opacity = isStale ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100';
     
-    if (typeof result === 'string') {
-        return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: ${result}</div>`;
+    if (typeof result !== 'object' || result === null) {
+        return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: Invalid result format.</div>`;
     }
 
-    // Logic extracted from template literals to prevent nesting errors
-    const scItems = Array.isArray(result.sc) 
-        ? result.sc.map(item => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5"></i> <span>${item}</span></li>`).join('') 
-        : '<li>-</li>';
+    let scItemsHtml = '<li>-</li>';
+    if (Array.isArray(result.sc) && result.sc.length > 0) {
+        scItemsHtml = result.sc.map(item => 
+            `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5"></i> <span>${item}</span></li>`
+        ).join('');
+    }
 
-    const todoItems = (result.todo && Object.keys(result.todo).length > 0)
-        ? Object.entries(result.todo).map(([role, task]) => `
-            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
-                <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wide min-w-[70px] text-center mt-0.5">${role}</span>
-                <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
-            </div>`).join('')
-        : '<div class="text-sm text-gray-400">No specific actions generated.</div>';
+    let todoItemsHtml = '<div class="text-sm text-gray-400">No specific actions generated.</div>';
+    if (result.todo && typeof result.todo === 'object') {
+        const todos = Object.entries(result.todo);
+        if (todos.length > 0) {
+            todoItemsHtml = todos.map(([role, task]) => `
+                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
+                    <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wide min-w-[70px] text-center mt-0.5">${role}</span>
+                    <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
+                </div>
+            `).join('');
+        }
+    }
 
     return `
         <div class="${opacity} space-y-6 transition-all duration-500">
@@ -178,7 +188,7 @@ function renderResult(result, isStale) {
                         <i class="fa-solid fa-flag-checkered text-emerald-500"></i> Success Criteria
                     </h4>
                     <ul class="text-sm text-gray-600 space-y-2 relative z-10">
-                         ${scItems}
+                         ${scItemsHtml}
                     </ul>
                 </div>
             </div>
@@ -189,7 +199,7 @@ function renderResult(result, isStale) {
                     <i class="fa-solid fa-list-check text-violet-500"></i> Recommended Actions
                 </h4>
                 <div class="grid grid-cols-1 gap-3">
-                    ${todoItems}
+                    ${todoItemsHtml}
                 </div>
             </div>
 
@@ -260,48 +270,46 @@ function attachEvents(deal) {
                 return;
             }
 
-            // UI State: In-line Loading (Skeleton)
             setButtonLoading(btn, true, "Analyzing...");
             resultAreaContainer.classList.remove('hidden');
             resultAreaContainer.innerHTML = renderSkeleton();
 
             try {
-                // Ensure the content is visible when skeleton starts
                 const contentDiv = card.querySelector('.toggle-content');
                 contentDiv.classList.remove('hidden');
 
-                // Define JSON structure separately to avoid template literal parser errors
-                const jsonStructure = `{
-                        "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
-                        "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
-                        "todo": {
-                            "Presales": "Specific action item",
-                            "Sales": "Specific action item",
-                            "Marketing": "Specific action item",
-                            "CSM": "Specific action item"
-                        },
-                        "evidenceSummary": "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage. This will be used for scoring later."
-                    }`;
+                // Define JSON structure instruction clearly to avoid syntax errors in prompt
+                const jsonInstruction = JSON.stringify({
+                    jtbd: "Analyze the underlying Job to be Done (Functional & Emotional).",
+                    sc: ["List 3-5 specific Success Criteria (Measurable outcomes)."],
+                    todo: {
+                        "Presales": "Specific action item",
+                        "Sales": "Specific action item",
+                        "Marketing": "Specific action item",
+                        "CSM": "Specific action item"
+                    },
+                    evidenceSummary: "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage."
+                }, null, 2);
 
                 const prompt = `
-                    Role: B2B Sales Expert.
-                    Goal: Analyze customer inputs and extract structured sales insights.
-                    
-                    Context:
-                    - Deal: ${deal.dealName} (${deal.clientName})
-                    - Solution: ${deal.solution}
-                    - Stage: ${stageId.toUpperCase()}
-                    
-                    User Inputs:
-                    - Behavior: ${stageData.behavior}
-                    - Emotion: ${stageData.emotion}
-                    - Touchpoint: ${stageData.touchpoint}
-                    - Problem: ${stageData.problem}
-                    
-                    Output Instructions:
-                    Return a SINGLE JSON object containing the following keys.
-                    ${jsonStructure}
-                `;
+Role: B2B Sales Expert.
+Goal: Analyze customer inputs and extract structured sales insights.
+
+Context:
+- Deal: ${deal.dealName} (${deal.clientName})
+- Solution: ${deal.solution}
+- Stage: ${stageId.toUpperCase()}
+
+User Inputs:
+- Behavior: ${stageData.behavior}
+- Emotion: ${stageData.emotion}
+- Touchpoint: ${stageData.touchpoint}
+- Problem: ${stageData.problem}
+
+Output Instructions:
+Return a SINGLE JSON object matching this structure:
+${jsonInstruction}
+`;
 
                 const result = await callGemini(prompt);
                 
@@ -319,7 +327,7 @@ function attachEvents(deal) {
 
             } catch (error) {
                 console.error(error);
-                showToast("Analysis failed. Please try again.", 'error');
+                showToast("Analysis failed: " + error.message, 'error');
                 resultAreaContainer.innerHTML = ''; 
                 resultAreaContainer.classList.add('hidden');
             } finally {
