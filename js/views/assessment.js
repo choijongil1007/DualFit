@@ -28,23 +28,47 @@ export function renderAssessment(container, dealId) {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Biz Fit -->
-            <div>
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-2 h-6 bg-purple-500 rounded-full"></div>
-                    <h3 class="text-lg font-bold text-gray-900">Biz Fit</h3>
+        <div class="space-y-10 pb-10">
+            <!-- Biz Fit Box -->
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+                <!-- Decorative bg -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-bl-full -mr-10 -mt-10 opacity-50 pointer-events-none"></div>
+
+                <div class="relative z-10 mb-8 pb-4 border-b border-gray-100 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-briefcase text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Biz Fit Analysis</h3>
+                        <p class="text-gray-500 text-sm mt-0.5 font-medium">BANT (Budget, Authority, Need, Timeline)</p>
+                    </div>
                 </div>
-                ${renderScoreSection('biz', deal)}
+                
+                <!-- 2x2 Grid for Biz Categories -->
+                <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${renderScoreSection('biz', deal)}
+                </div>
             </div>
 
-            <!-- Tech Fit -->
-            <div>
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-2 h-6 bg-blue-500 rounded-full"></div>
-                    <h3 class="text-lg font-bold text-gray-900">Tech Fit</h3>
+            <!-- Tech Fit Box -->
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+                <!-- Decorative bg -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-full -mr-10 -mt-10 opacity-50 pointer-events-none"></div>
+
+                <div class="relative z-10 mb-8 pb-4 border-b border-gray-100 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-server text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900">Tech Fit Analysis</h3>
+                        <p class="text-gray-500 text-sm mt-0.5 font-medium">Requirements, Architecture, Data, Operations</p>
+                    </div>
                 </div>
-                ${renderScoreSection('tech', deal)}
+
+                <!-- 2x2 Grid for Tech Categories -->
+                <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${renderScoreSection('tech', deal)}
+                </div>
             </div>
         </div>
 
@@ -79,61 +103,57 @@ function renderScoreSection(type, deal) {
     const scores = deal.assessment[type].scores;
     const weights = deal.assessment[type].weights;
 
-    return `
-        <div class="space-y-6">
-            ${config.categories.map(cat => `
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-card hover:shadow-soft transition-all duration-200">
-                    <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-50">
-                        <h4 class="font-bold text-gray-800 text-base">${cat.label}</h4>
-                        <div class="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Weight %</span>
-                            <input type="number" class="weight-input w-10 text-center bg-transparent text-xs font-bold text-gray-700 focus:outline-none" 
-                                data-type="${type}" data-cat="${cat.id}" value="${weights[cat.id]}" min="0" max="100">
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-5">
-                        ${cat.items.map((item, idx) => {
-                            const itemId = `${cat.id}_${idx}`;
-                            const val = scores[itemId] || 0;
-                            return `
-                                <div class="flex justify-between items-center group">
-                                    <label class="text-sm font-medium text-gray-600 max-w-[60%] leading-tight">${item}</label>
-                                    <div class="flex items-center gap-3">
-                                        <!-- AI Recommendation -->
-                                        <div class="ai-recommendation has-tooltip relative w-6 h-6 flex items-center justify-center rounded-full bg-gray-50 text-gray-300 cursor-help hover:bg-blue-50 hover:text-blue-500 transition-colors" id="ai-rec-${type}-${itemId}">
-                                            <i class="fa-solid fa-robot text-xs"></i>
-                                            <span class="tooltip">AI analyzing...</span>
-                                        </div>
-                                        
-                                        <div class="relative">
-                                            <select class="score-select appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-sm font-medium text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:border-gray-300"
-                                                data-type="${type}" data-item-id="${itemId}">
-                                                <option value="0" disabled ${val == 0 ? 'selected' : ''}>-</option>
-                                                <option value="1" ${val == 1 ? 'selected' : ''}>1</option>
-                                                <option value="2" ${val == 2 ? 'selected' : ''}>2</option>
-                                                <option value="3" ${val == 3 ? 'selected' : ''}>3</option>
-                                                <option value="4" ${val == 4 ? 'selected' : ''}>4</option>
-                                                <option value="5" ${val == 5 ? 'selected' : ''}>5</option>
-                                            </select>
-                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                                            </div>
-                                        </div>
+    // Removed outer div wrapper to allow parent grid control
+    return config.categories.map(cat => `
+        <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-card hover:shadow-md transition-all duration-200 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-50">
+                <h4 class="font-bold text-gray-800 text-base">${cat.label}</h4>
+                <div class="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Weight %</span>
+                    <input type="number" class="weight-input w-10 text-center bg-transparent text-xs font-bold text-gray-700 focus:outline-none" 
+                        data-type="${type}" data-cat="${cat.id}" value="${weights[cat.id]}" min="0" max="100">
+                </div>
+            </div>
+            
+            <div class="space-y-5 flex-grow">
+                ${cat.items.map((item, idx) => {
+                    const itemId = `${cat.id}_${idx}`;
+                    const val = scores[itemId] || 0;
+                    return `
+                        <div class="flex justify-between items-center group">
+                            <label class="text-sm font-medium text-gray-600 max-w-[60%] leading-tight">${item}</label>
+                            <div class="flex items-center gap-3">
+                                <!-- AI Recommendation -->
+                                <div class="ai-recommendation has-tooltip relative w-6 h-6 flex items-center justify-center rounded-full bg-gray-50 text-gray-300 cursor-help hover:bg-blue-50 hover:text-blue-500 transition-colors" id="ai-rec-${type}-${itemId}">
+                                    <i class="fa-solid fa-robot text-xs"></i>
+                                    <span class="tooltip">AI analyzing...</span>
+                                </div>
+                                
+                                <div class="relative">
+                                    <select class="score-select appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-sm font-medium text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:border-gray-300"
+                                        data-type="${type}" data-item-id="${itemId}">
+                                        <option value="0" disabled ${val == 0 ? 'selected' : ''}>-</option>
+                                        <option value="1" ${val == 1 ? 'selected' : ''}>1</option>
+                                        <option value="2" ${val == 2 ? 'selected' : ''}>2</option>
+                                        <option value="3" ${val == 3 ? 'selected' : ''}>3</option>
+                                        <option value="4" ${val == 4 ? 'selected' : ''}>4</option>
+                                        <option value="5" ${val == 5 ? 'selected' : ''}>5</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
                                     </div>
                                 </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
         </div>
-    `;
+    `).join('');
 }
 
 async function runAIRecommendations(deal, forceRefresh = false) {
     // Stop if we have data and not forced to refresh.
-    // This prevents unnecessary API calls for Tech Fit if data was correctly saved.
     if (!forceRefresh && deal.assessment.recommendations) {
         applyAIRecommendations(deal.assessment.recommendations);
         return;
