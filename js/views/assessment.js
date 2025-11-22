@@ -1,11 +1,10 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
 
 let currentDealId = null;
-let pendingScoreChange = null; // To store state for modal confirmation
+let pendingScoreChange = null;
 
 export function renderAssessment(container, dealId) {
     currentDealId = dealId;
@@ -13,63 +12,64 @@ export function renderAssessment(container, dealId) {
     if (!deal) return;
 
     container.innerHTML = `
-        <div class="mb-6 border-b pb-4 flex justify-between items-center">
+        <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
             <div>
-                <h2 class="text-2xl font-bold">Assessment</h2>
-                <p class="text-gray-500 text-sm">Discovery 근거를 기반으로 적합성을 판단합니다.</p>
+                <h2 class="text-xl font-bold text-gray-900 mb-1">Assessment</h2>
+                <p class="text-gray-500 text-sm">Evaluate deal fit based on discovery evidence.</p>
             </div>
-            <div class="flex gap-2">
-                <button id="btn-refresh-ai" class="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded text-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-arrows-rotate"></i> AI 조언 갱신
+            <div class="flex gap-3">
+                <button id="btn-refresh-ai" class="bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm flex items-center gap-2 btn-pill">
+                    <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh AI
                 </button>
-                <button id="btn-calc-result" class="bg-black text-white px-4 py-2 rounded hover:bg-zinc-800 text-sm shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-calculator"></i> 결과 계산
+                <button id="btn-calc-result" class="bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-black text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill transition-transform active:scale-95">
+                    <i class="fa-solid fa-chart-pie"></i> Calculate
                 </button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Biz Fit -->
             <div>
-                <h3 class="text-xl font-bold mb-4 text-purple-800">Biz Fit (BANT)</h3>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-6 bg-purple-500 rounded-full"></div>
+                    <h3 class="text-lg font-bold text-gray-900">Biz Fit</h3>
+                </div>
                 ${renderScoreSection('biz', deal)}
             </div>
 
             <!-- Tech Fit -->
             <div>
-                <h3 class="text-xl font-bold mb-4 text-blue-800">Tech Fit</h3>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-2 h-6 bg-blue-500 rounded-full"></div>
+                    <h3 class="text-lg font-bold text-gray-900">Tech Fit</h3>
+                </div>
                 ${renderScoreSection('tech', deal)}
             </div>
         </div>
 
-        <!-- Score Confirmation Modal (Modern Black Style) -->
+        <!-- Score Confirmation Modal (Premium White) -->
         <div id="score-confirm-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
-            <div class="relative w-full max-w-sm bg-zinc-900 text-white border border-white/10 rounded-xl shadow-2xl p-6 animate-modal-in text-center">
-                <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors btn-close-score-modal">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+            <div class="absolute inset-0 bg-gray-900/20 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-modal p-8 animate-modal-in text-center">
                 
-                <div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-4 text-yellow-500">
+                <div class="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-5 text-amber-500 border border-amber-100">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                 </div>
                 
-                <h3 class="text-lg font-bold mb-2">점수 확인</h3>
-                <p id="score-confirm-msg" class="text-gray-400 text-sm mb-6 whitespace-pre-line">
-                    AI 추천 점수와 차이가 큽니다.<br>이 점수로 확정하시겠습니까?
+                <h3 class="text-lg font-bold mb-2 text-gray-900">Score Check</h3>
+                <p id="score-confirm-msg" class="text-gray-500 text-sm mb-8 leading-relaxed whitespace-pre-line">
+                    Significant deviation from AI recommendation.<br>Confirm this score?
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-score-modal px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors">취소</button>
-                    <button type="button" id="btn-confirm-score" class="px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-lg text-sm font-bold transition-colors">확인</button>
+                    <button type="button" class="btn-close-score-modal px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-semibold transition-colors btn-pill">Cancel</button>
+                    <button type="button" id="btn-confirm-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-full text-sm font-semibold transition-colors btn-pill shadow-lg shadow-gray-900/10">Confirm</button>
                 </div>
             </div>
         </div>
     `;
 
     attachEvents(deal);
-    
-    // Check if we have cached recommendations, otherwise run AI
     runAIRecommendations(deal, false);
 }
 
@@ -79,41 +79,46 @@ function renderScoreSection(type, deal) {
     const weights = deal.assessment[type].weights;
 
     return `
-        <div class="space-y-4">
+        <div class="space-y-6">
             ${config.categories.map(cat => `
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative group">
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-bold text-gray-800">${cat.label}</h4>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-500">가중치(%)</span>
-                            <input type="number" class="weight-input w-12 text-center border rounded text-xs p-1" 
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-card hover:shadow-soft transition-all duration-200">
+                    <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-50">
+                        <h4 class="font-bold text-gray-800 text-base">${cat.label}</h4>
+                        <div class="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Weight %</span>
+                            <input type="number" class="weight-input w-10 text-center bg-transparent text-xs font-bold text-gray-700 focus:outline-none" 
                                 data-type="${type}" data-cat="${cat.id}" value="${weights[cat.id]}" min="0" max="100">
                         </div>
                     </div>
                     
-                    <div class="space-y-3">
+                    <div class="space-y-5">
                         ${cat.items.map((item, idx) => {
                             const itemId = `${cat.id}_${idx}`;
                             const val = scores[itemId] || 0;
                             return `
-                                <div class="flex justify-between items-center assessment-row" data-id="${itemId}" data-label="${item}">
-                                    <label class="text-sm text-gray-600">${item}</label>
-                                    <div class="flex items-center gap-2">
-                                        <!-- AI Recommendation Tooltip Placeholder -->
-                                        <div class="ai-recommendation has-tooltip relative w-6 h-6 flex items-center justify-center text-gray-300 cursor-help" id="ai-rec-${type}-${itemId}">
-                                            <i class="fa-solid fa-robot text-sm"></i>
-                                            <span class="tooltip top">AI 분석 대기중...</span>
+                                <div class="flex justify-between items-center group">
+                                    <label class="text-sm font-medium text-gray-600 max-w-[60%] leading-tight">${item}</label>
+                                    <div class="flex items-center gap-3">
+                                        <!-- AI Recommendation -->
+                                        <div class="ai-recommendation has-tooltip relative w-6 h-6 flex items-center justify-center rounded-full bg-gray-50 text-gray-300 cursor-help hover:bg-blue-50 hover:text-blue-500 transition-colors" id="ai-rec-${type}-${itemId}">
+                                            <i class="fa-solid fa-robot text-xs"></i>
+                                            <span class="tooltip">AI analyzing...</span>
                                         </div>
                                         
-                                        <select class="score-select border border-gray-300 rounded px-2 py-1 text-sm outline-none focus:border-black"
-                                            data-type="${type}" data-item-id="${itemId}">
-                                            <option value="0" disabled ${val == 0 ? 'selected' : ''}>-</option>
-                                            <option value="1" ${val == 1 ? 'selected' : ''}>1 (매우 미흡)</option>
-                                            <option value="2" ${val == 2 ? 'selected' : ''}>2 (미흡)</option>
-                                            <option value="3" ${val == 3 ? 'selected' : ''}>3 (보통)</option>
-                                            <option value="4" ${val == 4 ? 'selected' : ''}>4 (우수)</option>
-                                            <option value="5" ${val == 5 ? 'selected' : ''}>5 (매우 우수)</option>
-                                        </select>
+                                        <div class="relative">
+                                            <select class="score-select appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-sm font-medium text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:border-gray-300"
+                                                data-type="${type}" data-item-id="${itemId}">
+                                                <option value="0" disabled ${val == 0 ? 'selected' : ''}>-</option>
+                                                <option value="1" ${val == 1 ? 'selected' : ''}>1</option>
+                                                <option value="2" ${val == 2 ? 'selected' : ''}>2</option>
+                                                <option value="3" ${val == 3 ? 'selected' : ''}>3</option>
+                                                <option value="4" ${val == 4 ? 'selected' : ''}>4</option>
+                                                <option value="5" ${val == 5 ? 'selected' : ''}>5</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -126,9 +131,7 @@ function renderScoreSection(type, deal) {
 }
 
 async function runAIRecommendations(deal, forceRefresh = false) {
-    // 1. Use Cached Data if available and not forced
     if (!forceRefresh && deal.assessment.recommendations) {
-        console.log("Using cached AI recommendations");
         applyAIRecommendations(deal.assessment.recommendations);
         return;
     }
@@ -138,72 +141,40 @@ async function runAIRecommendations(deal, forceRefresh = false) {
         .map((s, i) => `Stage ${i+1}: ${s.result.evidenceSummary}`)
         .join('\n');
 
-    if (!evidence.trim()) {
-        document.querySelectorAll('.ai-recommendation .tooltip').forEach(el => el.innerText = "Discovery 정보 부족");
-        return;
-    }
+    if (!evidence.trim()) return;
 
-    // UI Loading State
     document.querySelectorAll('.ai-recommendation i').forEach(icon => {
-        icon.className = 'fa-solid fa-spinner fa-spin text-blue-500';
+        icon.className = 'fa-solid fa-circle-notch fa-spin text-primary-500';
     });
-    document.querySelectorAll('.ai-recommendation .tooltip').forEach(el => el.innerText = "계산 중...");
 
-    if (forceRefresh) showToast("AI 추천 점수를 갱신합니다...", "info");
+    if (forceRefresh) showToast("Updating AI recommendations...", "info");
 
     try {
         const prompt = `
-            역할: 세일즈 딜 평가 AI.
-            목표: 아래 Evidence Summary를 바탕으로 각 평가 항목에 대한 1~5점 점수를 추천.
-            
-            [Context]
+            Task: B2B Deal Scoring recommendation (1-5 scale).
             Deal: ${deal.dealName}
-            Solution: ${deal.solution}
+            Evidence: ${evidence}
             
-            [Evidence Summary]
-            ${evidence}
+            Return JSON with recommended scores and brief reason for:
+            Budget (Exist, Fit), Authority (Access, Power), Need (Fit, Urgent), Timeline (Clear, Easy),
+            Tech (Req, UseCase, Arch, Sec, Data, Integ, Impl, Ops).
             
-            [Task]
-            Analyze the evidence and provide a recommended score (1-5) for EACH item below.
-            If no evidence found for an item, score "N/A", confidence "Low".
-            
-            Items to Score:
-            - Budget: 예산 존재 여부, 예산 적합성
-            - Authority: 의사결정권자 접근성, 내부 지지자 파워
-            - Need: 문제 적합성, 도입 필요성
-            - Timeline: 의사결정 타임라인 명확성, 도입 용이성
-            - Tech Req: 필수 요구사항 충족도, 유스케이스 적합성
-            - Tech Arch: 현행 인프라·환경 호환성, 보안·정책 준수 여부
-            - Tech Data: 데이터 구조·형식 호환성, 기존 시스템과의 연동 난이도
-            - Tech Ops: 구현 난이도, 운영·유지보수 가능성
-            
-            [Output JSON Format]
-            {
-                "items": {
-                    "budget_0": { "score": 4, "confidence": "High", "reason": "..." },
-                    "budget_1": { ... },
-                    ... map to all items logically ...
-                }
-            }
+            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "..."}, ...}}
         `;
 
         const result = await callGemini(prompt);
         
         if (result && result.items) {
-            // SAVE to Store
             deal.assessment.recommendations = result.items;
             Store.saveDeal(deal);
-
             applyAIRecommendations(result.items);
-            if (forceRefresh) showToast("AI 추천 점수가 갱신되었습니다.", "success");
+            if (forceRefresh) showToast("Recommendations updated", "success");
         }
 
     } catch (e) {
-        console.error("AI Rec Error", e);
-        document.querySelectorAll('.ai-recommendation .tooltip').forEach(el => el.innerText = "AI 연결 실패");
-        // Revert icons
+        console.error(e);
         document.querySelectorAll('.ai-recommendation i').forEach(icon => {
-            icon.className = 'fa-solid fa-triangle-exclamation text-red-400';
+            icon.className = 'fa-solid fa-exclamation text-red-400';
         });
     }
 }
@@ -223,25 +194,23 @@ function applyAIRecommendations(items) {
     for (const [jsonKey, uiKeyPart] of Object.entries(keyMap)) {
         const rec = items[jsonKey];
         const [type, itemId] = uiKeyPart.split('-'); 
-        const elId = `ai-rec-${type}-${itemId}`;
-        const el = document.getElementById(elId);
+        const el = document.getElementById(`ai-rec-${type}-${itemId}`);
         
         if (el && rec) {
             const icon = el.querySelector('i');
             icon.className = 'fa-solid fa-robot'; 
             
             if (rec.score !== "N/A") {
-                icon.classList.add('text-blue-600');
+                icon.classList.add('text-primary-600');
+                el.classList.add('bg-primary-50');
                 el.dataset.recScore = rec.score; 
-            } else {
-                icon.classList.add('text-gray-300');
             }
 
             const confColor = rec.confidence === 'High' ? 'text-green-400' : rec.confidence === 'Medium' ? 'text-yellow-400' : 'text-red-400';
             el.querySelector('.tooltip').innerHTML = `
                 <div class="text-left">
-                    <div class="font-bold mb-1">추천: ${rec.score} <span class="${confColor} text-xs">(${rec.confidence})</span></div>
-                    <div class="leading-tight text-gray-300">${rec.reason}</div>
+                    <div class="font-bold mb-1 text-white">Rec: ${rec.score} <span class="${confColor} text-[10px]">(${rec.confidence})</span></div>
+                    <div class="leading-tight text-gray-300 text-xs font-normal">${rec.reason}</div>
                 </div>
             `;
         }
@@ -249,62 +218,42 @@ function applyAIRecommendations(items) {
 }
 
 function attachEvents(deal) {
-    /* --- REFRESH AI BUTTON --- */
     document.getElementById('btn-refresh-ai').addEventListener('click', () => {
         runAIRecommendations(deal, true);
     });
 
-    /* --- MODAL LOGIC --- */
     const modal = document.getElementById('score-confirm-modal');
-    const closeBtn = modal.querySelector('.btn-close-score-modal');
-    const backdrop = modal.querySelector('.modal-backdrop');
-    const confirmBtn = document.getElementById('btn-confirm-score');
-    const msgEl = document.getElementById('score-confirm-msg');
-
-    const closeModal = () => {
-        modal.classList.add('hidden');
+    const toggleModal = (show) => modal.classList.toggle('hidden', !show);
+    
+    modal.querySelectorAll('.btn-close-score-modal').forEach(btn => btn.addEventListener('click', () => {
+        toggleModal(false);
         if (pendingScoreChange) {
-            // Revert UI if cancelled/closed without confirm
-            const { target, oldValue } = pendingScoreChange;
-            target.value = oldValue;
+            pendingScoreChange.target.value = pendingScoreChange.oldValue;
             pendingScoreChange = null;
         }
-    };
+    }));
 
-    // Close events
-    modal.querySelectorAll('.btn-close-score-modal').forEach(btn => btn.addEventListener('click', closeModal));
-    backdrop.addEventListener('click', closeModal);
-
-    // Confirm Action
-    confirmBtn.addEventListener('click', () => {
+    document.getElementById('btn-confirm-score').addEventListener('click', () => {
         if (pendingScoreChange) {
             const { target, type, itemId, newValue } = pendingScoreChange;
-            // Apply new value
             deal.assessment[type].scores[itemId] = newValue;
             Store.saveDeal(deal);
-            // Reset pending state but don't revert UI (it's already set to new value)
             pendingScoreChange = null; 
-            modal.classList.add('hidden');
+            toggleModal(false);
         }
     });
 
-    // Weight Inputs
     document.querySelectorAll('.weight-input').forEach(input => {
         input.addEventListener('change', (e) => {
             const type = e.target.dataset.type;
             const cat = e.target.dataset.cat;
-            const val = parseInt(e.target.value);
-            deal.assessment[type].weights[cat] = val;
+            deal.assessment[type].weights[cat] = parseInt(e.target.value);
             Store.saveDeal(deal);
         });
     });
 
-    // Score Selects
     document.querySelectorAll('.score-select').forEach(select => {
-        // Store initial value for potential revert
-        select.addEventListener('focus', () => {
-            select.dataset.previous = select.value;
-        });
+        select.addEventListener('focus', () => { select.dataset.previous = select.value; });
 
         select.addEventListener('change', (e) => {
             const type = e.target.dataset.type;
@@ -312,35 +261,24 @@ function attachEvents(deal) {
             const val = parseInt(e.target.value);
             const oldValue = select.dataset.previous || 0;
             
-            // Validation Logic
             const recContainer = document.getElementById(`ai-rec-${type}-${itemId}`);
             if (recContainer && recContainer.dataset.recScore) {
                 const recScore = parseInt(recContainer.dataset.recScore);
-                
                 if (Math.abs(recScore - val) >= 2) {
-                    // Trigger Custom Modal
                     pendingScoreChange = { target: e.target, type, itemId, newValue: val, oldValue: oldValue };
-                    msgEl.innerHTML = `AI 추천 점수(<strong class="text-yellow-400">${recScore}점</strong>)와 차이가 큽니다.<br>정말 <strong class="text-white">${val}점</strong>으로 설정하시겠습니까?`;
-                    modal.classList.remove('hidden');
-                    return; // Stop here, wait for modal
+                    document.getElementById('score-confirm-msg').innerHTML = `AI recommends <strong class="text-gray-900">${recScore}</strong>.<br>Are you sure about <strong class="text-gray-900">${val}</strong>?`;
+                    toggleModal(true);
+                    return;
                 }
             }
 
-            // Normal save if no warning
             deal.assessment[type].scores[itemId] = val;
             Store.saveDeal(deal);
             select.dataset.previous = val;
         });
     });
 
-    // Result Button
     document.getElementById('btn-calc-result').addEventListener('click', () => {
-        const bizWeightSum = Object.values(deal.assessment.biz.weights).reduce((a, b) => a + b, 0);
-        const techWeightSum = Object.values(deal.assessment.tech.weights).reduce((a, b) => a + b, 0);
-
-        if (bizWeightSum !== 100) { showToast(`Biz 가중치 합이 100이 아닙니다 (현재 ${bizWeightSum})`, 'error'); return; }
-        if (techWeightSum !== 100) { showToast(`Tech 가중치 합이 100이 아닙니다 (현재 ${techWeightSum})`, 'error'); return; }
-
         import('../app.js').then(module => {
             module.navigateTo('summary', { id: deal.id });
         });

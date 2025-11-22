@@ -1,6 +1,5 @@
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
-import { showLoader, hideLoader, renderMarkdownLike } from '../utils.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
 import { navigateTo } from '../app.js';
 
@@ -11,77 +10,88 @@ export function renderSummary(container, dealId) {
     const { bizScore, techScore, lowItems } = calculateScores(deal);
 
     container.innerHTML = `
-        <div class="mb-6 border-b pb-4">
-            <h2 class="text-2xl font-bold">Deal Summary</h2>
-            <p class="text-gray-500 text-sm">종합 평가 결과 및 권장 액션</p>
+        <div class="mb-8 border-b border-gray-100 pb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Executive Summary</h2>
+            <p class="text-gray-500 text-sm">Strategic overview and action plan.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
             <!-- Left: Quadrant -->
-            <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex flex-col items-center">
-                <h3 class="font-bold text-lg mb-4">Quadrant Analysis</h3>
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex flex-col items-center">
+                <h3 class="font-bold text-lg text-gray-900 mb-6">Fit Analysis</h3>
                 
-                <div class="quadrant-container rounded-lg mb-6">
+                <div class="quadrant-container rounded-2xl mb-8">
                     <div class="quadrant-line-x"></div>
                     <div class="quadrant-line-y"></div>
-                    <span class="quadrant-label q-top-left">Tech Only</span>
-                    <span class="quadrant-label q-top-right text-blue-600">Go / Strong</span>
-                    <span class="quadrant-label q-bottom-left text-red-600">No-Go</span>
-                    <span class="quadrant-label q-bottom-right">Biz Only</span>
+                    <span class="quadrant-label q-top-left">Tech Strong</span>
+                    <span class="quadrant-label q-top-right text-primary-600">Ideal Fit</span>
+                    <span class="quadrant-label q-bottom-left text-red-400">Low Fit</span>
+                    <span class="quadrant-label q-bottom-right">Biz Strong</span>
                     
-                    <!-- The Dot -->
                     <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;"></div>
                 </div>
 
-                <div class="w-full grid grid-cols-2 gap-4 text-center">
-                    <div class="bg-purple-50 p-3 rounded">
-                        <div class="text-xs text-purple-800 uppercase font-bold">Biz Fit Score</div>
-                        <div class="text-2xl font-bold text-purple-900">${bizScore}</div>
+                <div class="w-full grid grid-cols-2 gap-4">
+                    <div class="bg-purple-50 p-4 rounded-2xl text-center">
+                        <div class="text-[10px] text-purple-600 uppercase font-bold tracking-wider mb-1">Biz Score</div>
+                        <div class="text-3xl font-bold text-purple-900">${bizScore}</div>
                     </div>
-                    <div class="bg-blue-50 p-3 rounded">
-                        <div class="text-xs text-blue-800 uppercase font-bold">Tech Fit Score</div>
-                        <div class="text-2xl font-bold text-blue-900">${techScore}</div>
+                    <div class="bg-blue-50 p-4 rounded-2xl text-center">
+                        <div class="text-[10px] text-blue-600 uppercase font-bold tracking-wider mb-1">Tech Score</div>
+                        <div class="text-3xl font-bold text-blue-900">${techScore}</div>
                     </div>
                 </div>
             </div>
 
             <!-- Right: AI Analysis -->
-            <div class="space-y-6">
-                <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm h-full flex flex-col">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-lg">AI Strategy Advisor</h3>
-                        <i class="fa-solid fa-sparkles text-yellow-500"></i>
-                    </div>
-                    
-                    <div id="summary-ai-content" class="flex-grow text-sm text-gray-700 space-y-4">
-                        <div class="animate-pulse space-y-2">
-                            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                            <div class="h-4 bg-gray-200 rounded w-full"></div>
-                            <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+            <div class="flex flex-col h-full">
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex-grow relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-6 relative z-10">
+                        <h3 class="font-bold text-lg text-gray-900">AI Advisor Strategy</h3>
+                        <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500">
+                            <i class="fa-solid fa-lightbulb"></i>
                         </div>
                     </div>
-
-                    <div class="mt-6 pt-4 border-t border-gray-100">
-                        <button id="btn-back-discovery" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded text-sm font-medium transition">
-                            Discovery 업데이트 후 재평가
-                        </button>
+                    
+                    <div id="summary-ai-content" class="text-sm text-gray-600 space-y-6 relative z-10">
+                        <div class="animate-pulse space-y-3">
+                            <div class="h-2 bg-gray-100 rounded w-full"></div>
+                            <div class="h-2 bg-gray-100 rounded w-5/6"></div>
+                            <div class="h-2 bg-gray-100 rounded w-4/6"></div>
+                        </div>
+                        <p class="text-xs text-gray-400">Generating strategic insights based on 12 data points...</p>
                     </div>
+
+                    <!-- Decorative blob -->
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full -z-0 opacity-50"></div>
                 </div>
+                
+                <button id="btn-back-discovery" class="mt-4 w-full py-3 bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 rounded-full text-sm font-semibold transition-all shadow-sm btn-pill">
+                    Update Discovery & Recalculate
+                </button>
             </div>
         </div>
 
         <!-- Low Score Items -->
-        <div class="mt-8">
-             <h3 class="font-bold text-lg mb-3">Risk Items (1-2점)</h3>
+        <div class="bg-gray-50 rounded-3xl p-8 border border-gray-100">
+             <div class="flex items-center gap-2 mb-6">
+                <h3 class="font-bold text-lg text-gray-900">Risk Factors</h3>
+                <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">${lowItems.length} Detected</span>
+             </div>
+             
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 ${lowItems.length > 0 ? lowItems.map(item => `
-                    <div class="p-3 border border-red-200 bg-red-50 rounded-md text-sm">
-                        <div class="font-bold text-red-800 mb-1">${item.catLabel} > ${item.label}</div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-red-600 font-medium">${item.val === 1 ? '⚠️ 주의 (1점)' : '⚠️ 유의 (2점)'}</span>
+                    <div class="p-4 bg-white border border-red-100 rounded-xl shadow-sm flex items-start gap-3">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500 mt-1 text-xs"></i>
+                        <div>
+                            <div class="font-bold text-gray-800 text-sm mb-1">${item.catLabel}</div>
+                            <div class="text-xs text-gray-500 mb-2">${item.label}</div>
+                            <span class="text-[10px] font-bold bg-red-50 text-red-600 px-2 py-1 rounded border border-red-100">
+                                Score: ${item.val} / 5
+                            </span>
                         </div>
                     </div>
-                `).join('') : '<div class="text-gray-500 text-sm italic">위험 항목이 없습니다.</div>'}
+                `).join('') : '<div class="col-span-full text-center text-gray-400 py-4">No critical risks identified.</div>'}
              </div>
         </div>
     `;
@@ -94,13 +104,11 @@ export function renderSummary(container, dealId) {
 }
 
 function calculateScores(deal) {
-    // Helper to calc section
     const calcSection = (type) => {
         const config = ASSESSMENT_CONFIG[type];
         let totalWeightedScore = 0;
         
         config.categories.forEach(cat => {
-            // Avg of 2 items
             const item1 = deal.assessment[type].scores[`${cat.id}_0`] || 0;
             const item2 = deal.assessment[type].scores[`${cat.id}_1`] || 0;
             const avg = (item1 + item2) / 2;
@@ -108,17 +116,12 @@ function calculateScores(deal) {
             totalWeightedScore += avg * weight;
         });
 
-        // Max possible is 5 * 100 = 500. Scale to 100.
-        // Current sum is (Avg 0-5) * Weight. Sum of weights is 100.
-        // So totalWeightedScore range is 0 to 500.
-        // Score = totalWeightedScore / 5.
         return Math.round(totalWeightedScore / 5);
     };
 
     const bizScore = calcSection('biz');
     const techScore = calcSection('tech');
 
-    // Find low items
     const lowItems = [];
     ['biz', 'tech'].forEach(type => {
         const config = ASSESSMENT_CONFIG[type];
@@ -145,60 +148,45 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
             .map(s => s.result.evidenceSummary)
             .join(' ');
 
-        const lowItemsText = lowItems.map(i => `- ${i.catLabel} (${i.label}): ${i.val}점`).join('\n');
+        const lowItemsText = lowItems.map(i => `- ${i.catLabel} (${i.label}): ${i.val}`).join('\n');
 
         const prompt = `
-            역할: 전략적 딜 리뷰어.
+            Task: Strategic Deal Review.
+            Deal: ${deal.dealName} (Biz: ${bizScore}, Tech: ${techScore})
+            Risks: ${lowItemsText}
+            Evidence: ${evidence}
             
-            [Input]
-            Deal: ${deal.dealName}
-            Biz Score: ${bizScore}/100
-            Tech Score: ${techScore}/100
-            
-            Low Score Items:
-            ${lowItemsText}
-            
-            Evidence Summary:
-            ${evidence}
-            
-            [Task]
-            1. Provide a 1-2 sentence Health Check of this deal.
-            2. Provide 1-3 Strategic Recommendations to move this deal forward, specifically addressing the low score items.
-            
-            [Format]
             Return JSON:
             {
-                "health": "String...",
-                "actions": [
-                    { "action": "...", "reason": "..." }
-                ]
+                "health": "Short health check sentence",
+                "actions": [{"action": "Specific Action", "reason": "Why"}]
             }
         `;
 
         const result = await callGemini(prompt);
         
         container.innerHTML = `
-            <div class="mb-4">
-                <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">Deal Health</h4>
-                <p class="font-medium text-gray-900 bg-gray-50 p-2 rounded border border-gray-100">
-                    ${result.health || '분석 불가'}
+            <div class="mb-6">
+                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Deal Health</h4>
+                <p class="font-medium text-gray-800 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                    ${result.health || 'Unable to generate health check.'}
                 </p>
             </div>
             
             <div>
-                <h4 class="text-xs font-bold text-gray-500 uppercase mb-1">Recommended Actions</h4>
+                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Strategic Actions</h4>
                 <ul class="space-y-3">
                     ${result.actions ? result.actions.map(act => `
-                        <li class="bg-yellow-50 border border-yellow-100 p-3 rounded text-sm">
-                            <div class="font-bold text-gray-800 mb-1">👉 ${act.action}</div>
-                            <div class="text-gray-600 text-xs">${act.reason}</div>
+                        <li class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div class="font-bold text-gray-900 text-sm mb-1">👉 ${act.action}</div>
+                            <div class="text-gray-500 text-xs leading-relaxed">${act.reason}</div>
                         </li>
-                    `).join('') : '<li>추천 액션 없음</li>'}
+                    `).join('') : '<li class="text-gray-400 text-sm">No specific actions recommended.</li>'}
                 </ul>
             </div>
         `;
 
     } catch (e) {
-        container.innerHTML = `<div class="text-red-500 text-sm">AI 분석 로드 실패. 다시 시도해주세요.</div>`;
+        container.innerHTML = `<div class="text-red-400 text-sm bg-red-50 p-3 rounded-lg border border-red-100">AI Service Unavailable. Please try again.</div>`;
     }
 }

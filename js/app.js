@@ -1,4 +1,3 @@
-
 import { renderDeals } from './views/deals.js';
 import { renderDiscovery } from './views/discovery.js';
 import { renderAssessment } from './views/assessment.js';
@@ -10,17 +9,14 @@ const backBtn = document.getElementById('nav-back-btn');
 
 // Simple Router
 export function navigateTo(view, params = {}) {
-    // Clear container
     appContainer.innerHTML = '';
     
-    // Update Navigation UI
     if (view === 'deals') {
         backBtn.classList.add('hidden');
     } else {
         backBtn.classList.remove('hidden');
     }
 
-    // Scroll to top
     window.scrollTo(0, 0);
 
     switch (view) {
@@ -47,68 +43,60 @@ function renderDetailsLayout(container, dealId) {
     }
 
     container.innerHTML = `
-        <div class="mb-6">
-             <h1 class="text-3xl font-bold mb-2">${deal.dealName}</h1>
-             <div class="flex gap-2 text-sm text-gray-500">
-                <span class="bg-gray-100 px-2 py-1 rounded text-xs font-medium text-gray-600">${deal.clientName}</span>
-                <span>${deal.solution}</span>
+        <div class="mb-8">
+             <div class="flex items-center gap-3 mb-3">
+                <span class="bg-gray-100 border border-gray-200 px-2.5 py-0.5 rounded-full text-xs font-semibold text-gray-600 tracking-wide uppercase">${deal.clientName}</span>
+                <span class="text-gray-300">|</span>
+                <span class="text-sm text-gray-500">${deal.solution}</span>
+             </div>
+             <div class="flex justify-between items-start">
+                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">${deal.dealName}</h1>
+                 <button class="text-gray-400 hover:text-gray-800 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100" id="btn-deal-info">
+                    <i class="fa-solid fa-circle-info text-lg"></i>
+                 </button>
              </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="flex border-b border-gray-200 mb-6 overflow-x-auto">
-            <button class="tab-btn px-4 py-2 font-medium text-sm border-b-2 border-black text-black transition-colors whitespace-nowrap" data-tab="discovery">Discovery</button>
-            <button class="tab-btn px-4 py-2 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:text-black transition-colors whitespace-nowrap" data-tab="assessment">Assessment</button>
-            <button class="ml-auto text-sm text-gray-400 hover:text-gray-800" id="btn-deal-info">
-                <i class="fa-solid fa-circle-info"></i> Info
-            </button>
+        <!-- Segmented Tabs -->
+        <div class="bg-gray-100/80 p-1.5 rounded-2xl inline-flex mb-8 shadow-inner">
+            <button class="tab-btn px-6 py-2 rounded-xl font-semibold text-sm transition-all duration-200 btn-pill" data-tab="discovery">Discovery</button>
+            <button class="tab-btn px-6 py-2 rounded-xl font-semibold text-sm transition-all duration-200 btn-pill" data-tab="assessment">Assessment</button>
         </div>
 
         <div id="tab-content"></div>
         
-        <!-- Info Modal (Modern Dark Style) -->
+        <!-- Info Modal (Premium White Style) -->
         <div id="info-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-            <!-- Backdrop -->
-            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            <div class="absolute inset-0 bg-gray-900/20 backdrop-blur-sm modal-backdrop transition-opacity duration-300"></div>
             
-            <!-- Content -->
-            <div class="relative w-full max-w-sm bg-[#111111] text-white border border-white/10 rounded-xl shadow-2xl p-6 animate-modal-in">
-                <!-- Close Button (X) -->
-                <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors btn-close-info-modal">
+            <div class="relative w-full max-w-sm bg-white text-gray-900 rounded-3xl shadow-modal p-8 animate-modal-in">
+                <button type="button" class="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors btn-close-info-modal">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
 
-                <h3 class="text-lg font-bold mb-5 tracking-tight">Deal Information</h3>
+                <h3 class="text-xl font-bold mb-6 text-gray-900">Deal Details</h3>
                 
-                <div class="space-y-4 text-sm">
-                    <div>
-                        <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Client</span>
-                        <div class="text-gray-200">${deal.clientName}</div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Client Contact</span>
-                            <div class="text-gray-200">${deal.clientContact || '-'}</div>
+                <div class="space-y-5">
+                    <div class="grid grid-cols-2 gap-6">
+                         <div>
+                            <span class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Client Contact</span>
+                            <div class="text-sm font-medium text-gray-900">${deal.clientContact || '-'}</div>
                         </div>
                         <div>
-                            <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Our Contact</span>
-                            <div class="text-gray-200">${deal.internalContact || '-'}</div>
+                            <span class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Internal Lead</span>
+                            <div class="text-sm font-medium text-gray-900">${deal.internalContact || '-'}</div>
                         </div>
                     </div>
                     <div>
-                         <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Date</span>
-                         <div class="text-gray-200">${deal.purchaseDate || '-'}</div>
+                         <span class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Target Date</span>
+                         <div class="text-sm font-medium text-gray-900">${deal.purchaseDate || '-'}</div>
                     </div>
                     <div>
-                         <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Memo</span>
-                         <div class="text-gray-300 leading-relaxed bg-[#222] p-3 rounded-lg border border-white/5">
-                            ${deal.memo || '<span class="text-gray-600">No memo</span>'}
+                         <span class="block text-xs font-bold text-gray-400 uppercase mb-1.5">Memo</span>
+                         <div class="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl border border-gray-100 leading-relaxed">
+                            ${deal.memo || '<span class="text-gray-400 italic">No memo</span>'}
                          </div>
                     </div>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-white/10 text-center">
-                    <button class="btn-close-info-modal w-full py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition text-sm">Close</button>
                 </div>
             </div>
         </div>
@@ -117,15 +105,14 @@ function renderDetailsLayout(container, dealId) {
     const tabContent = document.getElementById('tab-content');
     const tabs = document.querySelectorAll('.tab-btn');
 
-    // Tab Switching Logic
     function switchTab(tabName) {
         tabs.forEach(t => {
             if(t.dataset.tab === tabName) {
-                t.classList.replace('border-transparent', 'border-black');
-                t.classList.replace('text-gray-500', 'text-black');
+                // Active State: White bg, Shadow, Strong Text
+                t.className = 'tab-btn px-6 py-2 rounded-xl font-semibold text-sm transition-all duration-200 btn-pill bg-white text-gray-900 shadow-sm ring-1 ring-gray-200/50';
             } else {
-                t.classList.replace('border-black', 'border-transparent');
-                t.classList.replace('text-black', 'text-gray-500');
+                // Inactive State: Transparent, Gray Text
+                t.className = 'tab-btn px-6 py-2 rounded-xl font-medium text-sm transition-all duration-200 btn-pill text-gray-500 hover:text-gray-700 hover:bg-gray-200/50';
             }
         });
 
@@ -140,34 +127,18 @@ function renderDetailsLayout(container, dealId) {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // Initial load
     switchTab('discovery');
 
-    // Info Modal Logic
     const infoModal = document.getElementById('info-modal');
+    document.getElementById('btn-deal-info').addEventListener('click', () => infoModal.classList.remove('hidden'));
     
-    // Open
-    document.getElementById('btn-deal-info').addEventListener('click', () => {
-        infoModal.classList.remove('hidden');
-    });
-    
-    // Close functions
     const closeInfoModal = () => infoModal.classList.add('hidden');
-    
-    // Close on X and button
-    infoModal.querySelectorAll('.btn-close-info-modal').forEach(btn => {
-        btn.addEventListener('click', closeInfoModal);
-    });
-
-    // Close on Backdrop
+    infoModal.querySelectorAll('.btn-close-info-modal').forEach(btn => btn.addEventListener('click', closeInfoModal));
     infoModal.querySelector('.modal-backdrop').addEventListener('click', closeInfoModal);
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Nav Back Button
     backBtn.addEventListener('click', () => navigateTo('deals'));
     document.getElementById('nav-logo').addEventListener('click', () => navigateTo('deals'));
-
     navigateTo('deals');
 });
