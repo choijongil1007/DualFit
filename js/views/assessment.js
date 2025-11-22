@@ -1,9 +1,11 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
 
 let currentDealId = null;
+let pendingScoreChange = null; // To store state for modal confirmation
 
 export function renderAssessment(container, dealId) {
     currentDealId = dealId;
@@ -16,7 +18,7 @@ export function renderAssessment(container, dealId) {
                 <h2 class="text-2xl font-bold">Assessment</h2>
                 <p class="text-gray-500 text-sm">Discovery 근거를 기반으로 적합성을 판단합니다.</p>
             </div>
-             <button id="btn-calc-result" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm shadow-sm">
+             <button id="btn-calc-result" class="bg-black text-white px-4 py-2 rounded hover:bg-zinc-800 text-sm shadow-sm">
                 <i class="fa-solid fa-calculator mr-2"></i> 결과 계산 (Score)
             </button>
         </div>
@@ -34,11 +36,35 @@ export function renderAssessment(container, dealId) {
                 ${renderScoreSection('tech', deal)}
             </div>
         </div>
+
+        <!-- Score Confirmation Modal (Modern Black Style) -->
+        <div id="score-confirm-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            <div class="relative w-full max-w-sm bg-zinc-900 text-white border border-white/10 rounded-xl shadow-2xl p-6 animate-modal-in text-center">
+                <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors btn-close-score-modal">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                
+                <div class="w-12 h-12 rounded-full bg-yellow-500/10 flex items-center justify-center mx-auto mb-4 text-yellow-500">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                
+                <h3 class="text-lg font-bold mb-2">점수 확인</h3>
+                <p id="score-confirm-msg" class="text-gray-400 text-sm mb-6 whitespace-pre-line">
+                    AI 추천 점수와 차이가 큽니다.<br>이 점수로 확정하시겠습니까?
+                </p>
+                
+                <div class="flex gap-3 justify-center">
+                    <button type="button" class="btn-close-score-modal px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors">취소</button>
+                    <button type="button" id="btn-confirm-score" class="px-4 py-2 bg-white text-black hover:bg-gray-200 rounded-lg text-sm font-bold transition-colors">확인</button>
+                </div>
+            </div>
+        </div>
     `;
 
     attachEvents(deal);
     
-    // Trigger AI background check for recommendations
+    // Trigger AI background check
     runAIRecommendations(deal);
 }
 
@@ -95,24 +121,20 @@ function renderScoreSection(type, deal) {
 }
 
 async function runAIRecommendations(deal) {
-    // Collect Evidence Summary
+    // ... (Same as previous) ...
     const evidence = Object.values(deal.discovery)
         .filter(s => s.result && s.result.evidenceSummary)
         .map((s, i) => `Stage ${i+1}: ${s.result.evidenceSummary}`)
         .join('\n');
 
     if (!evidence.trim()) {
-        // No evidence, update tooltips to say N/A
         document.querySelectorAll('.ai-recommendation .tooltip').forEach(el => el.innerText = "Discovery 정보 부족");
         return;
     }
 
-    // Show mini loader in UI (make icons pulse)
     document.querySelectorAll('.ai-recommendation i').forEach(icon => icon.classList.add('animate-pulse', 'text-blue-300'));
 
     try {
-        // Due to token limits/latency, let's do one bulk call for all categories or split by Biz/Tech.
-        // Let's do one big call.
         const prompt = `
             역할: 세일즈 딜 평가 AI.
             목표: 아래 Evidence Summary를 바탕으로 각 평가 항목에 대한 1~5점 점수를 추천.
@@ -146,16 +168,6 @@ async function runAIRecommendations(deal) {
                     ... map to all items logically ...
                 }
             }
-            
-            Mapping Keys:
-            Budget items -> budget_0, budget_1
-            Authority items -> authority_0, authority_1
-            Need items -> need_0, need_1
-            Timeline items -> timeline_0, timeline_1
-            Req items -> req_0, req_1
-            Arch items -> arch_0, arch_1
-            Data items -> data_0, data_1
-            Ops items -> ops_0, ops_1
         `;
 
         const result = await callGemini(prompt);
@@ -173,14 +185,11 @@ async function runAIRecommendations(deal) {
 }
 
 function applyAIRecommendations(items) {
-    // Type maps to keys in the JSON response
     const keyMap = {
-        // Biz
         'budget_0': 'biz-budget_0', 'budget_1': 'biz-budget_1',
         'authority_0': 'biz-authority_0', 'authority_1': 'biz-authority_1',
         'need_0': 'biz-need_0', 'need_1': 'biz-need_1',
         'timeline_0': 'biz-timeline_0', 'timeline_1': 'biz-timeline_1',
-        // Tech
         'req_0': 'tech-req_0', 'req_1': 'tech-req_1',
         'arch_0': 'tech-arch_0', 'arch_1': 'tech-arch_1',
         'data_0': 'tech-data_0', 'data_1': 'tech-data_1',
@@ -189,25 +198,22 @@ function applyAIRecommendations(items) {
 
     for (const [jsonKey, uiKeyPart] of Object.entries(keyMap)) {
         const rec = items[jsonKey];
-        const [type, itemId] = uiKeyPart.split('-'); // e.g. biz, budget_0
-        
-        // Find element ID: ai-rec-{type}-{itemId}
+        const [type, itemId] = uiKeyPart.split('-'); 
         const elId = `ai-rec-${type}-${itemId}`;
         const el = document.getElementById(elId);
         
         if (el && rec) {
             const icon = el.querySelector('i');
-            icon.className = 'fa-solid fa-robot'; // reset class
+            icon.className = 'fa-solid fa-robot'; 
             
             if (rec.score !== "N/A") {
                 icon.classList.add('text-blue-600');
-                el.dataset.recScore = rec.score; // store for validation
+                el.dataset.recScore = rec.score; 
             } else {
                 icon.classList.add('text-gray-300');
             }
 
             const confColor = rec.confidence === 'High' ? 'text-green-400' : rec.confidence === 'Medium' ? 'text-yellow-400' : 'text-red-400';
-            
             el.querySelector('.tooltip').innerHTML = `
                 <div class="text-left">
                     <div class="font-bold mb-1">추천: ${rec.score} <span class="${confColor} text-xs">(${rec.confidence})</span></div>
@@ -219,6 +225,40 @@ function applyAIRecommendations(items) {
 }
 
 function attachEvents(deal) {
+    /* --- MODAL LOGIC --- */
+    const modal = document.getElementById('score-confirm-modal');
+    const closeBtn = modal.querySelector('.btn-close-score-modal');
+    const backdrop = modal.querySelector('.modal-backdrop');
+    const confirmBtn = document.getElementById('btn-confirm-score');
+    const msgEl = document.getElementById('score-confirm-msg');
+
+    const closeModal = () => {
+        modal.classList.add('hidden');
+        if (pendingScoreChange) {
+            // Revert UI if cancelled/closed without confirm
+            const { target, oldValue } = pendingScoreChange;
+            target.value = oldValue;
+            pendingScoreChange = null;
+        }
+    };
+
+    // Close events
+    modal.querySelectorAll('.btn-close-score-modal').forEach(btn => btn.addEventListener('click', closeModal));
+    backdrop.addEventListener('click', closeModal);
+
+    // Confirm Action
+    confirmBtn.addEventListener('click', () => {
+        if (pendingScoreChange) {
+            const { target, type, itemId, newValue } = pendingScoreChange;
+            // Apply new value
+            deal.assessment[type].scores[itemId] = newValue;
+            Store.saveDeal(deal);
+            // Reset pending state but don't revert UI (it's already set to new value)
+            pendingScoreChange = null; 
+            modal.classList.add('hidden');
+        }
+    });
+
     // Weight Inputs
     document.querySelectorAll('.weight-input').forEach(input => {
         input.addEventListener('change', (e) => {
@@ -232,39 +272,46 @@ function attachEvents(deal) {
 
     // Score Selects
     document.querySelectorAll('.score-select').forEach(select => {
+        // Store initial value for potential revert
+        select.addEventListener('focus', () => {
+            select.dataset.previous = select.value;
+        });
+
         select.addEventListener('change', (e) => {
             const type = e.target.dataset.type;
             const itemId = e.target.dataset.itemId;
             const val = parseInt(e.target.value);
+            const oldValue = select.dataset.previous || 0;
             
             // Validation Logic
             const recContainer = document.getElementById(`ai-rec-${type}-${itemId}`);
             if (recContainer && recContainer.dataset.recScore) {
                 const recScore = parseInt(recContainer.dataset.recScore);
+                
                 if (Math.abs(recScore - val) >= 2) {
-                    if (!confirm(`AI 추천 점수(${recScore})와 차이가 큽니다.\n정말 ${val}점으로 설정하시겠습니까?`)) {
-                        // Revert
-                        e.target.value = deal.assessment[type].scores[itemId] || 0;
-                        return;
-                    }
+                    // Trigger Custom Modal
+                    pendingScoreChange = { target: e.target, type, itemId, newValue: val, oldValue: oldValue };
+                    msgEl.innerHTML = `AI 추천 점수(<strong class="text-yellow-400">${recScore}점</strong>)와 차이가 큽니다.<br>정말 <strong class="text-white">${val}점</strong>으로 설정하시겠습니까?`;
+                    modal.classList.remove('hidden');
+                    return; // Stop here, wait for modal
                 }
             }
 
+            // Normal save if no warning
             deal.assessment[type].scores[itemId] = val;
             Store.saveDeal(deal);
+            select.dataset.previous = val;
         });
     });
 
     // Result Button
     document.getElementById('btn-calc-result').addEventListener('click', () => {
-        // Check weights sum
         const bizWeightSum = Object.values(deal.assessment.biz.weights).reduce((a, b) => a + b, 0);
         const techWeightSum = Object.values(deal.assessment.tech.weights).reduce((a, b) => a + b, 0);
 
         if (bizWeightSum !== 100) { showToast(`Biz 가중치 합이 100이 아닙니다 (현재 ${bizWeightSum})`, 'error'); return; }
         if (techWeightSum !== 100) { showToast(`Tech 가중치 합이 100이 아닙니다 (현재 ${techWeightSum})`, 'error'); return; }
 
-        // Calculate logic moved to Summary View usually, but let's show modal or navigate
         import('../app.js').then(module => {
             module.navigateTo('summary', { id: deal.id });
         });
