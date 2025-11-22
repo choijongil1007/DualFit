@@ -1,3 +1,4 @@
+
 export function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -38,8 +39,17 @@ export function showToast(message, type = 'info') {
 }
 
 export function cleanJSONString(str) {
-    // Remove markdown code blocks if present (case insensitive)
-    return str.replace(/```json/gi, '').replace(/```/g, '').trim();
+    if (!str) return "";
+    
+    // 1. Try to extract content inside ```json ... ``` or ``` ... ```
+    const jsonBlockMatch = str.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (jsonBlockMatch && jsonBlockMatch[1]) {
+        return jsonBlockMatch[1].trim();
+    }
+    
+    // 2. Fallback: remove all backticks if no clear block structure found
+    let cleaned = str.replace(/```json/gi, '').replace(/```/g, '');
+    return cleaned.trim();
 }
 
 export function renderMarkdownLike(text) {
