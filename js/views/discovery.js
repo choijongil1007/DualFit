@@ -154,40 +154,39 @@ function renderResult(result, isStale) {
         return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: Invalid result format.</div>`;
     }
 
-    // 3. Render Lists (SC and JTBD) - Small black bullets
-    let scItemsHtml = '<li>-</li>';
-    if (Array.isArray(result.sc) && result.sc.length > 0) {
-        scItemsHtml = result.sc.map(item => 
-            `<li class="flex items-start gap-3">
-                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2 flex-shrink-0"></span>
-                <span class="text-gray-700 leading-relaxed">${item}</span>
-            </li>`
-        ).join('');
-    }
+    // Helper function to render list items uniformly, handling both Array and String inputs
+    const renderListItems = (inputData) => {
+        let items = [];
+        if (Array.isArray(inputData)) {
+            items = inputData;
+        } else if (typeof inputData === 'string') {
+            // Split by newlines if it's a string block
+            items = inputData.split(/\n/).map(s => s.trim()).filter(s => s.length > 0);
+        }
 
-    let jtbdItemsHtml = '<li class="text-gray-500">-</li>';
-    if (Array.isArray(result.jtbd) && result.jtbd.length > 0) {
-        jtbdItemsHtml = result.jtbd.map(item => 
-            `<li class="flex items-start gap-3">
-                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2 flex-shrink-0"></span>
-                <span class="text-gray-700 leading-relaxed">${item}</span>
-            </li>`
-        ).join('');
-    } else if (typeof result.jtbd === 'string') {
-         // Fallback if AI returns string
-         jtbdItemsHtml = `
-            <li class="flex items-start gap-3">
-                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-2 flex-shrink-0"></span>
-                <span class="text-gray-700 leading-relaxed">${result.jtbd}</span>
+        if (items.length === 0) return '<li class="text-gray-500 italic">-</li>';
+
+        return items.map(item => {
+            // Clean leading dashes or bullets if included in the text
+            const cleanText = item.replace(/^[-*•]\s*/, '');
+            return `<li class="flex items-start gap-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-1.5 flex-shrink-0"></span>
+                <span class="text-gray-700 leading-relaxed">${cleanText}</span>
             </li>`;
-    }
+        }).join('');
+    };
 
-    // 4. Render To-Do (Filter out TechSupport strictly)
+    // 3. Render Lists (SC and JTBD)
+    const scItemsHtml = renderListItems(result.sc);
+    const jtbdItemsHtml = renderListItems(result.jtbd);
+
+    // 4. Render To-Do (Strictly Filter out TechSupport)
     let todoItemsHtml = '<div class="text-sm text-gray-400">No specific actions generated.</div>';
     if (result.todo && typeof result.todo === 'object') {
         const todos = Object.entries(result.todo)
             .filter(([role]) => {
                 const r = role.toLowerCase().replace(/\s+/g, '');
+                // Strict filter for tech support
                 return r !== 'techsupport' && r !== 'technicalsupport' && r !== '기술지원';
             });
 
@@ -320,7 +319,7 @@ function attachEvents(deal) {
                 contentDiv.classList.remove('hidden');
 
                 const jsonStructure = `{
-  "jtbd": ["Job 1 (Functional)", "Job 2 (Emotional)"],
+  "jtbd": ["Job 1 (Functional)", "Job 2 (Emotional)", "Job 3 (Social)"],
   "sc": ["Success Criteria 1", "Success Criteria 2", "Success Criteria 3"],
   "todo": {
     "Presales": "Specific action item",
@@ -348,7 +347,12 @@ User Inputs:
 - Problem: ${stageData.problem}
 
 Output Instructions:
-Return a SINGLE JSON object matching this structure (DO NOT include 'Technical Support' or 'TechSupport' in todo):
+Return a SINGLE JSON object matching this structure.
+IMPORTANT:
+1. "jtbd" MUST be an array of strings.
+2. DO NOT include 'Technical Support' or 'TechSupport' key in 'todo'.
+
+JSON Structure:
 ${jsonStructure}
 `;
 
