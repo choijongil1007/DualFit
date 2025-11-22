@@ -27,21 +27,32 @@ export function renderDiscovery(container, dealId) {
 function renderStage(stageConfig, data) {
     const isStale = !data.frozen && data.result; 
 
-    // Premium White Card Design
-    // Header is clean white, no background color on hover, just text color shift
+    const statusHtml = data.frozen 
+        ? '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>' 
+        : '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Pending Input</span>';
+
+    const staleAlert = isStale ? `
+        <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm animate-pulse">
+            <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
+            <div>
+                <strong class="font-semibold block mb-0.5">Content Modified</strong>
+                Inputs have changed. Please regenerate the analysis to get updated insights.
+            </div>
+        </div>
+    ` : '';
+
+    const btnText = data.result ? 'Regenerate' : 'Generate Insights';
+
     return `
         <div class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 stage-card overflow-hidden group" data-stage="${stageConfig.id}">
             <div class="p-5 md:p-6 flex justify-between items-center cursor-pointer toggle-header select-none">
                 <div class="flex items-center gap-4">
-                    <!-- Icon Box: Subtle accent background with colored icon -->
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-sm ${stageConfig.iconStyle} transition-transform group-hover:scale-105 duration-300">
                         <i class="fa-solid ${getIconForStage(stageConfig.id)}"></i>
                     </div>
                     <div>
                         <h3 class="font-bold text-gray-900 text-lg tracking-tight group-hover:text-primary-600 transition-colors">${stageConfig.label.split('. ')[1]}</h3>
-                        ${data.frozen 
-                            ? '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>' 
-                            : '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Pending Input</span>'}
+                        ${statusHtml}
                     </div>
                 </div>
                 <div class="w-9 h-9 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center transition-all duration-300 icon-chevron border border-transparent group-hover:border-gray-200 group-hover:bg-white group-hover:text-gray-900">
@@ -51,18 +62,8 @@ function renderStage(stageConfig, data) {
             
             <div class="hidden toggle-content border-t border-gray-100">
                 <div class="p-6 md:p-8 space-y-8">
-                    
-                    ${isStale ? `
-                        <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm animate-pulse">
-                            <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
-                            <div>
-                                <strong class="font-semibold block mb-0.5">Content Modified</strong>
-                                Inputs have changed. Please regenerate the analysis to get updated insights.
-                            </div>
-                        </div>
-                    ` : ''}
+                    ${staleAlert}
 
-                    <!-- Inputs Section: Wrapped in a Gray Box for contrast -->
                     <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-100/50">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Discovery Inputs</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
@@ -72,16 +73,14 @@ function renderStage(stageConfig, data) {
                             ${renderInput('Key Problem / Pain', 'problem', data.problem, stageConfig.id, 'What is blocking them?')}
                         </div>
                         
-                        <!-- Action Button aligned right within input box -->
                         <div class="flex justify-end pt-4 mt-2">
                              <button class="btn-analyze bg-gray-900 text-white px-6 py-2.5 rounded-full hover:bg-black transition-all text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill active:scale-95 justify-center min-w-[160px]" data-stage="${stageConfig.id}">
                                 <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i> 
-                                ${data.result ? 'Regenerate' : 'Generate Insights'}
+                                ${btnText}
                              </button>
                         </div>
                     </div>
 
-                    <!-- Results Section -->
                     <div class="result-area transition-all duration-500 ${!data.result && !isStale ? 'hidden' : ''}">
                         ${data.result ? renderResult(data.result, isStale) : ''}
                     </div>
@@ -140,6 +139,19 @@ function renderResult(result, isStale) {
         return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: ${result}</div>`;
     }
 
+    // Logic extracted from template literals to prevent nesting errors
+    const scItems = Array.isArray(result.sc) 
+        ? result.sc.map(item => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5"></i> <span>${item}</span></li>`).join('') 
+        : '<li>-</li>';
+
+    const todoItems = (result.todo && Object.keys(result.todo).length > 0)
+        ? Object.entries(result.todo).map(([role, task]) => `
+            <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
+                <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wide min-w-[70px] text-center mt-0.5">${role}</span>
+                <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
+            </div>`).join('')
+        : '<div class="text-sm text-gray-400">No specific actions generated.</div>';
+
     return `
         <div class="${opacity} space-y-6 transition-all duration-500">
             
@@ -166,7 +178,7 @@ function renderResult(result, isStale) {
                         <i class="fa-solid fa-flag-checkered text-emerald-500"></i> Success Criteria
                     </h4>
                     <ul class="text-sm text-gray-600 space-y-2 relative z-10">
-                         ${Array.isArray(result.sc) ? result.sc.map(item => `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5"></i> <span>${item}</span></li>`).join('') : '<li>-</li>'}
+                         ${scItems}
                     </ul>
                 </div>
             </div>
@@ -177,12 +189,7 @@ function renderResult(result, isStale) {
                     <i class="fa-solid fa-list-check text-violet-500"></i> Recommended Actions
                 </h4>
                 <div class="grid grid-cols-1 gap-3">
-                    ${Object.entries(result.todo || {}).map(([role, task]) => `
-                        <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
-                            <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wide min-w-[70px] text-center mt-0.5">${role}</span>
-                            <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
-                        </div>
-                    `).join('') : '<div class="text-sm text-gray-400">No specific actions generated.</div>'}
+                    ${todoItems}
                 </div>
             </div>
 
@@ -210,7 +217,7 @@ function attachEvents(deal) {
             content.classList.toggle('hidden');
             if (content.classList.contains('hidden')) {
                 icon.style.transform = 'rotate(0deg)';
-                header.classList.remove('pb-0'); // Reset padding if needed
+                header.classList.remove('pb-0'); 
             } else {
                 icon.style.transform = 'rotate(180deg)';
             }
@@ -231,7 +238,7 @@ function attachEvents(deal) {
                 
                 const stageCard = input.closest('.stage-card');
                 const resultAreaContainer = stageCard.querySelector('.result-area');
-                const resultArea = resultAreaContainer.querySelector('div'); // The inner div with opacity class
+                const resultArea = resultAreaContainer.querySelector('div'); 
                 if (resultArea) {
                    resultArea.className = 'opacity-40 grayscale blur-[1px] space-y-6 transition-all duration-500';
                 }
@@ -263,6 +270,19 @@ function attachEvents(deal) {
                 const contentDiv = card.querySelector('.toggle-content');
                 contentDiv.classList.remove('hidden');
 
+                // Define JSON structure separately to avoid template literal parser errors
+                const jsonStructure = `{
+                        "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
+                        "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
+                        "todo": {
+                            "Presales": "Specific action item",
+                            "Sales": "Specific action item",
+                            "Marketing": "Specific action item",
+                            "CSM": "Specific action item"
+                        },
+                        "evidenceSummary": "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage. This will be used for scoring later."
+                    }`;
+
                 const prompt = `
                     Role: B2B Sales Expert.
                     Goal: Analyze customer inputs and extract structured sales insights.
@@ -280,17 +300,7 @@ function attachEvents(deal) {
                     
                     Output Instructions:
                     Return a SINGLE JSON object containing the following keys.
-                    {
-                        "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
-                        "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
-                        "todo": {
-                            "Presales": "Specific action item",
-                            "Sales": "Specific action item",
-                            "Marketing": "Specific action item",
-                            "CSM": "Specific action item"
-                        },
-                        "evidenceSummary": "A concise summary (1-2 sentences) of the key pain points, budget signals, and urgency detected in this stage. This will be used for scoring later."
-                    }
+                    ${jsonStructure}
                 `;
 
                 const result = await callGemini(prompt);
@@ -299,12 +309,10 @@ function attachEvents(deal) {
                 deal.discovery[stageId].frozen = true;
                 Store.saveDeal(deal);
                 
-                // Render Actual Result
                 resultAreaContainer.innerHTML = renderResult(result, false);
                 
                 showToast('Insights Generated', 'success');
                 
-                // Update header status icon
                 const statusSpan = card.querySelector('.toggle-header h3').nextElementSibling;
                 statusSpan.innerHTML = '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
                 statusSpan.className = "text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5";
