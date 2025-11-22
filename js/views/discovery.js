@@ -138,16 +138,10 @@ function renderSkeleton() {
 function renderResult(result, isStale) {
     const opacity = isStale ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100';
     
-    // 1. Handle String Response (Plain Text / Markdown)
-    // This happens if the model returns text that isn't valid JSON
+    // 1. Handle String Response (Fallback)
     if (typeof result === 'string') {
         return `
             <div class="${opacity} transition-all duration-500">
-                <div class="flex items-center gap-3 justify-center mb-6">
-                     <div class="h-px bg-gray-200 flex-1"></div>
-                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-white px-2">Analysis Note</span>
-                     <div class="h-px bg-gray-200 flex-1"></div>
-                </div>
                 <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
                     ${result.replace(/<br>/g, '\n')} 
                 </div>
@@ -160,14 +154,25 @@ function renderResult(result, isStale) {
         return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: Invalid result format.</div>`;
     }
 
-    // 3. Handle Standard JSON Object Response
+    // 3. Render Lists (SC and JTBD)
     let scItemsHtml = '<li>-</li>';
     if (Array.isArray(result.sc) && result.sc.length > 0) {
         scItemsHtml = result.sc.map(item => 
-            `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5"></i> <span>${item}</span></li>`
+            `<li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 text-[10px] mt-1.5 flex-shrink-0"></i> <span>${item}</span></li>`
         ).join('');
     }
 
+    let jtbdItemsHtml = '<li class="text-gray-500">-</li>';
+    if (Array.isArray(result.jtbd) && result.jtbd.length > 0) {
+        jtbdItemsHtml = result.jtbd.map(item => 
+            `<li class="flex items-start gap-2"><i class="fa-solid fa-bullseye text-blue-400 text-[10px] mt-1.5 flex-shrink-0"></i> <span>${item}</span></li>`
+        ).join('');
+    } else if (typeof result.jtbd === 'string') {
+         // Fallback if AI returns string despite prompt
+         jtbdItemsHtml = `<li class="flex items-start gap-2"><i class="fa-solid fa-bullseye text-blue-400 text-[10px] mt-1.5 flex-shrink-0"></i> <span>${result.jtbd}</span></li>`;
+    }
+
+    // 4. Render To-Do
     let todoItemsHtml = '<div class="text-sm text-gray-400">No specific actions generated.</div>';
     if (result.todo && typeof result.todo === 'object') {
         const todos = Object.entries(result.todo);
@@ -197,7 +202,9 @@ function renderResult(result, isStale) {
                     <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 relative z-10">
                         <i class="fa-solid fa-bullseye text-blue-500"></i> Jobs to be Done
                     </h4>
-                    <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-line relative z-10">${result.jtbd || '-'}</p>
+                    <ul class="text-sm text-gray-600 space-y-2 relative z-10">
+                        ${jtbdItemsHtml}
+                    </ul>
                 </div>
 
                 <!-- Success Criteria Card -->
@@ -298,8 +305,8 @@ function attachEvents(deal) {
                 contentDiv.classList.remove('hidden');
 
                 const jsonStructure = `{
-  "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
-  "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
+  "jtbd": ["Job 1 (Functional)", "Job 2 (Emotional)"],
+  "sc": ["Success Criteria 1", "Success Criteria 2", "Success Criteria 3"],
   "todo": {
     "Presales": "Specific action item",
     "Sales": "Specific action item",
@@ -326,7 +333,7 @@ User Inputs:
 - Problem: ${stageData.problem}
 
 Output Instructions:
-Return a SINGLE JSON object matching this structure:
+Return a SINGLE JSON object matching this structure (Do not include TechSupport in todo):
 ${jsonStructure}
 `;
 

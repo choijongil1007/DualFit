@@ -132,6 +132,8 @@ function renderScoreSection(type, deal) {
 }
 
 async function runAIRecommendations(deal, forceRefresh = false) {
+    // Stop if we have data and not forced to refresh.
+    // This prevents unnecessary API calls for Tech Fit if data was correctly saved.
     if (!forceRefresh && deal.assessment.recommendations) {
         applyAIRecommendations(deal.assessment.recommendations);
         return;
@@ -164,13 +166,12 @@ async function runAIRecommendations(deal, forceRefresh = false) {
             3. **Complexity vs Tech Fit**: If environment is complex/legacy, Tech Fit scores (Integration/Arch) should be conservative.
             4. **Timeline**: If timeline is unrealistic or very tight, 'Timeline' score should be Low (risk is high).
             
-            Return JSON with recommended scores and brief reason for:
-            Budget (Exist, Fit), Authority (Access, Power), Need (Fit, Urgent), Timeline (Clear, Easy),
-            Tech (Req, UseCase, Arch, Sec, Data, Integ, Impl, Ops).
+            Return JSON with recommended scores and brief reason for ALL items below.
+            REQUIRED KEYS:
+            - budget_0, budget_1, authority_0, authority_1, need_0, need_1, timeline_0, timeline_1
+            - req_0, req_1, arch_0, arch_1, data_0, data_1, ops_0, ops_1
             
-            If a Logic Rule is triggered, mention it in the "reason".
-            
-            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "예산이 명확히 확보되어 있습니다."}, ...}}
+            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "reason..."}, "req_0": { ... }, ... }}
         `;
 
         const result = await callGemini(prompt);

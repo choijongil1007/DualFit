@@ -16,9 +16,9 @@ export function renderSummary(container, dealId) {
             <p class="text-gray-500 text-sm">전략 개요와 대응 계획</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-            <!-- Left: Quadrant -->
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex flex-col items-center relative overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-10 gap-8 mb-10">
+            <!-- Left: Quadrant (40%) -->
+            <div class="lg:col-span-4 bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex flex-col items-center relative overflow-hidden">
                 <h3 class="font-bold text-lg text-gray-900 mb-6 z-10">Fit Analysis</h3>
                 
                 <div class="quadrant-container rounded-2xl mb-8 z-10">
@@ -63,8 +63,8 @@ export function renderSummary(container, dealId) {
                 </div>
             </div>
 
-            <!-- Right: AI Analysis -->
-            <div class="flex flex-col h-full">
+            <!-- Right: AI Analysis (60%) -->
+            <div class="lg:col-span-6 flex flex-col h-full">
                 <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex-grow relative overflow-hidden">
                     <div class="flex justify-between items-center mb-6 relative z-10">
                         <h3 class="font-bold text-lg text-gray-900">AI 전략 조언</h3>
