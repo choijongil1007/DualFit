@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
@@ -152,6 +153,7 @@ async function runAIRecommendations(deal, forceRefresh = false) {
     try {
         const prompt = `
             Task: B2B Deal Scoring recommendation (1-5 scale).
+            Language: Korean (Must output strictly in Korean).
             Deal: ${deal.dealName}
             Evidence: ${evidence}
             

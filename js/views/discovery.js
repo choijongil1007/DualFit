@@ -36,8 +36,8 @@ function renderStage(stageConfig, data) {
         <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm animate-pulse">
             <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
             <div>
-                <strong class="font-semibold block mb-0.5">Content Modified</strong>
-                Inputs have changed. Please regenerate the analysis to get updated insights.
+                <strong class="font-semibold block mb-0.5">내용 변경됨</strong>
+                입력값이 변경되었습니다. 최신 인사이트를 얻으려면 분석을 다시 실행해주세요.
             </div>
         </div>
     ` : '';
@@ -312,6 +312,7 @@ function attachEvents(deal) {
                 const prompt = `
 Role: B2B Sales Expert.
 Goal: Analyze customer inputs and extract structured sales insights.
+Language: Korean (Must output strictly in Korean).
 
 Context:
 - Deal: ${deal.dealName} (${deal.clientName})

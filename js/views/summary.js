@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -152,6 +153,7 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
 
         const prompt = `
             Task: Strategic Deal Review.
+            Language: Korean (Must output strictly in Korean).
             Deal: ${deal.dealName} (Biz: ${bizScore}, Tech: ${techScore})
             Risks: ${lowItemsText}
             Evidence: ${evidence}
