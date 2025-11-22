@@ -18,9 +18,14 @@ export function renderAssessment(container, dealId) {
                 <h2 class="text-2xl font-bold">Assessment</h2>
                 <p class="text-gray-500 text-sm">Discovery 근거를 기반으로 적합성을 판단합니다.</p>
             </div>
-             <button id="btn-calc-result" class="bg-black text-white px-4 py-2 rounded hover:bg-zinc-800 text-sm shadow-sm">
-                <i class="fa-solid fa-calculator mr-2"></i> 결과 계산 (Score)
-            </button>
+            <div class="flex gap-2">
+                <button id="btn-refresh-ai" class="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i> AI 조언 갱신
+                </button>
+                <button id="btn-calc-result" class="bg-black text-white px-4 py-2 rounded hover:bg-zinc-800 text-sm shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> 결과 계산
+                </button>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -64,8 +69,8 @@ export function renderAssessment(container, dealId) {
 
     attachEvents(deal);
     
-    // Trigger AI background check
-    runAIRecommendations(deal);
+    // Check if we have cached recommendations, otherwise run AI
+    runAIRecommendations(deal, false);
 }
 
 function renderScoreSection(type, deal) {
@@ -120,8 +125,14 @@ function renderScoreSection(type, deal) {
     `;
 }
 
-async function runAIRecommendations(deal) {
-    // ... (Same as previous) ...
+async function runAIRecommendations(deal, forceRefresh = false) {
+    // 1. Use Cached Data if available and not forced
+    if (!forceRefresh && deal.assessment.recommendations) {
+        console.log("Using cached AI recommendations");
+        applyAIRecommendations(deal.assessment.recommendations);
+        return;
+    }
+
     const evidence = Object.values(deal.discovery)
         .filter(s => s.result && s.result.evidenceSummary)
         .map((s, i) => `Stage ${i+1}: ${s.result.evidenceSummary}`)
@@ -132,7 +143,13 @@ async function runAIRecommendations(deal) {
         return;
     }
 
-    document.querySelectorAll('.ai-recommendation i').forEach(icon => icon.classList.add('animate-pulse', 'text-blue-300'));
+    // UI Loading State
+    document.querySelectorAll('.ai-recommendation i').forEach(icon => {
+        icon.className = 'fa-solid fa-spinner fa-spin text-blue-500';
+    });
+    document.querySelectorAll('.ai-recommendation .tooltip').forEach(el => el.innerText = "계산 중...");
+
+    if (forceRefresh) showToast("AI 추천 점수를 갱신합니다...", "info");
 
     try {
         const prompt = `
@@ -173,14 +190,21 @@ async function runAIRecommendations(deal) {
         const result = await callGemini(prompt);
         
         if (result && result.items) {
+            // SAVE to Store
+            deal.assessment.recommendations = result.items;
+            Store.saveDeal(deal);
+
             applyAIRecommendations(result.items);
+            if (forceRefresh) showToast("AI 추천 점수가 갱신되었습니다.", "success");
         }
 
     } catch (e) {
         console.error("AI Rec Error", e);
         document.querySelectorAll('.ai-recommendation .tooltip').forEach(el => el.innerText = "AI 연결 실패");
-    } finally {
-         document.querySelectorAll('.ai-recommendation i').forEach(icon => icon.classList.remove('animate-pulse', 'text-blue-300'));
+        // Revert icons
+        document.querySelectorAll('.ai-recommendation i').forEach(icon => {
+            icon.className = 'fa-solid fa-triangle-exclamation text-red-400';
+        });
     }
 }
 
@@ -225,6 +249,11 @@ function applyAIRecommendations(items) {
 }
 
 function attachEvents(deal) {
+    /* --- REFRESH AI BUTTON --- */
+    document.getElementById('btn-refresh-ai').addEventListener('click', () => {
+        runAIRecommendations(deal, true);
+    });
+
     /* --- MODAL LOGIC --- */
     const modal = document.getElementById('score-confirm-modal');
     const closeBtn = modal.querySelector('.btn-close-score-modal');

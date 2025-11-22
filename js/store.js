@@ -1,3 +1,4 @@
+
 const STORAGE_KEY = 'dualfit_deals';
 
 export const Store = {
@@ -47,7 +48,8 @@ export const Store = {
             },
             assessment: {
                 biz: { scores: {}, weights: { budget: 20, authority: 25, need: 35, timeline: 20 } },
-                tech: { scores: {}, weights: { req: 30, arch: 25, data: 25, ops: 20 } }
+                tech: { scores: {}, weights: { req: 30, arch: 25, data: 25, ops: 20 } },
+                recommendations: null // Store AI recommendations here
             },
             updatedAt: new Date().toISOString()
         };
