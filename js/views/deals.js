@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { generateId, showToast } from '../utils.js';
 import { navigateTo } from '../app.js';
@@ -82,9 +83,14 @@ function createDealCard(deal) {
 
     return `
         <div class="group relative bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-all cursor-pointer deal-card" data-id="${deal.id}">
-            <div class="flex justify-between items-start mb-2">
-                <h3 class="font-bold text-lg text-gray-900 truncate pr-2">${deal.dealName}</h3>
-                <span class="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">${deal.clientName}</span>
+            <div class="flex justify-between items-start mb-3">
+                <div class="overflow-hidden pr-2">
+                    <h3 class="font-bold text-lg text-gray-900 truncate">${deal.dealName}</h3>
+                    <span class="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded mt-1 inline-block">${deal.clientName}</span>
+                </div>
+                <button class="btn-delete-deal text-gray-300 hover:text-red-500 p-1.5 rounded hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all z-10" data-id="${deal.id}" title="Delete Deal">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
             </div>
             <p class="text-sm text-gray-500 mb-4 line-clamp-2 h-10">${deal.memo || 'No memo'}</p>
             
@@ -144,6 +150,21 @@ function attachEvents() {
         renderDeals(app);
     });
 
+    // Delete Buttons Logic
+    document.querySelectorAll('.btn-delete-deal').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card click logic
+            const id = btn.dataset.id;
+            if (confirm('이 Deal을 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.')) {
+                Store.deleteDeal(id);
+                showToast('Deal이 삭제되었습니다.', 'success');
+                // Reload list
+                renderDeals(document.getElementById('app'));
+            }
+        });
+    });
+
+    // Card Click Logic
     document.querySelectorAll('.deal-card').forEach(card => {
         card.addEventListener('click', () => {
             const id = card.dataset.id;
