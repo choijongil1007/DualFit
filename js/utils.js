@@ -17,14 +17,49 @@ export function hideLoader() {
     if (loader) loader.classList.add('hidden');
 }
 
+/**
+ * 버튼 자체에 로딩 상태를 적용합니다 (화면 차단 없음)
+ * @param {HTMLElement} btn - 버튼 엘리먼트
+ * @param {boolean} isLoading - 로딩 중 여부
+ * @param {string} loadingText - 로딩 중 표시할 텍스트
+ */
+export function setButtonLoading(btn, isLoading, loadingText = "Analyzing...") {
+    if (!btn) return;
+
+    if (isLoading) {
+        // 기존 너비 고정 (레이아웃 흔들림 방지)
+        btn.style.width = `${btn.offsetWidth}px`;
+        btn.dataset.originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.classList.add('cursor-not-allowed', 'opacity-80', 'bg-gray-700');
+        btn.classList.remove('bg-gray-900', 'hover:bg-black', 'shadow-lg');
+        
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-white"></i> <span class="ml-2">${loadingText}</span>`;
+    } else {
+        btn.disabled = false;
+        btn.style.width = ''; // 너비 초기화
+        btn.classList.remove('cursor-not-allowed', 'opacity-80', 'bg-gray-700');
+        btn.classList.add('bg-gray-900', 'hover:bg-black', 'shadow-lg');
+        
+        if (btn.dataset.originalContent) {
+            btn.innerHTML = btn.dataset.originalContent;
+        }
+    }
+}
+
 export function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     
-    const colors = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-600' : 'bg-gray-800';
+    const colors = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-emerald-600' : 'bg-gray-800';
     
-    toast.className = `${colors} text-white px-4 py-3 rounded shadow-lg text-sm transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-2`;
-    toast.innerHTML = `<span>${message}</span>`;
+    toast.className = `${colors} text-white px-5 py-3 rounded-full shadow-2xl text-sm font-medium transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-3 backdrop-blur-md`;
+    
+    let icon = type === 'success' ? '<i class="fa-solid fa-check"></i>' : 
+               type === 'error' ? '<i class="fa-solid fa-triangle-exclamation"></i>' : 
+               '<i class="fa-solid fa-circle-info"></i>';
+
+    toast.innerHTML = `${icon} <span>${message}</span>`;
     
     container.appendChild(toast);
     

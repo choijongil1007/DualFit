@@ -1,7 +1,7 @@
 
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
-import { showLoader, hideLoader, showToast } from '../utils.js';
+import { showToast, setButtonLoading } from '../utils.js';
 import { DISCOVERY_STAGES } from '../config.js';
 
 let currentDealId = null;
@@ -71,7 +71,7 @@ function renderStage(stageConfig, data) {
 
                     <!-- Action Button -->
                     <div class="flex justify-end pt-2 border-t border-dashed border-gray-100 mt-4">
-                         <button class="btn-analyze bg-gray-900 text-white px-6 py-2.5 rounded-full hover:bg-black transition-all text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill active:scale-95" data-stage="${stageConfig.id}">
+                         <button class="btn-analyze bg-gray-900 text-white px-6 py-2.5 rounded-full hover:bg-black transition-all text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill active:scale-95 justify-center min-w-[180px]" data-stage="${stageConfig.id}">
                             <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i> 
                             ${data.result ? 'Regenerate Analysis' : 'Generate Insights'}
                          </button>
@@ -97,6 +97,22 @@ function renderInput(label, key, value, stageId) {
                 data-key="${key}"
                 placeholder="Enter details..."
             >${value || ''}</textarea>
+        </div>
+    `;
+}
+
+function renderSkeleton() {
+    return `
+        <div class="space-y-6 animate-pulse">
+            <div class="relative flex justify-center mb-6">
+                <span class="bg-white px-3 text-xs font-bold text-gray-300 uppercase tracking-widest">Generating Insights...</span>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 h-28"></div>
+                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 h-24"></div>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 h-32"></div>
         </div>
     `;
 }
@@ -154,7 +170,7 @@ function renderResult(result, isStale) {
                             <span class="text-[10px] font-bold bg-white border border-gray-200 text-gray-700 px-2 py-1 rounded-md uppercase tracking-wide min-w-[80px] text-center shadow-sm mt-0.5">${role}</span>
                             <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
                         </div>
-                    `).join('')}
+                    `).join('') : '<div class="text-sm text-gray-400">No specific actions generated.</div>'}
                 </div>
             </div>
 
@@ -214,16 +230,21 @@ function attachEvents(deal) {
     });
 
     document.querySelectorAll('.btn-analyze').forEach(btn => {
-        btn.addEventListener('click', async () => {
+        btn.addEventListener('click', async (e) => {
             const stageId = btn.dataset.stage;
             const stageData = deal.discovery[stageId];
+            const card = btn.closest('.stage-card');
+            const resultAreaContainer = card.querySelector('.result-area');
 
             if (!stageData.behavior && !stageData.problem && !stageData.emotion) {
                 showToast('Please provide some inputs first.', 'error');
                 return;
             }
 
-            showLoader('Analyzing Discovery Data...');
+            // UI State: Loading
+            setButtonLoading(btn, true);
+            resultAreaContainer.classList.remove('hidden');
+            resultAreaContainer.innerHTML = renderSkeleton();
 
             try {
                 const prompt = `
@@ -242,7 +263,7 @@ function attachEvents(deal) {
                     - Problem: ${stageData.problem}
                     
                     Output Instructions:
-                    Return a SINGLE JSON object with the following keys. Do not include markdown code blocks.
+                    Return a SINGLE JSON object containing the following keys.
                     {
                         "jtbd": "Analyze the underlying Job to be Done (Functional & Emotional).",
                         "sc": ["List 3-5 specific Success Criteria (Measurable outcomes)."],
@@ -262,25 +283,22 @@ function attachEvents(deal) {
                 deal.discovery[stageId].frozen = true;
                 Store.saveDeal(deal);
                 
-                hideLoader();
-                showToast('Insights Generated', 'success');
-                renderDiscovery(document.getElementById('app'), currentDealId); 
+                // Render Actual Result
+                resultAreaContainer.innerHTML = renderResult(result, false);
                 
-                // Re-open the accordion after render
-                setTimeout(() => {
-                    const card = document.querySelector(`.stage-card[data-stage="${stageId}"]`);
-                    if (card) {
-                        card.querySelector('.toggle-content').classList.remove('hidden');
-                        card.querySelector('.icon-chevron').style.transform = 'rotate(180deg)';
-                        card.querySelector('.toggle-header').classList.add('bg-gray-50/50');
-                        // Scroll to results
-                        card.querySelector('.result-area').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                }, 100);
+                showToast('Insights Generated', 'success');
+                
+                // Update header status icon
+                card.querySelector('.toggle-header h3').nextElementSibling.innerHTML = 
+                    '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
 
             } catch (error) {
-                hideLoader();
+                console.error(error);
                 showToast(error.message, 'error');
+                resultAreaContainer.innerHTML = ''; // Clear skeleton on error
+                resultAreaContainer.classList.add('hidden');
+            } finally {
+                setButtonLoading(btn, false);
             }
         });
     });
