@@ -22,44 +22,56 @@ export function renderDeals(container) {
             ` : deals.map(deal => createDealCard(deal)).join('')}
         </div>
 
-        <!-- Create Modal (Hidden by default) -->
-        <div id="create-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-md rounded-lg shadow-2xl p-6">
-                <h2 class="text-xl font-bold mb-4">Create New Deal</h2>
-                <form id="create-form" class="space-y-3">
+        <!-- Create Modal (Modern Dark Style) -->
+        <div id="create-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            
+            <!-- Content -->
+            <div class="relative w-full max-w-lg bg-[#111111] text-white border border-white/10 rounded-xl shadow-2xl p-6 sm:p-8 animate-modal-in">
+                <!-- Close Button (X) -->
+                <button type="button" class="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors btn-close-modal">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <h2 class="text-xl font-bold mb-6 tracking-tight">Create New Deal</h2>
+                
+                <form id="create-form" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Client Name</label>
-                        <input type="text" name="clientName" required class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black focus:border-transparent outline-none">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Client Name</label>
+                        <input type="text" name="clientName" required class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white placeholder-gray-500 outline-none transition-all" placeholder="e.g. Acme Corp">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Project Name (Deal ID)</label>
-                        <input type="text" name="dealName" required class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black focus:border-transparent outline-none">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Project Name</label>
+                        <input type="text" name="dealName" required class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white placeholder-gray-500 outline-none transition-all" placeholder="e.g. Cloud Migration Phase 1">
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Client Contact</label>
-                            <input type="text" name="clientContact" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black outline-none">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Client Contact</label>
+                            <input type="text" name="clientContact" class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white outline-none transition-all">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Our Contact</label>
-                            <input type="text" name="internalContact" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black outline-none">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Our Contact</label>
+                            <input type="text" name="internalContact" class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white outline-none transition-all">
                         </div>
                     </div>
                     <div>
-                         <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Solution</label>
-                         <input type="text" name="solution" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black outline-none">
+                         <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Solution</label>
+                         <input type="text" name="solution" class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white outline-none transition-all">
                     </div>
                     <div>
-                         <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Date</label>
-                         <input type="date" name="purchaseDate" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black outline-none">
+                         <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Target Date</label>
+                         <!-- Date input styling is tricky in dark mode, basic adjustment here -->
+                         <input type="date" name="purchaseDate" class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white outline-none transition-all [color-scheme:dark]">
                     </div>
                     <div>
-                         <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Memo</label>
-                         <textarea name="memo" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-black outline-none" rows="2"></textarea>
+                         <label class="block text-xs font-semibold text-gray-400 uppercase mb-1.5">Memo</label>
+                         <textarea name="memo" class="w-full bg-[#222] border border-transparent focus:border-white/30 rounded-lg p-2.5 text-sm text-white outline-none transition-all resize-none" rows="3"></textarea>
                     </div>
-                    <div class="flex justify-end gap-2 pt-4">
-                        <button type="button" id="btn-cancel-create" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm">Cancel</button>
-                        <button type="submit" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 text-sm">Create</button>
+                    
+                    <div class="flex justify-end gap-3 pt-4 mt-2 border-t border-white/5">
+                        <button type="button" class="btn-close-modal px-4 py-2 text-gray-400 hover:text-white rounded-lg text-sm transition-colors">Cancel</button>
+                        <button type="submit" class="px-5 py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors text-sm shadow-lg shadow-white/5">Create Deal</button>
                     </div>
                 </form>
             </div>
@@ -121,12 +133,23 @@ function createDealCard(deal) {
 function attachEvents() {
     const modal = document.getElementById('create-modal');
     const createBtn = document.getElementById('btn-create-deal');
-    const cancelBtn = document.getElementById('btn-cancel-create');
     const form = document.getElementById('create-form');
-    
+
+    // Open
     createBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-    cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+    // Close function
+    const closeModal = () => modal.classList.add('hidden');
+
+    // 1. Close on X button and Cancel button
+    modal.querySelectorAll('.btn-close-modal').forEach(btn => {
+        btn.addEventListener('click', closeModal);
+    });
+
+    // 2. Close on Backdrop click
+    modal.querySelector('.modal-backdrop').addEventListener('click', closeModal);
     
+    // Create Logic
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData(form);
@@ -142,7 +165,7 @@ function attachEvents() {
         newDeal.memo = formData.get('memo');
         
         Store.saveDeal(newDeal);
-        modal.classList.add('hidden');
+        closeModal();
         showToast('Deal created successfully', 'success');
         
         // Reload list

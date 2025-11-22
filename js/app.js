@@ -1,3 +1,4 @@
+
 import { renderDeals } from './views/deals.js';
 import { renderDiscovery } from './views/discovery.js';
 import { renderAssessment } from './views/assessment.js';
@@ -65,18 +66,50 @@ function renderDetailsLayout(container, dealId) {
 
         <div id="tab-content"></div>
         
-        <!-- Edit Info Modal (Simplified) -->
-        <div id="info-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div class="bg-white p-6 rounded-lg max-w-sm w-full">
-                <h3 class="font-bold mb-4">Deal Info</h3>
-                <div class="space-y-2 text-sm mb-4">
-                    <p><strong>Client:</strong> ${deal.clientName}</p>
-                    <p><strong>Client Contact:</strong> ${deal.clientContact || '-'}</p>
-                    <p><strong>Our Contact:</strong> ${deal.internalContact || '-'}</p>
-                    <p><strong>Date:</strong> ${deal.purchaseDate || '-'}</p>
-                    <p><strong>Memo:</strong> ${deal.memo || '-'}</p>
+        <!-- Info Modal (Modern Dark Style) -->
+        <div id="info-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+            <!-- Backdrop -->
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            
+            <!-- Content -->
+            <div class="relative w-full max-w-sm bg-[#111111] text-white border border-white/10 rounded-xl shadow-2xl p-6 animate-modal-in">
+                <!-- Close Button (X) -->
+                <button type="button" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors btn-close-info-modal">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <h3 class="text-lg font-bold mb-5 tracking-tight">Deal Information</h3>
+                
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Client</span>
+                        <div class="text-gray-200">${deal.clientName}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Client Contact</span>
+                            <div class="text-gray-200">${deal.clientContact || '-'}</div>
+                        </div>
+                        <div>
+                            <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Our Contact</span>
+                            <div class="text-gray-200">${deal.internalContact || '-'}</div>
+                        </div>
+                    </div>
+                    <div>
+                         <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Date</span>
+                         <div class="text-gray-200">${deal.purchaseDate || '-'}</div>
+                    </div>
+                    <div>
+                         <span class="block text-xs font-semibold text-gray-500 uppercase mb-1">Memo</span>
+                         <div class="text-gray-300 leading-relaxed bg-[#222] p-3 rounded-lg border border-white/5">
+                            ${deal.memo || '<span class="text-gray-600">No memo</span>'}
+                         </div>
+                    </div>
                 </div>
-                <button class="w-full bg-black text-white py-2 rounded text-sm" onclick="this.parentElement.parentElement.classList.add('hidden')">Close</button>
+
+                <div class="mt-6 pt-4 border-t border-white/10 text-center">
+                    <button class="btn-close-info-modal w-full py-2 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition text-sm">Close</button>
+                </div>
             </div>
         </div>
     `;
@@ -110,10 +143,24 @@ function renderDetailsLayout(container, dealId) {
     // Initial load
     switchTab('discovery');
 
-    // Info Modal
+    // Info Modal Logic
+    const infoModal = document.getElementById('info-modal');
+    
+    // Open
     document.getElementById('btn-deal-info').addEventListener('click', () => {
-        document.getElementById('info-modal').classList.remove('hidden');
+        infoModal.classList.remove('hidden');
     });
+    
+    // Close functions
+    const closeInfoModal = () => infoModal.classList.add('hidden');
+    
+    // Close on X and button
+    infoModal.querySelectorAll('.btn-close-info-modal').forEach(btn => {
+        btn.addEventListener('click', closeInfoModal);
+    });
+
+    // Close on Backdrop
+    infoModal.querySelector('.modal-backdrop').addEventListener('click', closeInfoModal);
 }
 
 // Initialize
