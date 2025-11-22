@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast, renderMarkdownLike } from '../utils.js';
@@ -91,6 +92,19 @@ function renderInput(label, key, value, stageId) {
 
 function renderResult(result, isStale) {
     const opacity = isStale ? 'opacity-50' : 'opacity-100';
+    
+    // Fallback if result is just a string (failed JSON parse)
+    if (typeof result === 'string') {
+        return `
+            <div class="${opacity} space-y-4 transition-opacity">
+                <div class="bg-red-50 p-4 rounded text-sm text-red-700 border border-red-100">
+                    <strong>Raw Output (JSON Parse Failed):</strong><br>
+                    <pre class="whitespace-pre-wrap mt-2 text-xs text-gray-600">${result}</pre>
+                </div>
+            </div>
+        `;
+    }
+
     return `
         <div class="${opacity} space-y-5 transition-opacity">
             <div>
@@ -152,12 +166,7 @@ function attachEvents(deal) {
             if (deal.discovery[stageId].frozen) {
                 deal.discovery[stageId].frozen = false;
                 Store.saveDeal(deal);
-                // Re-render just this stage card header/content warning without full reload to keep focus? 
-                // Simplest is to reload the UI, but that kills focus. 
-                // Better: Just update UI classes.
                 
-                // For this implementation, we will save state, then show warning on next interaction or reload.
-                // But let's try to update the specific UI element "modified" banner dynamically.
                 const stageCard = input.closest('.stage-card');
                 const resultArea = stageCard.querySelector('.result-area');
                 if (resultArea) {
@@ -204,11 +213,11 @@ function attachEvents(deal) {
                     Problem: ${stageData.problem}
                     
                     [Output Requirement]
-                    Return ONLY a JSON object (no markdown) with the following keys:
-                    1. "jtbd": (String) Hierarchy of jobs (Functional, Emotional, Social).
-                    2. "sc": (Array of Strings) 3-5 Success Criteria (Biz/Tech/Project balance).
+                    Return ONLY a valid JSON object (no markdown, no code blocks) with the following keys:
+                    1. "jtbd": (String) Hierarchy of jobs.
+                    2. "sc": (Array of Strings) 3-5 Success Criteria.
                     3. "todo": (Object) Key is role (Presales, Sales, Marketing, CSM, TechSupport), Value is specific action string.
-                    4. "evidenceSummary": (String) Short summary of key signals (Budget, Authority, Need urgency, Timeline constraints) derived from this input for scoring later.
+                    4. "evidenceSummary": (String) Short summary of key signals.
                 `;
 
                 const result = await callGemini(prompt);
@@ -234,6 +243,7 @@ function attachEvents(deal) {
             } catch (error) {
                 hideLoader();
                 showToast('AI 분석 실패: ' + error.message, 'error');
+                console.error(error);
             }
         });
     });

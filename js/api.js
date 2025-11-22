@@ -16,7 +16,8 @@ export async function callGemini(prompt) {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status} - ${errText}`);
         }
 
         const data = await response.json();
@@ -27,19 +28,34 @@ export async function callGemini(prompt) {
             return parseResult(data.text);
         }
 
-        // 2. Raw Gemini API Format (fallback): { candidates: [ { content: { parts: [ { text: "..." } ] } } ] }
-        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts) {
-            const text = data.candidates[0].content.parts[0].text;
-            return parseResult(text);
+        // 2. Raw Gemini API Format: { candidates: [ { content: { parts: [ { text: "..." } ] } } ] }
+        if (data.candidates && Array.isArray(data.candidates) && data.candidates.length > 0) {
+            const candidate = data.candidates[0];
+            // Check for safety blocking
+            if (candidate.finishReason && candidate.finishReason !== "STOP") {
+                throw new Error(`Gemini Generation Stopped: ${candidate.finishReason}`);
+            }
+            
+            if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+                const text = candidate.content.parts[0].text;
+                return parseResult(text);
+            }
         }
 
-        // 3. Error Handling
+        // 3. Explicit Error from Proxy
         if (data.error) {
              const msg = typeof data.error === 'object' ? JSON.stringify(data.error) : data.error;
              throw new Error("Gemini API Error: " + msg);
         }
 
-        throw new Error("Invalid response format: " + JSON.stringify(data));
+        // 4. Fallback: The data IS the payload (e.g. proxy returned the object directly)
+        // If it's a non-empty object, return it as-is.
+        if (typeof data === 'object' && data !== null && Object.keys(data).length > 0) {
+            console.log("Returning data object directly as payload.");
+            return data;
+        }
+
+        throw new Error("Unknown response format: " + JSON.stringify(data));
 
     } catch (error) {
         console.error("Gemini API Error:", error);
@@ -54,7 +70,7 @@ function parseResult(rawText) {
     } catch (e) {
         // If parsing fails, return the raw text. 
         // This is useful if the model returns plain text instead of JSON.
-        console.warn("Failed to parse JSON from AI response, returning text:", e);
-        return cleanedText;
+        console.warn("Failed to parse JSON from AI response, returning text. Raw:", rawText);
+        return rawText; // Return raw string so UI can at least display it
     }
 }
