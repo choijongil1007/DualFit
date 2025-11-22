@@ -38,8 +38,8 @@ export function showToast(message, type = 'info') {
 }
 
 export function cleanJSONString(str) {
-    // Remove markdown code blocks if present
-    return str.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Remove markdown code blocks if present (case insensitive)
+    return str.replace(/```json/gi, '').replace(/```/g, '').trim();
 }
 
 export function renderMarkdownLike(text) {

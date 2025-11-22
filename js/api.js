@@ -4,10 +4,15 @@ import { cleanJSONString } from './utils.js';
 export async function callGemini(prompt) {
     try {
         console.log("Sending Prompt to Gemini:", prompt);
+        
+        // Google Apps Script Web Apps do not support OPTIONS (preflight) requests.
+        // Using 'application/json' triggers a preflight check which fails with CORS errors.
+        // We must use 'text/plain' or 'application/x-www-form-urlencoded' to skip the preflight.
+        // The script backend will still receive the body string which contains our JSON.
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "text/plain;charset=utf-8"
             },
             body: JSON.stringify({ prompt: prompt })
         });
@@ -20,6 +25,7 @@ export async function callGemini(prompt) {
         
         // The proxy returns structure like { text: "..." }
         if (!data.text) {
+             if (data.error) throw new Error(data.error);
             throw new Error("Invalid response format from proxy");
         }
 
