@@ -92,7 +92,7 @@ export function renderDeals(container) {
                 
                 <h3 class="text-lg font-bold mb-2 text-gray-900">Delete Deal?</h3>
                 <p class="text-gray-500 text-sm mb-8 leading-relaxed">
-                    This action cannot be undone.<br>Are you sure you want to proceed?
+                    Deal을 삭제할까요? 이 작업은 취소할 수 없습니다.
                 </p>
                 
                 <div class="flex gap-3 justify-center">
