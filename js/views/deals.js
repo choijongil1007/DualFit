@@ -14,7 +14,7 @@ export function renderDeals(container) {
                 <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Deals</h1>
                 <p class="text-gray-500 mt-1 text-sm">Manage your sales pipeline effectively.</p>
             </div>
-            <button id="btn-create-deal" class="bg-emerald-600 hover:bg-emerald-700 text-white pl-4 pr-5 py-2.5 rounded-full transition-all shadow-lg shadow-emerald-500/30 text-sm font-semibold flex items-center gap-2 btn-pill active:scale-95">
+            <button id="btn-create-deal" class="bg-[#5A0E7A] hover:bg-[#450b5e] text-white pl-4 pr-5 py-2.5 rounded-full transition-all shadow-lg shadow-[#5A0E7A]/30 text-sm font-semibold flex items-center gap-2 btn-pill active:scale-95">
                 <i class="fa-solid fa-plus text-xs"></i> New Deal
             </button>
         </div>
