@@ -128,7 +128,7 @@ function createDealCard(deal) {
                 </button>
             </div>
             
-            <p class="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed flex-grow">${deal.memo || 'No details provided.'}</p>
+            <p class="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed flex-grow">${deal.memo || '정보가 등록되지 않았습니다.'}</p>
             
             <div class="space-y-4 mt-auto">
                 <div>

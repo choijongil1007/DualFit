@@ -70,10 +70,10 @@ function renderStage(stageConfig, data) {
                     <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-100/50">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Discovery Inputs</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                            ${renderInput('Customer Behavior', 'behavior', data.behavior, stageConfig.id, 'What are they doing?')}
-                            ${renderInput('Customer Emotion', 'emotion', data.emotion, stageConfig.id, 'How do they feel?')}
-                            ${renderInput('Touchpoint / Channel', 'touchpoint', data.touchpoint, stageConfig.id, 'Where did we meet?')}
-                            ${renderInput('Key Problem / Pain', 'problem', data.problem, stageConfig.id, 'What is blocking them?')}
+                            ${renderInput('고객 행동', 'behavior', data.behavior, stageConfig.id, '고객이 하는 행동')}
+                            ${renderInput('고객 감정', 'emotion', data.emotion, stageConfig.id, '고객이 느끼는 감정과 그 이유')}
+                            ${renderInput('고객 접점', 'touchpoint', data.touchpoint, stageConfig.id, '고객이 정보를 수집하는 채널')}
+                            ${renderInput('고객 문제', 'problem', data.problem, stageConfig.id, '고객의 Pain Point')}
                         </div>
                         
                         <div class="flex justify-end pt-4 mt-2">
@@ -205,7 +205,7 @@ function renderResult(result, isStale) {
             
             <div class="flex items-center gap-3 justify-center">
                  <div class="h-px bg-gray-200 flex-1"></div>
-                 <span class="text-xs font-bold text-primary-600 uppercase tracking-widest bg-white px-2">Analysis Results</span>
+                 <span class="text-xs font-bold text-primary-600 uppercase tracking-widest bg-white px-2">분석 결과</span>
                  <div class="h-px bg-gray-200 flex-1"></div>
             </div>
 
