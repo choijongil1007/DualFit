@@ -13,7 +13,7 @@ export function renderSummary(container, dealId) {
     container.innerHTML = `
         <div class="mb-8 border-b border-gray-100 pb-6">
             <h2 class="text-2xl font-bold text-gray-900 mb-1">Deal 요약</h2>
-            <p class="text-gray-500 text-sm">전략 개요와 대응 계획</p>
+            <p class="text-gray-500 text-sm">Deal 적합도와 대응 계획</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-10 gap-8 mb-10">
