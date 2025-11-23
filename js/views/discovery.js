@@ -249,7 +249,7 @@ function renderResult(result, isStale) {
                     <i class="fa-solid fa-fingerprint text-xs"></i>
                 </div>
                 <div>
-                    <h4 class="text-xs font-bold text-gray-800 uppercase mb-1 tracking-wide">Signal Detected</h4>
+                    <h4 class="text-xs font-bold text-gray-800 uppercase mb-1 tracking-wide">감지된 신호</h4>
                     <p class="text-sm text-gray-600 leading-relaxed italic">"${result.evidenceSummary || 'No significant signals detected yet.'}"</p>
                 </div>
             </div>
