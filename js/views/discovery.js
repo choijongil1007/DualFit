@@ -14,7 +14,7 @@ export function renderDiscovery(container, dealId) {
     container.innerHTML = `
         <div class="mb-8 pl-1">
             <h2 class="text-xl font-bold text-gray-900 mb-1">Discovery Analysis</h2>
-            <p class="text-gray-500 text-sm">Understand the customer's journey stage by stage.</p>
+            <p class="text-gray-500 text-sm">고객 여정 단계별 이해</p>
         </div>
         <div class="space-y-6" id="stages-container">
             ${DISCOVERY_STAGES.map(stage => renderStage(stage, deal.discovery[stage.id])).join('')}

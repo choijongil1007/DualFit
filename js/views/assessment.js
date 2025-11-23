@@ -16,7 +16,7 @@ export function renderAssessment(container, dealId) {
         <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
             <div>
                 <h2 class="text-xl font-bold text-gray-900 mb-1">Assessment</h2>
-                <p class="text-gray-500 text-sm">Evaluate deal fit based on discovery evidence.</p>
+                <p class="text-gray-500 text-sm">Deal 적합성 평가</p>
             </div>
             <div class="flex gap-3">
                 <button id="btn-refresh-ai" class="bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm flex items-center gap-2 btn-pill">
