@@ -8,141 +8,254 @@ export function renderSummary(container, dealId) {
     const deal = Store.getDeal(dealId);
     if (!deal) return;
 
-    const { bizScore, techScore, lowItems } = calculateScores(deal);
+    const { bizScore, techScore, lowItems, categoryScores } = calculateScores(deal);
+    const reportDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     container.innerHTML = `
-        <div class="mb-8 border-b border-gray-100 pb-6">
-            <h2 class="text-2xl font-bold text-gray-900 mb-1">Deal 요약</h2>
-            <p class="text-gray-500 text-sm">Deal 적합도와 대응 계획</p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-10 gap-8 mb-10 items-start">
-            <!-- Left: Quadrant (40%) -->
-            <div class="lg:col-span-4 bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex flex-col items-center relative overflow-hidden h-fit">
-                <h3 class="font-bold text-lg text-gray-900 mb-6 z-10">Fit Analysis</h3>
-                
-                <div class="quadrant-container rounded-2xl mb-8 z-10">
-                    <!-- Background Zones -->
-                    <div class="quadrant-bg">
-                        <div class="q-zone q-zone-tl">
-                            <span class="q-label-inner">Tech OK<br>Biz Weak</span>
-                        </div>
-                        <div class="q-zone q-zone-tr">
-                            <span class="q-label-inner text-emerald-600">Go</span>
-                        </div>
-                        <div class="q-zone q-zone-bl">
-                            <span class="q-label-inner text-gray-400">No-Go</span>
-                        </div>
-                        <div class="q-zone q-zone-br">
-                            <span class="q-label-inner">Biz OK<br>Tech Weak</span>
-                        </div>
-                    </div>
-
-                    <!-- Grid Lines -->
-                    <div class="quadrant-line-x"></div>
-                    <div class="quadrant-line-y"></div>
-                    
-                    <!-- The Dot -->
-                    <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;">
-                        <div class="quadrant-dot-pulse"></div>
-                        <div class="quadrant-tooltip">
-                            Biz: ${bizScore} / Tech: ${techScore}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-full grid grid-cols-2 gap-4 z-10">
-                    <div class="bg-purple-50 p-4 rounded-2xl text-center border border-purple-100">
-                        <div class="text-[10px] text-purple-600 uppercase font-bold tracking-wider mb-1">Biz Score</div>
-                        <div class="text-3xl font-bold text-purple-900">${bizScore}</div>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-2xl text-center border border-blue-100">
-                        <div class="text-[10px] text-blue-600 uppercase font-bold tracking-wider mb-1">Tech Score</div>
-                        <div class="text-3xl font-bold text-blue-900">${techScore}</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: AI Analysis (60%) -->
-            <div class="lg:col-span-6 flex flex-col h-full">
-                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-card flex-grow relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-6 relative z-10">
-                        <h3 class="font-bold text-lg text-gray-900">AI 전략 조언</h3>
-                        <div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500 shadow-sm border border-yellow-100">
-                            <i class="fa-solid fa-lightbulb"></i>
-                        </div>
-                    </div>
-                    
-                    <div id="summary-ai-content" class="text-sm text-gray-600 space-y-6 relative z-10">
-                        <div class="animate-pulse space-y-3">
-                            <div class="h-2 bg-gray-100 rounded w-full"></div>
-                            <div class="h-2 bg-gray-100 rounded w-5/6"></div>
-                            <div class="h-2 bg-gray-100 rounded w-4/6"></div>
-                        </div>
-                        <p class="text-xs text-gray-400">전략적 인사이트 생성 중...</p>
-                    </div>
-
-                    <!-- Decorative blob -->
-                    <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full -z-0 opacity-60 pointer-events-none"></div>
-                </div>
-                
-                <button id="btn-back-discovery" class="mt-4 w-full py-3 bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 rounded-full text-sm font-semibold transition-all shadow-sm btn-pill group">
-                    <i class="fa-solid fa-rotate-left mr-2 text-gray-400 group-hover:text-gray-600"></i> Discovery 업데이트 및 재계산
+        <div class="max-w-4xl mx-auto">
+            <!-- Action Bar (Outside Report) -->
+            <div class="flex justify-between items-center mb-6 px-2">
+                <button id="btn-back-details" class="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium text-sm">
+                    <i class="fa-solid fa-arrow-left"></i> 돌아가기
                 </button>
+                <div class="flex gap-3">
+                    <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-full text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> 인쇄 / PDF 저장
+                    </button>
+                    <button id="btn-recalc" class="bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-black text-sm font-semibold shadow-lg shadow-gray-900/20 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> AI 전략 재생성
+                    </button>
+                </div>
             </div>
-        </div>
 
-        <!-- Low Score Items -->
-        <div class="bg-gray-50 rounded-3xl p-8 border border-gray-100">
-             <div class="flex items-center gap-2 mb-6">
-                <h3 class="font-bold text-lg text-gray-900">Risk Factors</h3>
-                <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">${lowItems.length} Detected</span>
-             </div>
-             
-             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                ${lowItems.length > 0 ? lowItems.map(item => `
-                    <div class="p-4 bg-white border border-red-100 rounded-xl shadow-sm flex items-start gap-3 hover:shadow-md transition-shadow duration-200">
-                        <div class="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-triangle-exclamation text-red-500 text-[10px]"></i>
-                        </div>
+            <!-- Report Container (Paper Style) -->
+            <div class="bg-white rounded-t-3xl rounded-b-3xl shadow-2xl border border-gray-200 overflow-hidden relative" id="report-content">
+                
+                <!-- 1. Report Header -->
+                <div class="bg-[#1e293b] text-white p-8 md:p-10 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-bl-full -mr-16 -mt-16 pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-tr-full -ml-10 -mb-10 pointer-events-none"></div>
+                    
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                         <div>
-                            <div class="font-bold text-gray-800 text-sm mb-1">${item.catLabel}</div>
-                            <div class="text-xs text-gray-500 mb-2 leading-snug">${item.label}</div>
-                            <span class="text-[10px] font-bold bg-red-50 text-red-600 px-2 py-1 rounded border border-red-100">
-                                점수: ${item.val} / 5
-                            </span>
+                            <div class="inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-xs font-bold uppercase tracking-wider mb-3 border border-white/10">
+                                Final Strategy Report
+                            </div>
+                            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white mb-2">${deal.dealName}</h1>
+                            <div class="flex items-center gap-4 text-gray-300 text-sm">
+                                <span class="flex items-center gap-1.5"><i class="fa-regular fa-building"></i> ${deal.clientName}</span>
+                                <span class="w-1 h-1 rounded-full bg-gray-500"></span>
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-box-open"></i> ${deal.solution}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Report Date</div>
+                            <div class="text-lg font-bold text-white font-mono">${reportDate}</div>
                         </div>
                     </div>
-                `).join('') : '<div class="col-span-full text-center text-gray-400 py-8 flex flex-col items-center"><i class="fa-solid fa-check-circle text-3xl text-gray-200 mb-2"></i><span>식별된 주요 위험 요소가 없습니다.</span></div>'}
-             </div>
+                </div>
+
+                <!-- 2. Executive Dashboard (Quadrant & Score Breakdown) -->
+                <div class="p-8 md:p-10 border-b border-gray-100">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                        
+                        <!-- Left: Quadrant Chart (5 cols) -->
+                        <div class="lg:col-span-5 flex flex-col items-center">
+                            <h3 class="w-full text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
+                                Fit Analysis Matrix
+                            </h3>
+                            <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-xl">
+                                <div class="quadrant-bg">
+                                    <div class="q-zone q-zone-tl"><span class="q-label-inner text-[10px]">Tech OK<br>Biz Weak</span></div>
+                                    <div class="q-zone q-zone-tr"><span class="q-label-inner text-[10px] text-emerald-600">Best Fit</span></div>
+                                    <div class="q-zone q-zone-bl"><span class="q-label-inner text-[10px] text-gray-400">Drop</span></div>
+                                    <div class="q-zone q-zone-br"><span class="q-label-inner text-[10px]">Biz OK<br>Tech Weak</span></div>
+                                </div>
+                                <div class="quadrant-line-x"></div>
+                                <div class="quadrant-line-y"></div>
+                                <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;">
+                                    <div class="quadrant-dot-pulse"></div>
+                                    <div class="quadrant-tooltip">Biz ${bizScore} / Tech ${techScore}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Total Score Badges -->
+                            <div class="flex gap-4 mt-6 w-full">
+                                <div class="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-gray-500 uppercase">Biz Score</span>
+                                    <span class="text-xl font-bold text-gray-900">${bizScore}</span>
+                                </div>
+                                <div class="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-gray-500 uppercase">Tech Score</span>
+                                    <span class="text-xl font-bold text-gray-900">${techScore}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Detailed Score Breakdown (7 cols) -->
+                        <div class="lg:col-span-7">
+                            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
+                                Detailed Scorecard
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                <!-- Biz Column -->
+                                <div>
+                                    <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                                        <i class="fa-solid fa-briefcase text-purple-600"></i>
+                                        <span class="font-bold text-gray-800 text-sm">Biz Perspective</span>
+                                    </div>
+                                    <div class="space-y-4">
+                                        ${renderScoreBars(categoryScores.biz)}
+                                    </div>
+                                </div>
+
+                                <!-- Tech Column -->
+                                <div>
+                                    <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                                        <i class="fa-solid fa-server text-blue-600"></i>
+                                        <span class="font-bold text-gray-800 text-sm">Tech Perspective</span>
+                                    </div>
+                                    <div class="space-y-4">
+                                        ${renderScoreBars(categoryScores.tech)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. AI Strategic Analysis -->
+                <div class="p-8 md:p-10 bg-gray-50/50">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-indigo-500 pl-3 mb-6 flex items-center gap-2">
+                        AI Strategic Insight <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-xs"></i>
+                    </h3>
+
+                    <div id="summary-ai-content" class="min-h-[200px]">
+                        <!-- Skeleton Loader -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+                            <div class="lg:col-span-2 space-y-3">
+                                <div class="h-32 bg-gray-200 rounded-xl w-full"></div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+                                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+                                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+                            </div>
+                        </div>
+                        <p class="text-center text-xs text-gray-400 mt-4">Generating strategic report...</p>
+                    </div>
+                </div>
+
+                <!-- 4. Risk Factors (Full Width) -->
+                ${lowItems.length > 0 ? `
+                <div class="p-8 md:p-10 border-t border-gray-200 bg-red-50/30">
+                    <h3 class="text-sm font-bold text-red-700 uppercase tracking-wide border-l-4 border-red-500 pl-3 mb-6 flex items-center gap-2">
+                        Critical Risk Factors <span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">${lowItems.length}</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${lowItems.map(item => `
+                            <div class="bg-white border border-red-100 p-4 rounded-xl shadow-sm flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 text-red-500 mt-1">
+                                    <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs font-bold text-gray-400 uppercase mb-0.5">${item.catLabel}</div>
+                                    <div class="text-sm font-bold text-gray-800 mb-1 leading-tight">${item.label}</div>
+                                    <div class="text-xs text-red-600 font-medium">Score: ${item.val} / 5 (Risky)</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : `
+                <div class="p-8 md:p-10 border-t border-gray-200 bg-emerald-50/30 flex items-center justify-center gap-3 text-emerald-700">
+                    <i class="fa-solid fa-circle-check text-xl"></i>
+                    <span class="font-medium">No critical risk factors detected. Deal looks healthy.</span>
+                </div>
+                `}
+
+                <!-- Footer -->
+                <div class="bg-gray-100 p-6 text-center border-t border-gray-200">
+                    <p class="text-xs text-gray-400 font-medium">Generated by DualFit AI • Confidential</p>
+                </div>
+            </div>
+            
+            <div class="h-20"></div> <!-- Spacer -->
         </div>
     `;
 
-    document.getElementById('btn-back-discovery').addEventListener('click', () => {
+    document.getElementById('btn-back-details').addEventListener('click', () => {
         navigateTo('details', { id: dealId });
     });
 
+    document.getElementById('btn-recalc').addEventListener('click', () => {
+         generateSummaryAI(deal, bizScore, techScore, lowItems);
+    });
+
     generateSummaryAI(deal, bizScore, techScore, lowItems);
+}
+
+function renderScoreBars(categoryData) {
+    return categoryData.map(cat => {
+        // Calculate width percentage (score / 5 * 100)
+        const pct = (cat.avg / 5) * 100;
+        let colorClass = 'bg-gray-400';
+        if (cat.avg >= 4) colorClass = 'bg-emerald-500';
+        else if (cat.avg >= 3) colorClass = 'bg-blue-500';
+        else if (cat.avg >= 2) colorClass = 'bg-amber-400';
+        else colorClass = 'bg-red-400';
+
+        return `
+            <div>
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-xs font-semibold text-gray-600">${cat.label}</span>
+                    <span class="text-xs font-bold text-gray-900">${cat.avg.toFixed(1)}</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                    <div class="${colorClass} h-2 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function calculateScores(deal) {
     const calcSection = (type) => {
         const config = ASSESSMENT_CONFIG[type];
         let totalWeightedScore = 0;
+        const catScores = [];
         
         config.categories.forEach(cat => {
             const item1 = deal.assessment[type].scores[`${cat.id}_0`] || 0;
             const item2 = deal.assessment[type].scores[`${cat.id}_1`] || 0;
-            const avg = (item1 + item2) / 2;
+            
+            // Treat 0 as 1 for calculation if not set, or keep strictly? 
+            // UI defaults 0 to 1 visually, let's use actual values but floor at 1 for safety if needed.
+            const val1 = item1 === 0 ? 1 : item1;
+            const val2 = item2 === 0 ? 1 : item2;
+
+            const avg = (val1 + val2) / 2;
             const weight = deal.assessment[type].weights[cat.id] || 0;
             totalWeightedScore += avg * weight;
+
+            catScores.push({
+                id: cat.id,
+                label: cat.label,
+                avg: avg
+            });
         });
 
-        return Math.round(totalWeightedScore / 5);
+        return { 
+            score: Math.round(totalWeightedScore / 5), // Normalize to 0-100 range? The previous logic seemed to aim for 1-5 scale mapped to something.
+            // Wait, previous logic was: totalWeightedScore (max 500 if weight sum 100) / 5 -> max 100.
+            catScores 
+        };
     };
 
-    const bizScore = calcSection('biz');
-    const techScore = calcSection('tech');
+    const bizData = calcSection('biz');
+    const techData = calcSection('tech');
 
     const lowItems = [];
     ['biz', 'tech'].forEach(type => {
@@ -151,19 +264,44 @@ function calculateScores(deal) {
             cat.items.forEach((label, idx) => {
                 const id = `${cat.id}_${idx}`;
                 const val = deal.assessment[type].scores[id] || 0;
-                if (val > 0 && val <= 2) {
-                    lowItems.push({ catLabel: cat.label, label, val });
+                // Treat 0 as 1 for display
+                const displayVal = val === 0 ? 1 : val;
+                if (displayVal <= 2) {
+                    lowItems.push({ catLabel: cat.label, label, val: displayVal });
                 }
             });
         });
     });
 
-    return { bizScore, techScore, lowItems };
+    return { 
+        bizScore: bizData.score, 
+        techScore: techData.score, 
+        lowItems,
+        categoryScores: {
+            biz: bizData.catScores,
+            tech: techData.catScores
+        }
+    };
 }
 
 async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
     const container = document.getElementById('summary-ai-content');
     
+    // Reset to Skeleton
+    container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+            <div class="lg:col-span-2 space-y-3">
+                <div class="h-32 bg-gray-200 rounded-xl w-full"></div>
+            </div>
+            <div class="space-y-3">
+                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+            </div>
+        </div>
+        <p class="text-center text-xs text-gray-400 mt-4">AI evaluating deal strategy...</p>
+    `;
+
     try {
         const evidence = Object.values(deal.discovery)
             .filter(s => s.result && s.result.evidenceSummary)
@@ -173,60 +311,80 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
         const lowItemsText = lowItems.map(i => `- ${i.catLabel} (${i.label}): ${i.val}점`).join('\n');
 
         const prompt = `
-            Role: Sales Strategist.
-            Task: Create a Deal Executive Summary.
-            Language: Korean (Must output strictly in Korean).
+            Role: Senior Sales Strategist.
+            Task: Write a final executive summary for a sales deal.
+            Language: Korean (Professional Report Style).
             
-            Context:
-            - Deal Name: ${deal.dealName}
+            Deal Context:
+            - Client: ${deal.clientName}
+            - Deal: ${deal.dealName}
             - Biz Score: ${bizScore} / 100
             - Tech Score: ${techScore} / 100
-            - Risk Factors (Low Scores):
+            - Risk Factors:
             ${lowItemsText}
             
-            Discovery Evidence:
+            Key Evidence from Discovery:
             ${evidence}
             
-            Request:
-            Return a JSON object with:
-            1. "health": A 1-2 sentence assessment of the deal health in Korean.
-            2. "actions": An array of 2-3 recommended actions. Each object should have "action" (title) and "reason" (explanation), both in Korean.
-            
-            Format:
+            JSON Requirements:
             {
-                "health": "이 딜은 ... 상태입니다.",
+                "executiveSummary": "A comprehensive paragraph (3-4 sentences) diagnosing the deal's health, main strengths, and critical weaknesses. Be direct and professional.",
                 "actions": [
-                    {"action": "경영진 미팅 추진", "reason": "Authority 점수가 낮으므로..."},
-                    ...
+                    { "type": "strategic", "title": "Action Title", "desc": "Detailed explanation..." },
+                    { "type": "tactical", "title": "Action Title", "desc": "Detailed explanation..." },
+                    { "type": "risk", "title": "Action Title", "desc": "Detailed explanation..." }
                 ]
             }
         `;
 
         const result = await callGemini(prompt);
         
+        // Render Final AI Content
         container.innerHTML = `
-            <div class="mb-6">
-                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Deal Health Check</h4>
-                <p class="font-medium text-gray-800 leading-relaxed bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-                    ${result.health || '건강 상태를 진단할 수 없습니다.'}
-                </p>
-            </div>
-            
-            <div>
-                <h4 class="text-xs font-bold text-gray-400 uppercase mb-2 tracking-wide">Action Plan</h4>
-                <ul class="space-y-3">
-                    ${result.actions ? result.actions.map(act => `
-                        <li class="bg-white border border-gray-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                            <div class="font-bold text-gray-900 text-sm mb-1">👉 ${act.action}</div>
-                            <div class="text-gray-500 text-xs leading-relaxed">${act.reason}</div>
-                        </li>
-                    `).join('') : '<li class="text-gray-400 text-sm">특별한 권장 액션이 없습니다.</li>'}
-                </ul>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Executive Summary -->
+                <div class="lg:col-span-7">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Executive Summary</h4>
+                    <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+                        ${result.executiveSummary || '종합 분석 내용을 생성하지 못했습니다.'}
+                    </div>
+                </div>
+                
+                <!-- Action Plan -->
+                <div class="lg:col-span-5">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Strategic Actions</h4>
+                    <div class="space-y-3">
+                        ${result.actions ? result.actions.map(act => {
+                            let icon = 'fa-check';
+                            let bgClass = 'bg-white border-gray-200';
+                            if (act.type === 'strategic') { icon = 'fa-chess'; bgClass = 'bg-indigo-50 border-indigo-100 text-indigo-900'; }
+                            if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
+                            
+                            return `
+                                <div class="${bgClass} border p-4 rounded-xl shadow-sm hover:shadow-md transition-all">
+                                    <div class="flex items-start gap-3">
+                                        <div class="mt-0.5"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
+                                        <div>
+                                            <div class="text-sm font-bold mb-1">${act.title}</div>
+                                            <div class="text-xs opacity-80 leading-relaxed">${act.desc}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('') : '<div class="text-gray-400 text-sm">추천 액션이 없습니다.</div>'}
+                    </div>
+                </div>
             </div>
         `;
 
     } catch (e) {
         console.error(e);
-        container.innerHTML = `<div class="text-red-400 text-sm bg-red-50 p-3 rounded-lg border border-red-100 flex items-center gap-2"><i class="fa-solid fa-circle-exclamation"></i> AI 서비스를 사용할 수 없습니다. 다시 시도해주세요.</div>`;
+        container.innerHTML = `
+            <div class="bg-red-50 p-6 rounded-xl border border-red-100 text-center">
+                <i class="fa-solid fa-circle-exclamation text-red-400 text-2xl mb-2"></i>
+                <p class="text-red-700 font-medium text-sm">AI 전략 리포트 생성 실패</p>
+                <p class="text-red-500 text-xs mt-1">네트워크 상태를 확인하고 다시 시도해주세요.</p>
+            </div>
+        `;
     }
 }
