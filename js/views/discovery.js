@@ -47,11 +47,21 @@ function renderStage(stageConfig, data) {
     const resultHtml = data.result ? renderResult(data.result, isStale) : '';
     const resultClass = (!data.result && !isStale) ? 'hidden' : '';
 
+    // Stage별 컬러 매핑
+    const colorMap = {
+        'awareness': 'rose',
+        'consideration': 'amber',
+        'evaluation': 'sky',
+        'purchase': 'emerald'
+    };
+    const color = colorMap[stageConfig.id] || 'gray';
+
     return `
         <div class="bg-white border border-gray-200 rounded-xl shadow-card hover:shadow-md transition-all duration-300 stage-card overflow-hidden group" data-stage="${stageConfig.id}">
-            <div class="p-5 flex justify-between items-center cursor-pointer toggle-header select-none bg-white">
+            <!-- Header: Stage별 은은한 배경색 적용 -->
+            <div class="p-5 flex justify-between items-center cursor-pointer toggle-header select-none bg-${color}-50/30 hover:bg-${color}-50 transition-colors border-b border-transparent hover:border-${color}-100">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shadow-sm border border-gray-100 ${stageConfig.iconStyle.replace('bg-', 'bg-opacity-20 bg-').replace('text-', 'text-opacity-90 text-')}">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shadow-sm border border-${color}-100 ${stageConfig.iconStyle.replace('bg-', 'bg-opacity-20 bg-').replace('text-', 'text-opacity-90 text-')}">
                         <i class="fa-solid ${getIconForStage(stageConfig.id)} text-sm"></i>
                     </div>
                     <div>
@@ -59,16 +69,17 @@ function renderStage(stageConfig, data) {
                         ${statusHtml}
                     </div>
                 </div>
-                <div class="w-8 h-8 rounded-md bg-gray-50 text-gray-400 flex items-center justify-center transition-all duration-300 icon-chevron border border-transparent hover:border-gray-200 hover:text-gray-600">
+                <div class="w-8 h-8 rounded-md bg-white text-gray-400 flex items-center justify-center transition-all duration-300 icon-chevron border border-gray-200 group-hover:border-${color}-200 group-hover:text-${color}-600">
                     <i class="fa-solid fa-chevron-down text-xs"></i>
                 </div>
             </div>
             
-            <div class="hidden toggle-content border-t border-gray-100 bg-gray-50/30">
+            <div class="hidden toggle-content border-t border-${color}-100 bg-white">
                 <div class="p-6 md:p-8">
                     ${staleAlert}
 
-                    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-8">
+                    <!-- Input Area: 회색 배경으로 입력 영역 구분 -->
+                    <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 shadow-sm mb-8">
                         <h4 class="text-base font-bold text-gray-900 mb-6 flex items-center gap-2">
                             Discovery Inputs
                         </h4>
@@ -79,7 +90,7 @@ function renderStage(stageConfig, data) {
                             ${renderInput('고객 문제', 'problem', data.problem, stageConfig.id, '고객의 Pain Point')}
                         </div>
                         
-                        <div class="flex justify-end pt-6 mt-2 border-t border-gray-100">
+                        <div class="flex justify-end pt-6 mt-2 border-t border-slate-200">
                              <button class="btn-analyze bg-gray-900 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all text-sm font-semibold shadow-md flex items-center gap-2 active:scale-95 justify-center min-w-[150px]" data-stage="${stageConfig.id}">
                                 <i class="fa-solid fa-wand-magic-sparkles text-yellow-300 text-xs"></i> 
                                 ${btnText}
@@ -111,7 +122,7 @@ function renderInput(label, key, value, stageId, placeholder) {
         <div class="space-y-2">
             <label class="text-sm font-semibold text-gray-800 block">${label}</label>
             <textarea 
-                class="input-premium w-full min-h-[100px] resize-none leading-relaxed text-gray-900 text-sm focus:bg-white bg-gray-50 border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg p-3 transition-colors"
+                class="input-premium w-full min-h-[100px] resize-none leading-relaxed text-gray-900 text-sm focus:bg-white bg-white border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg p-3 transition-colors shadow-sm"
                 data-stage="${stageId}" 
                 data-key="${key}"
                 placeholder="${placeholder}"
@@ -188,8 +199,8 @@ function renderResult(result, isStale) {
 
         if (todos.length > 0) {
             todoItemsHtml = todos.map(([role, task]) => `
-                <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors">
-                    <span class="text-[11px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 min-w-[70px] text-center mt-0.5">${role}</span>
+                <div class="flex items-start gap-3 p-3 rounded-lg bg-white/50 border border-gray-100 hover:bg-white hover:border-gray-200 transition-colors">
+                    <span class="text-[11px] font-bold bg-violet-50 text-violet-700 px-2 py-0.5 rounded border border-violet-100 min-w-[70px] text-center mt-0.5">${role}</span>
                     <span class="text-sm text-gray-700 leading-snug pt-0.5">${task}</span>
                 </div>
             `).join('');
@@ -206,9 +217,9 @@ function renderResult(result, isStale) {
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <!-- JTBD Card -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50/50 rounded-bl-full -mr-8 -mt-8"></div>
+                <!-- JTBD Card (Blue Tint) -->
+                <div class="bg-blue-50/40 p-6 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-blue-100/50 rounded-bl-full -mr-8 -mt-8"></div>
                     <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
                         <i class="fa-solid fa-bullseye text-blue-600"></i> 고객이 하려는 일 (JTBD)
                     </h4>
@@ -217,9 +228,9 @@ function renderResult(result, isStale) {
                     </ul>
                 </div>
 
-                <!-- Success Criteria Card -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-50/50 rounded-bl-full -mr-8 -mt-8"></div>
+                <!-- Success Criteria Card (Emerald Tint) -->
+                <div class="bg-emerald-50/40 p-6 rounded-xl border border-emerald-100 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-100/50 rounded-bl-full -mr-8 -mt-8"></div>
                     <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
                         <i class="fa-solid fa-flag-checkered text-emerald-600"></i> 성공 기준
                     </h4>
@@ -229,8 +240,8 @@ function renderResult(result, isStale) {
                 </div>
             </div>
 
-            <!-- To-Do List -->
-            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            <!-- To-Do List (Violet Tint) -->
+            <div class="bg-violet-50/40 p-6 rounded-xl border border-violet-100 shadow-sm">
                 <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-list-check text-violet-600"></i> 추천 액션 아이템
                 </h4>
@@ -240,7 +251,7 @@ function renderResult(result, isStale) {
             </div>
 
             <!-- Evidence Summary -->
-            <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 flex items-start gap-4">
+            <div class="bg-slate-50/80 p-5 rounded-xl border border-slate-200 flex items-start gap-4">
                 <div class="w-8 h-8 rounded-full bg-gray-800 text-white flex-shrink-0 flex items-center justify-center shadow-sm mt-1">
                     <i class="fa-solid fa-fingerprint text-xs"></i>
                 </div>

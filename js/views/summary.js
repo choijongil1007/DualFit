@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -22,7 +21,7 @@ export function renderSummary(container, dealId) {
                     <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2">
                         <i class="fa-solid fa-print"></i> 인쇄 / PDF 저장
                     </button>
-                    <button id="btn-recalc" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                    <button id="btn-recalc" class="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black text-sm font-medium shadow-sm transition-all flex items-center gap-2">
                         <i class="fa-solid fa-rotate"></i> 전략 재생성
                     </button>
                 </div>
