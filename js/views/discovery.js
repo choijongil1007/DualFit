@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showToast, setButtonLoading } from '../utils.js';
@@ -211,7 +210,7 @@ function renderResult(result, isStale) {
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50/50 rounded-bl-full -mr-8 -mt-8"></div>
                     <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
-                        <i class="fa-solid fa-bullseye text-blue-600"></i> 해결 과제 (JTBD)
+                        <i class="fa-solid fa-bullseye text-blue-600"></i> 고객이 하려는 일 (JTBD)
                     </h4>
                     <ul class="space-y-2 relative z-10">
                         ${jtbdItemsHtml}
