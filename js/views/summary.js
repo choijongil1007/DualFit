@@ -81,11 +81,11 @@ export function renderSummary(container, dealId) {
                             <!-- Total Score Badges -->
                             <div class="flex gap-4 mt-8 w-full">
                                 <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Biz Score</span>
+                                    <span class="text-xs font-bold text-gray-500 tracking-wide">Biz Score</span>
                                     <span class="text-2xl font-bold text-gray-900">${bizScore}</span>
                                 </div>
                                 <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Tech Score</span>
+                                    <span class="text-xs font-bold text-gray-500 tracking-wide">Tech Score</span>
                                     <span class="text-2xl font-bold text-gray-900">${techScore}</span>
                                 </div>
                             </div>
@@ -299,7 +299,7 @@ function renderAIContent(result) {
         <div class="flex flex-col gap-10">
             <!-- Executive Summary -->
             <div class="w-full">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">요약 (Executive Summary)</h4>
+                <h4 class="text-xl font-bold text-gray-900 mb-4">요약</h4>
                 <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-sm text-gray-800 leading-relaxed text-sm whitespace-pre-line font-medium">
                     ${result.executiveSummary || '요약이 생성되지 않았습니다.'}
                 </div>
@@ -307,7 +307,7 @@ function renderAIContent(result) {
             
             <!-- Action Plan -->
             <div class="w-full">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">전략적 제언 (Action Plan)</h4>
+                <h4 class="text-xl font-bold text-gray-900 mb-4">전략적 제언</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     ${result.actions ? result.actions.map(act => {
                         let icon = 'fa-check';
