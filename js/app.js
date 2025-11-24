@@ -75,36 +75,41 @@ function renderDetailsLayout(container, dealId) {
 
         <div id="tab-content"></div>
         
-        <!-- Info Modal -->
+        <!-- Info Modal (Dark Theme) -->
         <div id="info-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm modal-backdrop transition-opacity duration-300"></div>
+            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm modal-backdrop transition-opacity duration-300"></div>
             
-            <div class="relative w-full max-w-md bg-white text-gray-900 rounded-xl shadow-modal p-8 animate-modal-in border border-gray-100">
-                <button type="button" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors btn-close-info-modal">
+            <div class="relative w-full max-w-md bg-gray-900 text-white rounded-2xl shadow-modal p-8 animate-modal-in border border-gray-800">
+                <button type="button" class="absolute top-5 right-5 text-gray-500 hover:text-gray-300 transition-colors btn-close-info-modal">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
 
-                <h3 class="text-xl font-bold mb-6 text-gray-900">Deal 상세 정보</h3>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 text-indigo-500">
+                        <i class="fa-solid fa-circle-info text-sm"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white tracking-tight">Deal 상세 정보</h3>
+                </div>
                 
                 <div class="space-y-6">
                     <div class="grid grid-cols-2 gap-6">
                          <div>
-                            <span class="block text-xs font-semibold text-gray-500 mb-1">고객 담당자</span>
-                            <div class="text-sm font-bold text-gray-900">${deal.clientContact || '-'}</div>
+                            <span class="block text-xs font-semibold text-gray-500 mb-1.5 ml-0.5">고객 담당자</span>
+                            <div class="text-sm font-bold text-white">${deal.clientContact || '-'}</div>
                         </div>
                         <div>
-                            <span class="block text-xs font-semibold text-gray-500 mb-1">내부 담당자</span>
-                            <div class="text-sm font-bold text-gray-900">${deal.internalContact || '-'}</div>
+                            <span class="block text-xs font-semibold text-gray-500 mb-1.5 ml-0.5">내부 담당자</span>
+                            <div class="text-sm font-bold text-white">${deal.internalContact || '-'}</div>
                         </div>
                     </div>
                     <div>
-                         <span class="block text-xs font-semibold text-gray-500 mb-1">수주 목표일</span>
-                         <div class="text-sm font-bold text-gray-900">${deal.purchaseDate || '-'}</div>
+                         <span class="block text-xs font-semibold text-gray-500 mb-1.5 ml-0.5">수주 목표일</span>
+                         <div class="text-sm font-bold text-white">${deal.purchaseDate || '-'}</div>
                     </div>
                     <div>
-                         <span class="block text-xs font-semibold text-gray-500 mb-1">메모</span>
-                         <div class="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200 leading-relaxed font-medium">
-                            ${deal.memo || '<span class="text-gray-400 italic font-normal">메모 없음</span>'}
+                         <span class="block text-xs font-semibold text-gray-500 mb-1.5 ml-0.5">메모</span>
+                         <div class="text-sm text-gray-300 bg-gray-800 p-4 rounded-xl border border-gray-700 leading-relaxed font-medium">
+                            ${deal.memo || '<span class="text-gray-500 italic font-normal">메모 없음</span>'}
                          </div>
                     </div>
                 </div>
