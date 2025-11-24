@@ -32,101 +32,111 @@ export function renderDeals(container) {
             ` : deals.map(deal => createDealCard(deal)).join('')}
         </div>
 
-        <!-- Create Modal -->
+        <!-- Create Modal (Dark Theme) -->
         <div id="create-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm modal-backdrop transition-opacity"></div>
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-modal p-8 animate-modal-in border border-gray-100">
-                <button type="button" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors btn-close-modal">
+            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            <div class="relative w-full max-w-lg bg-gray-900 rounded-2xl shadow-modal p-8 animate-modal-in border border-gray-800">
+                <button type="button" class="absolute top-5 right-5 text-gray-500 hover:text-gray-300 transition-colors btn-close-modal">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
 
-                <h2 class="text-xl font-bold mb-6 text-gray-900 tracking-tight">새 Deal 등록</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 text-indigo-500">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">새 Deal 등록</h2>
+                </div>
                 
                 <form id="create-form" class="space-y-5">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">고객사명 (Client)</label>
-                        <input type="text" name="clientName" required class="w-full input-premium" placeholder="예: 삼성전자">
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">고객사명 (Client)</label>
+                        <input type="text" name="clientName" required class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm" placeholder="예: 삼성전자">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">프로젝트명 (Deal Name)</label>
-                        <input type="text" name="dealName" required class="w-full input-premium" placeholder="예: 클라우드 마이그레이션">
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">프로젝트명 (Deal Name)</label>
+                        <input type="text" name="dealName" required class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm" placeholder="예: 클라우드 마이그레이션">
                     </div>
                     <div class="grid grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">고객 담당자</label>
-                            <input type="text" name="clientContact" class="w-full input-premium">
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">고객 담당자</label>
+                            <input type="text" name="clientContact" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">내부 담당자</label>
-                            <input type="text" name="internalContact" class="w-full input-premium">
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">내부 담당자</label>
+                            <input type="text" name="internalContact" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                         </div>
                     </div>
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">제안 솔루션</label>
-                         <input type="text" name="solution" class="w-full input-premium">
+                         <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">제안 솔루션</label>
+                         <input type="text" name="solution" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                     </div>
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">수주 목표일</label>
-                         <input type="date" name="purchaseDate" class="w-full input-premium text-gray-700">
+                         <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">수주 목표일</label>
+                         <input type="date" name="purchaseDate" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm [color-scheme:dark]">
                     </div>
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">메모</label>
-                         <textarea name="memo" class="w-full input-premium resize-none" rows="3"></textarea>
+                         <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">메모</label>
+                         <textarea name="memo" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors resize-none shadow-sm" rows="3"></textarea>
                     </div>
                     
-                    <div class="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100">
-                        <button type="button" class="btn-close-modal px-5 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors">취소</button>
+                    <div class="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-800">
+                        <button type="button" class="btn-close-modal px-5 py-2.5 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-300 rounded-lg text-sm font-medium transition-colors">취소</button>
                         <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all text-sm shadow-sm">등록</button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Edit Modal -->
+        <!-- Edit Modal (Dark Theme) -->
         <div id="edit-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm edit-modal-backdrop transition-opacity"></div>
-            <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-modal p-8 animate-modal-in border border-gray-100">
-                <button type="button" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors btn-close-edit-modal">
+            <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm edit-modal-backdrop transition-opacity"></div>
+            <div class="relative w-full max-w-lg bg-gray-900 rounded-2xl shadow-modal p-8 animate-modal-in border border-gray-800">
+                <button type="button" class="absolute top-5 right-5 text-gray-500 hover:text-gray-300 transition-colors btn-close-edit-modal">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
 
-                <h2 class="text-xl font-bold mb-6 text-gray-900 tracking-tight">Deal 정보 수정</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 text-indigo-500">
+                        <i class="fa-solid fa-pen text-sm"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Deal 정보 수정</h2>
+                </div>
                 
                 <form id="edit-form" class="space-y-5">
                     <input type="hidden" name="id">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">고객사명 (Client)</label>
-                        <input type="text" name="clientName" required class="w-full input-premium">
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">고객사명 (Client)</label>
+                        <input type="text" name="clientName" required class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">프로젝트명 (Deal Name)</label>
-                        <input type="text" name="dealName" required class="w-full input-premium">
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">프로젝트명 (Deal Name)</label>
+                        <input type="text" name="dealName" required class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">고객 담당자</label>
-                            <input type="text" name="clientContact" class="w-full input-premium">
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">고객 담당자</label>
+                            <input type="text" name="clientContact" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">내부 담당자</label>
-                            <input type="text" name="internalContact" class="w-full input-premium">
+                            <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">내부 담당자</label>
+                            <input type="text" name="internalContact" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                         </div>
                     </div>
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">제안 솔루션</label>
-                         <input type="text" name="solution" class="w-full input-premium">
+                         <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">제안 솔루션</label>
+                         <input type="text" name="solution" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm">
                     </div>
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">수주 목표일</label>
-                         <input type="date" name="purchaseDate" class="w-full input-premium text-gray-700">
+                         <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">수주 목표일</label>
+                         <input type="date" name="purchaseDate" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors shadow-sm [color-scheme:dark]">
                     </div>
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1.5 ml-0.5">메모</label>
-                         <textarea name="memo" class="w-full input-premium resize-none" rows="3"></textarea>
+                         <label class="block text-sm font-medium text-gray-300 mb-1.5 ml-0.5">메모</label>
+                         <textarea name="memo" class="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-xl focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 placeholder-gray-500 transition-colors resize-none shadow-sm" rows="3"></textarea>
                     </div>
                     
-                    <div class="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-100">
-                        <button type="button" class="btn-close-edit-modal px-5 py-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors">취소</button>
+                    <div class="flex justify-end gap-3 pt-6 mt-4 border-t border-gray-800">
+                        <button type="button" class="btn-close-edit-modal px-5 py-2.5 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-300 rounded-lg text-sm font-medium transition-colors">취소</button>
                         <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-all text-sm shadow-sm">저장</button>
                     </div>
                 </form>
