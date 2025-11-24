@@ -3,6 +3,7 @@ import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
+import { navigateTo } from '../app.js';
 
 let currentDealId = null;
 let pendingScoreChange = null;
@@ -87,242 +88,172 @@ export function renderAssessment(container, dealId) {
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-score-modal px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-semibold transition-colors btn-pill">Cancel</button>
-                    <button type="button" id="btn-confirm-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-full text-sm font-semibold transition-colors btn-pill shadow-lg shadow-gray-900/10">Confirm</button>
+                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-semibold transition-colors btn-pill">Cancel</button>
+                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-full text-sm font-semibold shadow-lg shadow-gray-900/10 transition-colors btn-pill">Confirm</button>
                 </div>
             </div>
         </div>
     `;
 
     attachEvents(deal);
-    runAIRecommendations(deal, false);
 }
 
 function renderScoreSection(type, deal) {
     const config = ASSESSMENT_CONFIG[type];
-    const scores = deal.assessment[type].scores;
-    const weights = deal.assessment[type].weights;
+    const recs = deal.assessment.recommendations ? deal.assessment.recommendations[type] : null;
 
-    // Removed outer div wrapper to allow parent grid control
-    return config.categories.map(cat => `
-        <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-card hover:shadow-md transition-all duration-200 h-full flex flex-col">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b border-gray-50">
-                <h4 class="font-bold text-gray-800 text-base">${cat.label}</h4>
-                <div class="flex items-center gap-2 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Weight %</span>
-                    <input type="number" class="weight-input w-10 text-center bg-transparent text-xs font-bold text-gray-700 focus:outline-none" 
-                        data-type="${type}" data-cat="${cat.id}" value="${weights[cat.id]}" min="0" max="100">
-                </div>
-            </div>
-            
-            <div class="space-y-5 flex-grow">
-                ${cat.items.map((item, idx) => {
-                    const itemId = `${cat.id}_${idx}`;
-                    const val = scores[itemId] || 0;
-                    return `
-                        <div class="flex justify-between items-center group">
-                            <label class="text-sm font-medium text-gray-600 max-w-[60%] leading-tight">${item}</label>
-                            <div class="flex items-center gap-3">
-                                <!-- AI Recommendation -->
-                                <div class="ai-recommendation has-tooltip relative w-6 h-6 flex items-center justify-center rounded-full bg-gray-50 text-gray-300 cursor-help hover:bg-blue-50 hover:text-blue-500 transition-colors" id="ai-rec-${type}-${itemId}">
-                                    <i class="fa-solid fa-robot text-xs"></i>
-                                    <span class="tooltip">AI 분석 중...</span>
-                                </div>
-                                
-                                <div class="relative">
-                                    <select class="score-select appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-sm font-medium text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer hover:border-gray-300"
-                                        data-type="${type}" data-item-id="${itemId}">
-                                        <option value="0" disabled ${val == 0 ? 'selected' : ''}>-</option>
-                                        <option value="1" ${val == 1 ? 'selected' : ''}>1</option>
-                                        <option value="2" ${val == 2 ? 'selected' : ''}>2</option>
-                                        <option value="3" ${val == 3 ? 'selected' : ''}>3</option>
-                                        <option value="4" ${val == 4 ? 'selected' : ''}>4</option>
-                                        <option value="5" ${val == 5 ? 'selected' : ''}>5</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                                        <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        </div>
-    `).join('');
-}
-
-async function runAIRecommendations(deal, forceRefresh = false) {
-    // Stop if we have data and not forced to refresh.
-    if (!forceRefresh && deal.assessment.recommendations) {
-        applyAIRecommendations(deal.assessment.recommendations);
-        return;
-    }
-
-    const evidence = Object.values(deal.discovery)
-        .filter(s => s.result && s.result.evidenceSummary)
-        .map((s, i) => `Stage ${i+1}: ${s.result.evidenceSummary}`)
-        .join('\n');
-
-    if (!evidence.trim()) return;
-
-    document.querySelectorAll('.ai-recommendation i').forEach(icon => {
-        icon.className = 'fa-solid fa-circle-notch fa-spin text-primary-500';
-    });
-
-    if (forceRefresh) showToast("AI 추천 점수를 계산 중입니다...", "info");
-
-    try {
-        // Coupling Logic Rules are explicitly added to the prompt
-        // Added stricter instruction for Korean reason
-        const prompt = `
-            Task: B2B Deal Scoring recommendation (1-5 scale).
-            Language: Korean (Output MUST be in Korean).
-            Deal: ${deal.dealName}
-            Evidence: ${evidence}
-            
-            Apply "Coupling Logic" to ensure consistency between Evidence and Scores:
-            1. **Pain vs Need**: If Pain is described as weak or unclear, 'Need' score MUST be Low (1-2).
-            2. **Champion vs Authority**: If no decision maker or champion is mentioned, 'Authority' score MUST be Low (1-2).
-            3. **Complexity vs Tech Fit**: If environment is complex/legacy, Tech Fit scores (Integration/Arch) should be conservative.
-            4. **Timeline**: If timeline is unrealistic or very tight, 'Timeline' score should be Low (risk is high).
-            
-            Return JSON with recommended scores and brief reason (in Korean) for ALL items below.
-            
-            REQUIRED KEYS:
-            - budget_0, budget_1, authority_0, authority_1, need_0, need_1, timeline_0, timeline_1
-            - req_0, req_1, arch_0, arch_1, data_0, data_1, ops_0, ops_1
-            
-            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "이유를 한글로 작성하세요..."}, "req_0": { ... }, ... }}
-        `;
-
-        const result = await callGemini(prompt);
+    return config.categories.map(cat => {
+        // AI Rec for this category
+        const aiData = recs ? recs[cat.id] : null;
         
-        if (result && result.items) {
-            deal.assessment.recommendations = result.items;
-            Store.saveDeal(deal);
-            applyAIRecommendations(result.items);
-            if (forceRefresh) showToast("AI 추천이 완료되었습니다.", "success");
-        }
-
-    } catch (e) {
-        console.error(e);
-        document.querySelectorAll('.ai-recommendation i').forEach(icon => {
-            icon.className = 'fa-solid fa-exclamation text-red-400';
-        });
-    }
-}
-
-function applyAIRecommendations(items) {
-    const keyMap = {
-        'budget_0': 'biz-budget_0', 'budget_1': 'biz-budget_1',
-        'authority_0': 'biz-authority_0', 'authority_1': 'biz-authority_1',
-        'need_0': 'biz-need_0', 'need_1': 'biz-need_1',
-        'timeline_0': 'biz-timeline_0', 'timeline_1': 'biz-timeline_1',
-        'req_0': 'tech-req_0', 'req_1': 'tech-req_1',
-        'arch_0': 'tech-arch_0', 'arch_1': 'tech-arch_1',
-        'data_0': 'tech-data_0', 'data_1': 'tech-data_1',
-        'ops_0': 'tech-ops_0', 'ops_1': 'tech-ops_1',
-    };
-
-    for (const [jsonKey, uiKeyPart] of Object.entries(keyMap)) {
-        const rec = items[jsonKey];
-        const [type, itemId] = uiKeyPart.split('-'); 
-        const el = document.getElementById(`ai-rec-${type}-${itemId}`);
-        
-        if (el && rec) {
-            const icon = el.querySelector('i');
-            icon.className = 'fa-solid fa-robot'; 
+        let aiIndicator = '';
+        if (aiData) {
+            const confMap = { 'High': '높음', 'Medium': '보통', 'Low': '낮음' };
+            const confKo = confMap[aiData.confidence] || '보통';
             
-            if (rec.score !== "N/A") {
-                icon.classList.add('text-primary-600');
-                el.classList.add('bg-primary-50');
-                el.dataset.recScore = rec.score; 
-            }
-
-            const confColor = rec.confidence === 'High' ? 'text-green-400' : rec.confidence === 'Medium' ? 'text-yellow-400' : 'text-red-400';
-            
-            // Translate Confidence
-            let confDisplay = rec.confidence;
-            if (rec.confidence === 'High') confDisplay = '높음';
-            else if (rec.confidence === 'Medium') confDisplay = '보통';
-            else if (rec.confidence === 'Low') confDisplay = '낮음';
-
-            el.querySelector('.tooltip').innerHTML = `
-                <div class="text-left">
-                    <div class="font-bold mb-1 text-white">AI 추천: ${rec.score}점 <span class="${confColor} text-[10px]">(${confDisplay})</span></div>
-                    <div class="leading-tight text-gray-300 text-xs font-normal">${rec.reason}</div>
+            aiIndicator = `
+                <div class="has-tooltip relative group inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-xs font-semibold cursor-help border border-indigo-100 ml-auto transition-colors hover:bg-indigo-100">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
+                    <span>AI: ${aiData.score}</span>
+                    <div class="tooltip text-left p-3 min-w-[260px] pointer-events-none">
+                        <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-700">AI 추천 점수: ${aiData.score}점. 신뢰도: ${confKo}</div>
+                        <div class="text-xs text-gray-300 leading-relaxed mt-1">${aiData.reason}</div>
+                    </div>
                 </div>
             `;
+        } else {
+            aiIndicator = `<span class="text-xs text-gray-300 ml-auto font-medium">AI Ready</span>`;
         }
-    }
+
+        const itemsHtml = cat.items.map((itemLabel, idx) => {
+            const itemId = `${cat.id}_${idx}`;
+            const currentVal = deal.assessment[type].scores[itemId] || 0;
+            
+            return `
+                <div class="mb-4 last:mb-0">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold text-gray-600">${itemLabel}</label>
+                        <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">${currentVal} / 5</span>
+                    </div>
+                    <input type="range" min="0" max="5" step="1" value="${currentVal}" 
+                        class="score-slider w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-gray-900 hover:accent-primary-600 transition-all"
+                        data-type="${type}" data-id="${itemId}">
+                    <div class="flex justify-between px-1 mt-1">
+                        <span class="text-[10px] text-gray-400">0</span>
+                        <span class="text-[10px] text-gray-400">5</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
+                <div class="flex items-center mb-4">
+                    <h4 class="font-bold text-gray-800 text-sm tracking-tight">${cat.label}</h4>
+                    ${aiIndicator}
+                </div>
+                ${itemsHtml}
+            </div>
+        `;
+    }).join('');
 }
 
 function attachEvents(deal) {
-    document.getElementById('btn-refresh-ai').addEventListener('click', () => {
-        runAIRecommendations(deal, true);
+    // 1. Sliders
+    document.querySelectorAll('.score-slider').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            const type = e.target.dataset.type;
+            const id = e.target.dataset.id;
+            const val = parseInt(e.target.value);
+            
+            // UI Update immediately
+            e.target.previousElementSibling.querySelector('span').innerText = `${val} / 5`;
+            
+            // Store update
+            deal.assessment[type].scores[id] = val;
+            Store.saveDeal(deal);
+        });
+        
+        // Deviation Check on change (optional logic could go here)
     });
 
+    // 2. Refresh AI
+    const refreshBtn = document.getElementById('btn-refresh-ai');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            generateAssessmentAI(deal);
+        });
+    }
+
+    // 3. Calculate
+    const calcBtn = document.getElementById('btn-calc-result');
+    if (calcBtn) {
+        calcBtn.addEventListener('click', () => {
+            // Check for missing scores?
+            navigateTo('summary', { id: deal.id });
+        });
+    }
+
+    // 4. Modal
     const modal = document.getElementById('score-confirm-modal');
     const toggleModal = (show) => modal.classList.toggle('hidden', !show);
     
-    modal.querySelectorAll('.btn-close-score-modal').forEach(btn => btn.addEventListener('click', () => {
-        toggleModal(false);
-        if (pendingScoreChange) {
-            pendingScoreChange.target.value = pendingScoreChange.oldValue;
-            pendingScoreChange = null;
+    modal.querySelectorAll('.btn-close-confirm-modal').forEach(btn => {
+        btn.addEventListener('click', () => toggleModal(false));
+    });
+}
+
+async function generateAssessmentAI(deal) {
+    showLoader("AI 분석 중...");
+    
+    // Prepare context from Discovery
+    const discoverySummary = Object.entries(deal.discovery).map(([stage, data]) => {
+        return `${stage.toUpperCase()}: ${data.result ? JSON.stringify(data.result) : 'No analysis'}`;
+    }).join('\n');
+
+    const prompt = `
+Role: B2B Sales Coach.
+Goal: Evaluate Deal Fit (Biz & Tech) based on Discovery data.
+Language: Korean (Example: "예산 부족 가능성이 있음").
+
+Data:
+${discoverySummary}
+
+Task:
+Provide a score (1-5) and confidence (High/Medium/Low) for each category.
+Categories:
+- Biz: budget, authority, need, timeline
+- Tech: req, arch, data, ops
+
+JSON Output Format:
+{
+  "biz": {
+    "budget": { "score": 3, "confidence": "Medium", "reason": "한글 설명..." },
+    ...
+  },
+  "tech": { ... }
+}
+
+Important:
+- "reason" MUST be in Korean.
+- "score" is integer 1-5.
+- "confidence" is High, Medium, or Low.
+`;
+
+    try {
+        const result = await callGemini(prompt);
+        if (result && result.biz && result.tech) {
+            deal.assessment.recommendations = result;
+            Store.saveDeal(deal);
+            renderAssessment(document.getElementById('tab-content'), deal.id); // Re-render tab content
+            showToast('AI Recommendations Updated', 'success');
+        } else {
+            throw new Error('Invalid AI response');
         }
-    }));
-
-    document.getElementById('btn-confirm-score').addEventListener('click', () => {
-        if (pendingScoreChange) {
-            const { target, type, itemId, newValue } = pendingScoreChange;
-            deal.assessment[type].scores[itemId] = newValue;
-            Store.saveDeal(deal);
-            pendingScoreChange = null; 
-            toggleModal(false);
-        }
-    });
-
-    document.querySelectorAll('.weight-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const type = e.target.dataset.type;
-            const cat = e.target.dataset.cat;
-            deal.assessment[type].weights[cat] = parseInt(e.target.value);
-            Store.saveDeal(deal);
-        });
-    });
-
-    document.querySelectorAll('.score-select').forEach(select => {
-        select.addEventListener('focus', () => { select.dataset.previous = select.value; });
-
-        select.addEventListener('change', (e) => {
-            const type = e.target.dataset.type;
-            const itemId = e.target.dataset.itemId;
-            const val = parseInt(e.target.value);
-            const oldValue = select.dataset.previous || 0;
-            
-            const recContainer = document.getElementById(`ai-rec-${type}-${itemId}`);
-            if (recContainer && recContainer.dataset.recScore) {
-                const recScore = parseInt(recContainer.dataset.recScore);
-                // UI Coupling Logic: Warn if deviation >= 2
-                if (Math.abs(recScore - val) >= 2) {
-                    pendingScoreChange = { target: e.target, type, itemId, newValue: val, oldValue: oldValue };
-                    document.getElementById('score-confirm-msg').innerHTML = `AI는 <strong class="text-gray-900">${recScore}점</strong>을 추천했습니다.<br>선택하신 <strong class="text-gray-900">${val}점</strong>으로 확정하시겠습니까?`;
-                    toggleModal(true);
-                    return;
-                }
-            }
-
-            deal.assessment[type].scores[itemId] = val;
-            Store.saveDeal(deal);
-            select.dataset.previous = val;
-        });
-    });
-
-    document.getElementById('btn-calc-result').addEventListener('click', () => {
-        import('../app.js').then(module => {
-            module.navigateTo('summary', { id: deal.id });
-        });
-    });
+    } catch (e) {
+        console.error(e);
+        showToast('AI Update Failed', 'error');
+    } finally {
+        hideLoader();
+    }
 }
