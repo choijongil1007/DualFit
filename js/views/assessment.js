@@ -54,9 +54,9 @@ export function renderAssessment(container, dealId) {
 
                 <!-- Scoring Guide -->
                 <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 미흡</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 매우 미흡</span>
                      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 우수</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 매우 우수</span>
                 </div>
                 
                 <!-- 2x2 Grid for Biz Categories -->
@@ -84,9 +84,9 @@ export function renderAssessment(container, dealId) {
 
                 <!-- Scoring Guide -->
                 <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 미흡</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 매우 미흡</span>
                      <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 우수</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 매우 우수</span>
                 </div>
 
                 <!-- 2x2 Grid for Tech Categories -->
