@@ -31,9 +31,11 @@ export function renderAssessment(container, dealId) {
 
         <div class="space-y-10 pb-10">
             <!-- Biz Fit Box -->
-            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden">
-                <!-- Decorative bg -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-bl-full -mr-10 -mt-10 opacity-50 pointer-events-none"></div>
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative">
+                <!-- Decorative bg container (Clipped here to allow Tooltips to overflow the main card) -->
+                <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
+                </div>
 
                 <div class="relative z-10 mb-8 pb-4 border-b border-gray-100 flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
@@ -52,9 +54,11 @@ export function renderAssessment(container, dealId) {
             </div>
 
             <!-- Tech Fit Box -->
-            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden">
-                <!-- Decorative bg -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-full -mr-10 -mt-10 opacity-50 pointer-events-none"></div>
+            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative">
+                <!-- Decorative bg container -->
+                <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
+                </div>
 
                 <div class="relative z-10 mb-8 pb-4 border-b border-gray-100 flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
