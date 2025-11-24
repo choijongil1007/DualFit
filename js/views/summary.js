@@ -62,7 +62,7 @@ export function renderSummary(container, dealId) {
                         <!-- Left: Quadrant Chart (5 cols) -->
                         <div class="lg:col-span-5 flex flex-col items-center">
                             <h3 class="w-full text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
-                                Fit Analysis Matrix
+                                적합도 분석 매트릭스
                             </h3>
                             <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-xl">
                                 <div class="quadrant-bg">
@@ -95,7 +95,7 @@ export function renderSummary(container, dealId) {
                         <!-- Right: Detailed Score Breakdown (7 cols) -->
                         <div class="lg:col-span-7">
                             <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
-                                Detailed Scorecard
+                                적합도 점수 상세
                             </h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
@@ -103,7 +103,7 @@ export function renderSummary(container, dealId) {
                                 <div>
                                     <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
                                         <i class="fa-solid fa-briefcase text-purple-600"></i>
-                                        <span class="font-bold text-gray-800 text-sm">Biz Perspective</span>
+                                        <span class="font-bold text-gray-800 text-sm">Biz Fit</span>
                                     </div>
                                     <div class="space-y-4">
                                         ${renderScoreBars(categoryScores.biz)}
@@ -114,7 +114,7 @@ export function renderSummary(container, dealId) {
                                 <div>
                                     <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
                                         <i class="fa-solid fa-server text-blue-600"></i>
-                                        <span class="font-bold text-gray-800 text-sm">Tech Perspective</span>
+                                        <span class="font-bold text-gray-800 text-sm">Tech Fit</span>
                                     </div>
                                     <div class="space-y-4">
                                         ${renderScoreBars(categoryScores.tech)}
@@ -151,7 +151,7 @@ export function renderSummary(container, dealId) {
                 ${lowItems.length > 0 ? `
                 <div class="p-8 md:p-10 border-t border-gray-200 bg-red-50/30">
                     <h3 class="text-sm font-bold text-red-700 uppercase tracking-wide border-l-4 border-red-500 pl-3 mb-6 flex items-center gap-2">
-                        Critical Risk Factors <span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">${lowItems.length}</span>
+                        주의 사항 <span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">${lowItems.length}</span>
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -341,9 +341,9 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
         
         // Render Final AI Content
         container.innerHTML = `
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="flex flex-col gap-8">
                 <!-- Executive Summary -->
-                <div class="lg:col-span-7">
+                <div class="w-full">
                     <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Executive Summary</h4>
                     <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm text-gray-700 leading-relaxed text-sm whitespace-pre-line">
                         ${result.executiveSummary || '종합 분석 내용을 생성하지 못했습니다.'}
@@ -351,9 +351,9 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
                 </div>
                 
                 <!-- Action Plan -->
-                <div class="lg:col-span-5">
+                <div class="w-full">
                     <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Strategic Actions</h4>
-                    <div class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${result.actions ? result.actions.map(act => {
                             let icon = 'fa-check';
                             let bgClass = 'bg-white border-gray-200';
@@ -361,7 +361,7 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
                             if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
                             
                             return `
-                                <div class="${bgClass} border p-4 rounded-xl shadow-sm hover:shadow-md transition-all">
+                                <div class="${bgClass} border p-4 rounded-xl shadow-sm hover:shadow-md transition-all h-full">
                                     <div class="flex items-start gap-3">
                                         <div class="mt-0.5"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
                                         <div>
@@ -371,7 +371,7 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
                                     </div>
                                 </div>
                             `;
-                        }).join('') : '<div class="text-gray-400 text-sm">추천 액션이 없습니다.</div>'}
+                        }).join('') : '<div class="text-gray-400 text-sm col-span-2">추천 액션이 없습니다.</div>'}
                     </div>
                 </div>
             </div>
