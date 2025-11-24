@@ -108,27 +108,8 @@ function renderScoreSection(type, deal) {
     const recs = deal.assessment.recommendations ? deal.assessment.recommendations[type] : null;
 
     return config.categories.map(cat => {
-        // AI Rec for this category
-        const aiData = recs ? recs[cat.id] : null;
-        
-        let aiIndicator = '';
-        if (aiData) {
-            const confMap = { 'High': '높음', 'Medium': '보통', 'Low': '낮음' };
-            const confKo = confMap[aiData.confidence] || '보통';
-            
-            aiIndicator = `
-                <div class="has-tooltip relative group inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full text-xs font-semibold cursor-help border border-indigo-100 ml-auto transition-colors hover:bg-indigo-100">
-                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-500"></i>
-                    <span>AI: ${aiData.score}</span>
-                    <div class="tooltip text-left p-3 min-w-[260px] pointer-events-none">
-                        <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-700">AI 추천 점수: ${aiData.score}점. 신뢰도: ${confKo}</div>
-                        <div class="text-xs text-gray-300 leading-relaxed mt-1">${aiData.reason}</div>
-                    </div>
-                </div>
-            `;
-        } else {
-            aiIndicator = `<span class="text-xs text-gray-300 ml-auto font-medium">AI Ready</span>`;
-        }
+        // AI Recommendations for this Category (Should be an Array corresponding to items)
+        const aiCategoryData = recs ? recs[cat.id] : null;
 
         const itemsHtml = cat.items.map((itemLabel, idx) => {
             const itemId = `${cat.id}_${idx}`;
@@ -136,15 +117,40 @@ function renderScoreSection(type, deal) {
             const currentVal = deal.assessment[type].scores[itemId] || 0;
             const displayVal = currentVal === 0 ? 1 : currentVal;
             
+            // AI Data for this specific item (Array index based)
+            let aiIndicator = '';
+            let aiScore = null;
+
+            if (aiCategoryData && Array.isArray(aiCategoryData) && aiCategoryData[idx]) {
+                const aiItem = aiCategoryData[idx];
+                aiScore = aiItem.score;
+                const confMap = { 'High': '높음', 'Medium': '보통', 'Low': '낮음' };
+                const confKo = confMap[aiItem.confidence] || '보통';
+
+                aiIndicator = `
+                    <div class="has-tooltip relative group inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-help border border-indigo-100 transition-colors hover:bg-indigo-100 ml-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[9px] text-indigo-500"></i>
+                        <span>${aiScore}</span>
+                        <div class="tooltip text-left p-3 min-w-[240px] pointer-events-none">
+                            <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-700">AI 추천 점수: ${aiScore}점. 신뢰도: ${confKo}</div>
+                            <div class="text-xs text-gray-300 leading-relaxed mt-1">${aiItem.reason}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
             return `
                 <div class="mb-4 last:mb-0">
                     <div class="flex justify-between items-center mb-2">
-                        <label class="text-xs font-semibold text-gray-600">${itemLabel}</label>
+                        <div class="flex items-center">
+                            <label class="text-xs font-semibold text-gray-600">${itemLabel}</label>
+                            ${aiIndicator}
+                        </div>
                         <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">${displayVal} / 5</span>
                     </div>
                     <input type="range" min="1" max="5" step="1" value="${displayVal}" 
                         class="score-slider w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-gray-900 hover:accent-primary-600 transition-all"
-                        data-type="${type}" data-id="${itemId}" data-cat="${cat.id}">
+                        data-type="${type}" data-id="${itemId}" data-cat="${cat.id}" data-idx="${idx}">
                     <div class="flex justify-between px-1 mt-1 text-[10px] text-gray-400 font-medium">
                         <span class="w-3 text-center">1</span>
                         <span class="w-3 text-center">2</span>
@@ -160,7 +166,6 @@ function renderScoreSection(type, deal) {
             <div class="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
                 <div class="flex items-center mb-4">
                     <h4 class="font-bold text-gray-800 text-sm tracking-tight">${cat.label}</h4>
-                    ${aiIndicator}
                 </div>
                 ${itemsHtml}
             </div>
@@ -178,7 +183,7 @@ function attachEvents(deal) {
         // 'input' event: Update UI immediately while dragging
         slider.addEventListener('input', (e) => {
             const val = parseInt(e.target.value);
-            e.target.previousElementSibling.querySelector('span').innerText = `${val} / 5`;
+            e.target.previousElementSibling.querySelector('span:last-child').innerText = `${val} / 5`;
         });
 
         // 'change' event: Handle Deviation Logic & Saving
@@ -186,19 +191,21 @@ function attachEvents(deal) {
             const type = e.target.dataset.type;
             const itemId = e.target.dataset.id;
             const catId = e.target.dataset.cat;
+            const idx = parseInt(e.target.dataset.idx);
             const newVal = parseInt(e.target.value);
 
-            // Get AI Recommendation for this category (if exists)
-            const aiRec = deal.assessment.recommendations?.[type]?.[catId];
+            // Get AI Recommendation for this SPECIFIC item
+            const aiCatData = deal.assessment.recommendations?.[type]?.[catId];
+            const aiItemRec = (aiCatData && Array.isArray(aiCatData)) ? aiCatData[idx] : null;
             
             // Check Deviation (If AI score exists and diff >= 2)
-            if (aiRec && Math.abs(newVal - aiRec.score) >= 2) {
+            if (aiItemRec && Math.abs(newVal - aiItemRec.score) >= 2) {
                 // Trigger Warning
                 pendingScoreChange = { type, id: itemId, val: newVal };
                 pendingSliderElement = e.target;
                 
                 const msg = document.getElementById('score-confirm-msg');
-                msg.innerHTML = `AI 추천 점수(${aiRec.score}점)와 2점 이상 차이가 납니다.<br>현재 입력하신 ${newVal}점으로 설정하시겠습니까?`;
+                msg.innerHTML = `AI 추천 점수(${aiItemRec.score}점)와 2점 이상 차이가 납니다.<br>현재 입력하신 ${newVal}점으로 설정하시겠습니까?`;
                 
                 modal.classList.remove('hidden');
             } else {
@@ -241,7 +248,7 @@ function attachEvents(deal) {
                 const revertVal = savedVal === 0 ? 1 : savedVal;
                 
                 pendingSliderElement.value = revertVal;
-                pendingSliderElement.previousElementSibling.querySelector('span').innerText = `${revertVal} / 5`;
+                pendingSliderElement.previousElementSibling.querySelector('span:last-child').innerText = `${revertVal} / 5`;
             }
             closeModal();
         });
@@ -266,33 +273,44 @@ async function generateAssessmentAI(deal) {
         return `${stage.toUpperCase()}: ${data.result ? JSON.stringify(data.result) : 'No analysis'}`;
     }).join('\n');
 
+    // Build structure explanation dynamically
+    let structureHint = "";
+    ['biz', 'tech'].forEach(type => {
+        structureHint += `[${type.toUpperCase()}]\n`;
+        ASSESSMENT_CONFIG[type].categories.forEach(cat => {
+            structureHint += ` - ${cat.id}: [${cat.items.join(', ')}]\n`;
+        });
+    });
+
     const prompt = `
 Role: B2B Sales Coach.
 Goal: Evaluate Deal Fit (Biz & Tech) based on Discovery data.
-Language: Korean (Example: "예산 부족 가능성이 있음").
+Language: Korean.
 
 Data:
 ${discoverySummary}
 
+Items to Evaluate (Structure):
+${structureHint}
+
 Task:
-Provide a score (1-5) and confidence (High/Medium/Low) for each category.
-Categories:
-- Biz: budget, authority, need, timeline
-- Tech: req, arch, data, ops
+For each category, return an ARRAY of objects. Each object corresponds to an item in the list above, in the exact same order.
+Provide a score (1-5), confidence (High/Medium/Low), and a short Korean reason for EACH item.
 
 JSON Output Format:
 {
   "biz": {
-    "budget": { "score": 3, "confidence": "Medium", "reason": "한글 설명..." },
-    ...
+    "budget": [
+       { "score": 3, "confidence": "High", "reason": "Reason for item 1..." },
+       { "score": 2, "confidence": "Low", "reason": "Reason for item 2..." }
+    ],
+    "authority": [ ... ]
   },
-  "tech": { ... }
+  "tech": {
+     "req": [ ... ],
+     ...
+  }
 }
-
-Important:
-- "reason" MUST be in Korean.
-- "score" is integer 1-5.
-- "confidence" is High, Medium, or Low.
 `;
 
     try {
