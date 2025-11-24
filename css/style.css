@@ -3,6 +3,10 @@
    DualFit Design System - Premium SaaS Style
 */
 
+html {
+    overflow-y: scroll; /* Prevents layout shift when scrollbar appears/disappears */
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;

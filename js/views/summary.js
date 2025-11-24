@@ -12,7 +12,7 @@ export function renderSummary(container, dealId) {
     const reportDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     container.innerHTML = `
-        <div class="max-w-5xl mx-auto">
+        <div class="w-full">
             <!-- Action Bar (Outside Report) -->
             <div class="flex justify-between items-center mb-6 px-1 no-print">
                 <button id="btn-back-details" class="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium text-sm">
