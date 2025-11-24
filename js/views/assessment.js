@@ -7,6 +7,7 @@ import { navigateTo } from '../app.js';
 
 let currentDealId = null;
 let pendingScoreChange = null;
+let pendingSliderElement = null;
 
 export function renderAssessment(container, dealId) {
     currentDealId = dealId;
@@ -86,14 +87,14 @@ export function renderAssessment(container, dealId) {
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                 </div>
                 
-                <h3 class="text-lg font-bold mb-2 text-gray-900">Score Check</h3>
+                <h3 class="text-lg font-bold mb-2 text-gray-900">점수 확인</h3>
                 <p id="score-confirm-msg" class="text-gray-500 text-sm mb-8 leading-relaxed whitespace-pre-line">
-                    Significant deviation from AI recommendation.<br>Confirm this score?
+                    AI 추천 점수와 차이가 큽니다.<br>이 점수로 설정하시겠습니까?
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-semibold transition-colors btn-pill">Cancel</button>
-                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-full text-sm font-semibold shadow-lg shadow-gray-900/10 transition-colors btn-pill">Confirm</button>
+                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-semibold transition-colors btn-pill">취소</button>
+                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-full text-sm font-semibold shadow-lg shadow-gray-900/10 transition-colors btn-pill">확인</button>
                 </div>
             </div>
         </div>
@@ -131,20 +132,25 @@ function renderScoreSection(type, deal) {
 
         const itemsHtml = cat.items.map((itemLabel, idx) => {
             const itemId = `${cat.id}_${idx}`;
+            // Default to 1 if no score is set yet, since range is 1-5
             const currentVal = deal.assessment[type].scores[itemId] || 0;
+            const displayVal = currentVal === 0 ? 1 : currentVal;
             
             return `
                 <div class="mb-4 last:mb-0">
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-xs font-semibold text-gray-600">${itemLabel}</label>
-                        <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">${currentVal} / 5</span>
+                        <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">${displayVal} / 5</span>
                     </div>
-                    <input type="range" min="0" max="5" step="1" value="${currentVal}" 
+                    <input type="range" min="1" max="5" step="1" value="${displayVal}" 
                         class="score-slider w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-gray-900 hover:accent-primary-600 transition-all"
-                        data-type="${type}" data-id="${itemId}">
-                    <div class="flex justify-between px-1 mt-1">
-                        <span class="text-[10px] text-gray-400">0</span>
-                        <span class="text-[10px] text-gray-400">5</span>
+                        data-type="${type}" data-id="${itemId}" data-cat="${cat.id}">
+                    <div class="flex justify-between px-1 mt-1 text-[10px] text-gray-400 font-medium">
+                        <span class="w-3 text-center">1</span>
+                        <span class="w-3 text-center">2</span>
+                        <span class="w-3 text-center">3</span>
+                        <span class="w-3 text-center">4</span>
+                        <span class="w-3 text-center">5</span>
                     </div>
                 </div>
             `;
@@ -163,22 +169,44 @@ function renderScoreSection(type, deal) {
 }
 
 function attachEvents(deal) {
-    // 1. Sliders
-    document.querySelectorAll('.score-slider').forEach(slider => {
+    const sliders = document.querySelectorAll('.score-slider');
+    const modal = document.getElementById('score-confirm-modal');
+    const confirmBtn = document.getElementById('btn-force-score');
+    
+    // 1. Slider Events
+    sliders.forEach(slider => {
+        // 'input' event: Update UI immediately while dragging
         slider.addEventListener('input', (e) => {
-            const type = e.target.dataset.type;
-            const id = e.target.dataset.id;
             const val = parseInt(e.target.value);
-            
-            // UI Update immediately
             e.target.previousElementSibling.querySelector('span').innerText = `${val} / 5`;
-            
-            // Store update
-            deal.assessment[type].scores[id] = val;
-            Store.saveDeal(deal);
         });
-        
-        // Deviation Check on change (optional logic could go here)
+
+        // 'change' event: Handle Deviation Logic & Saving
+        slider.addEventListener('change', (e) => {
+            const type = e.target.dataset.type;
+            const itemId = e.target.dataset.id;
+            const catId = e.target.dataset.cat;
+            const newVal = parseInt(e.target.value);
+
+            // Get AI Recommendation for this category (if exists)
+            const aiRec = deal.assessment.recommendations?.[type]?.[catId];
+            
+            // Check Deviation (If AI score exists and diff >= 2)
+            if (aiRec && Math.abs(newVal - aiRec.score) >= 2) {
+                // Trigger Warning
+                pendingScoreChange = { type, id: itemId, val: newVal };
+                pendingSliderElement = e.target;
+                
+                const msg = document.getElementById('score-confirm-msg');
+                msg.innerHTML = `AI 추천 점수(${aiRec.score}점)와 2점 이상 차이가 납니다.<br>현재 입력하신 ${newVal}점으로 설정하시겠습니까?`;
+                
+                modal.classList.remove('hidden');
+            } else {
+                // Safe to save immediately
+                deal.assessment[type].scores[itemId] = newVal;
+                Store.saveDeal(deal);
+            }
+        });
     });
 
     // 2. Refresh AI
@@ -193,17 +221,40 @@ function attachEvents(deal) {
     const calcBtn = document.getElementById('btn-calc-result');
     if (calcBtn) {
         calcBtn.addEventListener('click', () => {
-            // Check for missing scores?
             navigateTo('summary', { id: deal.id });
         });
     }
 
-    // 4. Modal
-    const modal = document.getElementById('score-confirm-modal');
-    const toggleModal = (show) => modal.classList.toggle('hidden', !show);
-    
+    // 4. Modal Events
+    const closeModal = () => {
+        modal.classList.add('hidden');
+        pendingScoreChange = null;
+        pendingSliderElement = null;
+    };
+
+    // Cancel: Revert Slider to previous saved value
     modal.querySelectorAll('.btn-close-confirm-modal').forEach(btn => {
-        btn.addEventListener('click', () => toggleModal(false));
+        btn.addEventListener('click', () => {
+            if (pendingScoreChange && pendingSliderElement) {
+                // Revert visual slider
+                const savedVal = deal.assessment[pendingScoreChange.type].scores[pendingScoreChange.id] || 0;
+                const revertVal = savedVal === 0 ? 1 : savedVal;
+                
+                pendingSliderElement.value = revertVal;
+                pendingSliderElement.previousElementSibling.querySelector('span').innerText = `${revertVal} / 5`;
+            }
+            closeModal();
+        });
+    });
+
+    // Confirm: Save the risky score
+    confirmBtn.addEventListener('click', () => {
+        if (pendingScoreChange) {
+            deal.assessment[pendingScoreChange.type].scores[pendingScoreChange.id] = pendingScoreChange.val;
+            Store.saveDeal(deal);
+            showToast('점수가 반영되었습니다.', 'success');
+        }
+        closeModal();
     });
 }
 
