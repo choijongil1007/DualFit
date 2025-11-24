@@ -22,10 +22,10 @@ export function renderAssessment(container, dealId) {
             </div>
             <div class="flex gap-3">
                 <button id="btn-refresh-ai" class="bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm flex items-center gap-2 btn-pill">
-                    <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh AI
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs text-indigo-500"></i> AI 추천 점수
                 </button>
                 <button id="btn-calc-result" class="bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-black text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill transition-transform active:scale-95">
-                    <i class="fa-solid fa-chart-pie"></i> Calculate
+                    <i class="fa-solid fa-check"></i> 저장 & 완료
                 </button>
             </div>
         </div>
@@ -38,7 +38,7 @@ export function renderAssessment(container, dealId) {
                     <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
                 </div>
 
-                <div class="relative z-10 mb-8 pb-4 border-b border-gray-100 flex items-center gap-4">
+                <div class="relative z-10 mb-6 pb-4 border-b border-gray-100 flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
                         <i class="fa-solid fa-briefcase text-lg"></i>
                     </div>
@@ -46,6 +46,13 @@ export function renderAssessment(container, dealId) {
                         <h3 class="text-xl font-bold text-gray-900">Biz Fit Analysis</h3>
                         <p class="text-gray-500 text-sm mt-0.5 font-medium">BANT (Budget, Authority, Need, Timeline)</p>
                     </div>
+                </div>
+
+                <!-- Scoring Guide -->
+                <div class="relative z-10 flex items-center justify-end gap-4 mb-6 text-xs text-gray-500">
+                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> 1점: 매우 미흡</span>
+                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> 3점: 보통</span>
+                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span> 5점: 매우 적합</span>
                 </div>
                 
                 <!-- 2x2 Grid for Biz Categories -->
@@ -61,7 +68,7 @@ export function renderAssessment(container, dealId) {
                     <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
                 </div>
 
-                <div class="relative z-10 mb-8 pb-4 border-b border-gray-100 flex items-center gap-4">
+                <div class="relative z-10 mb-6 pb-4 border-b border-gray-100 flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
                         <i class="fa-solid fa-server text-lg"></i>
                     </div>
@@ -69,6 +76,13 @@ export function renderAssessment(container, dealId) {
                         <h3 class="text-xl font-bold text-gray-900">Tech Fit Analysis</h3>
                         <p class="text-gray-500 text-sm mt-0.5 font-medium">Requirements, Architecture, Data, Operations</p>
                     </div>
+                </div>
+
+                <!-- Scoring Guide -->
+                <div class="relative z-10 flex items-center justify-end gap-4 mb-6 text-xs text-gray-500">
+                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> 1점: 매우 미흡</span>
+                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> 3점: 보통</span>
+                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span> 5점: 매우 적합</span>
                 </div>
 
                 <!-- 2x2 Grid for Tech Categories -->
