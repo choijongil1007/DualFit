@@ -42,7 +42,7 @@ function renderStage(stageConfig, data) {
         </div>
     ` : '';
 
-    const btnText = data.result ? 'Regenerate' : 'Generate Insights';
+    const btnText = data.result ? '인사이트 재생성' : '인사이트 생성';
     const resultHtml = data.result ? renderResult(data.result, isStale) : '';
     const resultClass = (!data.result && !isStale) ? 'hidden' : '';
 
@@ -68,8 +68,8 @@ function renderStage(stageConfig, data) {
                     ${staleAlert}
 
                     <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-100/50">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Discovery Inputs</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                        <h4 class="text-base font-bold text-gray-800 tracking-tight mb-5">Discovery Inputs</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                             ${renderInput('고객 행동', 'behavior', data.behavior, stageConfig.id, '고객이 하는 행동')}
                             ${renderInput('고객 감정', 'emotion', data.emotion, stageConfig.id, '고객이 느끼는 감정과 그 이유')}
                             ${renderInput('고객 접점', 'touchpoint', data.touchpoint, stageConfig.id, '고객이 정보를 수집하는 채널')}
@@ -105,8 +105,8 @@ function getIconForStage(id) {
 
 function renderInput(label, key, value, stageId, placeholder) {
     return `
-        <div class="space-y-1.5">
-            <label class="text-[11px] font-bold text-gray-500 uppercase ml-1 tracking-wider">${label}</label>
+        <div class="space-y-2">
+            <label class="text-sm font-bold text-gray-700 uppercase ml-1 tracking-wide">${label}</label>
             <textarea 
                 class="input-premium w-full min-h-[80px] resize-none leading-relaxed text-gray-800 text-sm focus:bg-white bg-white shadow-sm"
                 data-stage="${stageId}" 
@@ -205,7 +205,7 @@ function renderResult(result, isStale) {
             
             <div class="flex items-center gap-3 justify-center">
                  <div class="h-px bg-gray-200 flex-1"></div>
-                 <span class="text-xs font-bold text-primary-600 uppercase tracking-widest bg-white px-2">분석 결과</span>
+                 <span class="text-base font-bold text-primary-600 tracking-wide bg-white px-4">분석 결과</span>
                  <div class="h-px bg-gray-200 flex-1"></div>
             </div>
 
@@ -249,7 +249,7 @@ function renderResult(result, isStale) {
                     <i class="fa-solid fa-fingerprint text-xs"></i>
                 </div>
                 <div>
-                    <h4 class="text-xs font-bold text-gray-800 uppercase mb-1 tracking-wide">감지된 신호</h4>
+                    <h4 class="text-sm font-bold text-gray-900 uppercase mb-1 tracking-wide">감지된 신호</h4>
                     <p class="text-sm text-gray-600 leading-relaxed italic">"${result.evidenceSummary || 'No significant signals detected yet.'}"</p>
                 </div>
             </div>
