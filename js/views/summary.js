@@ -128,7 +128,7 @@ export function renderSummary(container, dealId) {
                 <!-- 3. AI Strategic Analysis -->
                 <div class="p-8 md:p-10 bg-gray-50/50">
                     <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-indigo-500 pl-3 mb-6 flex items-center gap-2">
-                        AI Strategic Insight <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-xs"></i>
+                        AI 전략 분석 <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-xs"></i>
                     </h3>
 
                     <div id="summary-ai-content" class="min-h-[200px]">
