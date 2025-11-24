@@ -176,10 +176,24 @@ function renderScoreSection(type, deal) {
             `;
         }).join('');
 
+        // Weight Input - Restored
+        const currentWeight = deal.assessment[type].weights[cat.id] || cat.defaultWeight || 0;
+
         return `
             <div class="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
-                <div class="flex items-center mb-4">
+                <div class="flex justify-between items-center mb-4">
                     <h4 class="font-bold text-gray-800 text-sm tracking-tight">${cat.label}</h4>
+                    <div class="flex items-center bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mr-1.5">Weight</span>
+                        <input type="number" 
+                            class="weight-input w-10 text-right text-xs font-bold text-gray-700 bg-transparent border-none p-0 focus:ring-0" 
+                            value="${currentWeight}" 
+                            data-type="${type}" 
+                            data-cat="${cat.id}"
+                            min="0" max="100"
+                            onclick="this.select()">
+                        <span class="text-[10px] text-gray-400 font-bold ml-0.5">%</span>
+                    </div>
                 </div>
                 ${itemsHtml}
             </div>
@@ -189,6 +203,7 @@ function renderScoreSection(type, deal) {
 
 function attachEvents(deal) {
     const sliders = document.querySelectorAll('.score-slider');
+    const weightInputs = document.querySelectorAll('.weight-input');
     const modal = document.getElementById('score-confirm-modal');
     const confirmBtn = document.getElementById('btn-force-score');
     
@@ -230,7 +245,26 @@ function attachEvents(deal) {
         });
     });
 
-    // 2. Refresh AI
+    // 2. Weight Input Events
+    weightInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+            const type = e.target.dataset.type;
+            const catId = e.target.dataset.cat;
+            let val = parseInt(e.target.value);
+            
+            if (isNaN(val) || val < 0) val = 0;
+            if (val > 100) val = 100;
+            
+            e.target.value = val;
+            
+            if (!deal.assessment[type].weights) deal.assessment[type].weights = {};
+            deal.assessment[type].weights[catId] = val;
+            
+            Store.saveDeal(deal);
+        });
+    });
+
+    // 3. Refresh AI
     const refreshBtn = document.getElementById('btn-refresh-ai');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
@@ -238,7 +272,7 @@ function attachEvents(deal) {
         });
     }
 
-    // 3. Calculate
+    // 4. Calculate
     const calcBtn = document.getElementById('btn-calc-result');
     if (calcBtn) {
         calcBtn.addEventListener('click', () => {
@@ -246,7 +280,7 @@ function attachEvents(deal) {
         });
     }
 
-    // 4. Modal Events
+    // 5. Modal Events
     const closeModal = () => {
         modal.classList.add('hidden');
         pendingScoreChange = null;

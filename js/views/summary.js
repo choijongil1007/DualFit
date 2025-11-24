@@ -61,7 +61,7 @@ export function renderSummary(container, dealId) {
                         
                         <!-- Left: Quadrant Chart (5 cols) -->
                         <div class="lg:col-span-5 flex flex-col items-center">
-                            <h3 class="w-full text-lg font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
+                            <h3 class="w-full text-xl font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
                                 적합도 분석 매트릭스
                             </h3>
                             <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-xl">
@@ -94,7 +94,7 @@ export function renderSummary(container, dealId) {
 
                         <!-- Right: Detailed Score Breakdown (7 cols) -->
                         <div class="lg:col-span-7">
-                            <h3 class="text-lg font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
+                            <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
                                 적합도 점수 상세
                             </h3>
                             
@@ -127,7 +127,7 @@ export function renderSummary(container, dealId) {
 
                 <!-- 3. AI Strategic Analysis -->
                 <div class="p-8 md:p-10 bg-gray-50/50">
-                    <h3 class="text-lg font-bold text-gray-900 uppercase tracking-wide border-l-4 border-indigo-500 pl-3 mb-6 flex items-center gap-2">
+                    <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide border-l-4 border-indigo-500 pl-3 mb-6 flex items-center gap-2">
                         AI 전략 분석 <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
                     </h3>
 
@@ -149,7 +149,7 @@ export function renderSummary(container, dealId) {
                 <!-- 4. Risk Factors (Full Width) -->
                 ${lowItems.length > 0 ? `
                 <div class="p-8 md:p-10 border-t border-gray-200 bg-red-50/30">
-                    <h3 class="text-lg font-bold text-red-700 uppercase tracking-wide border-l-4 border-red-500 pl-3 mb-6 flex items-center gap-2">
+                    <h3 class="text-xl font-bold text-red-700 uppercase tracking-wide border-l-4 border-red-500 pl-3 mb-6 flex items-center gap-2">
                         주의 사항 <span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">${lowItems.length}</span>
                     </h3>
                     
@@ -297,8 +297,8 @@ function renderAIContent(result) {
         if (!text) return '';
         // 1. Replace markdown bold with HTML bold
         let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
-        // 2. Replace hyphens with bullets
-        formatted = formatted.replace(/(^|\n)-\s/g, '$1• ');
+        // 2. Replace hyphens with bullets (handles start of string or newline followed by hyphen)
+        formatted = formatted.replace(/(^|\n)[-]\s+/g, '$1• ');
         return formatted;
     };
 
