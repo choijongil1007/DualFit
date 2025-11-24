@@ -142,8 +142,8 @@ function renderScoreSection(type, deal) {
                 const confKo = confMap[aiItem.confidence] || '보통';
 
                 aiIndicator = `
-                    <div class="has-tooltip relative group inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-help border border-indigo-100 transition-colors hover:bg-indigo-100 ml-2">
-                        <i class="fa-solid fa-wand-magic-sparkles text-[9px] text-indigo-500"></i>
+                    <div class="has-tooltip relative group inline-flex items-center gap-1 bg-gray-100 text-gray-900 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-help border border-gray-200 transition-colors hover:bg-gray-200 ml-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[9px] text-gray-600"></i>
                         <span>${aiScore}</span>
                         <div class="tooltip text-left p-3 min-w-[240px] pointer-events-none">
                             <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-700">AI 추천 점수: ${aiScore}점. 신뢰도: ${confKo}</div>
@@ -160,7 +160,7 @@ function renderScoreSection(type, deal) {
                             <label class="text-xs font-semibold text-gray-600">${itemLabel}</label>
                             ${aiIndicator}
                         </div>
-                        <span class="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">${displayVal} / 5</span>
+                        <span class="text-xs font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">${displayVal} / 5</span>
                     </div>
                     <input type="range" min="1" max="5" step="1" value="${displayVal}" 
                         class="score-slider w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-gray-900 hover:accent-primary-600 transition-all"
