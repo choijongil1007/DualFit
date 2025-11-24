@@ -36,62 +36,72 @@ export function renderAssessment(container, dealId) {
 
         <div class="space-y-6 pb-10">
             <!-- Biz Fit Box -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-card relative">
-                <div class="relative z-10 mb-6 pb-4 border-b border-gray-100 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
-                        <i class="fa-solid fa-briefcase text-lg"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <h3 class="text-lg font-bold text-gray-900">비즈니스 적합성(Biz Fit) 분석</h3>
-                            <span id="biz-weight-display" class="text-xs font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(bizWeightSum)}">
-                                가중치 합계: <span class="val">${bizWeightSum}</span>%
-                            </span>
+            <div class="bg-white border border-gray-200 rounded-xl shadow-card overflow-hidden relative transition-all duration-200 hover:shadow-md">
+                <!-- Header (Discovery Style) -->
+                <div class="p-5 flex justify-between items-center bg-purple-50/40 border-b border-purple-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg shadow-sm border border-purple-100">
+                            <i class="fa-solid fa-briefcase text-sm"></i>
                         </div>
-                        <p class="text-gray-500 text-sm mt-0.5">BANT (예산, 권한, 니즈, 일정)</p>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-gray-900 text-base tracking-tight">비즈니스 적합성 (Biz Fit)</h3>
+                                <span id="biz-weight-display" class="text-[10px] font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(bizWeightSum)}">
+                                    가중치: <span class="val">${bizWeightSum}</span>%
+                                </span>
+                            </div>
+                            <p class="text-gray-500 text-xs font-medium mt-0.5">BANT (예산, 권한, 니즈, 일정)</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Scoring Guide -->
-                <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 매우 미흡</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 매우 우수</span>
-                </div>
-                
-                <!-- 2x2 Grid for Biz Categories -->
-                <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${renderScoreSection('biz', deal)}
+                <div class="p-6 md:p-8 bg-white">
+                    <!-- Scoring Guide -->
+                    <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
+                         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 매우 미흡</span>
+                         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
+                         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 매우 우수</span>
+                    </div>
+                    
+                    <!-- 2x2 Grid for Biz Categories -->
+                    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${renderScoreSection('biz', deal)}
+                    </div>
                 </div>
             </div>
 
             <!-- Tech Fit Box -->
-            <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-card relative">
-                <div class="relative z-10 mb-6 pb-4 border-b border-gray-100 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                        <i class="fa-solid fa-server text-lg"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-3">
-                            <h3 class="text-lg font-bold text-gray-900">기술 적합성(Tech Fit) 분석</h3>
-                            <span id="tech-weight-display" class="text-xs font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(techWeightSum)}">
-                                가중치 합계: <span class="val">${techWeightSum}</span>%
-                            </span>
+            <div class="bg-white border border-gray-200 rounded-xl shadow-card overflow-hidden relative transition-all duration-200 hover:shadow-md">
+                <!-- Header (Discovery Style) -->
+                <div class="p-5 flex justify-between items-center bg-blue-50/40 border-b border-blue-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg shadow-sm border border-blue-100">
+                            <i class="fa-solid fa-server text-sm"></i>
                         </div>
-                        <p class="text-gray-500 text-sm mt-0.5">요구사항, 아키텍처, 데이터, 운영</p>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-gray-900 text-base tracking-tight">기술 적합성 (Tech Fit)</h3>
+                                <span id="tech-weight-display" class="text-[10px] font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(techWeightSum)}">
+                                    가중치: <span class="val">${techWeightSum}</span>%
+                                </span>
+                            </div>
+                            <p class="text-gray-500 text-xs font-medium mt-0.5">요구사항, 아키텍처, 데이터, 운영</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Scoring Guide -->
-                <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 매우 미흡</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 매우 우수</span>
-                </div>
+                <div class="p-6 md:p-8 bg-white">
+                    <!-- Scoring Guide -->
+                    <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
+                         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 매우 미흡</span>
+                         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
+                         <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 매우 우수</span>
+                    </div>
 
-                <!-- 2x2 Grid for Tech Categories -->
-                <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${renderScoreSection('tech', deal)}
+                    <!-- 2x2 Grid for Tech Categories -->
+                    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${renderScoreSection('tech', deal)}
+                    </div>
                 </div>
             </div>
         </div>
@@ -262,7 +272,7 @@ function attachEvents(deal) {
         if (display) {
             const valSpan = display.querySelector('.val');
             valSpan.innerText = sum;
-            display.className = `text-xs font-semibold px-2 py-0.5 rounded border transition-colors ${getWeightColorClass(sum)}`;
+            display.className = `text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${getWeightColorClass(sum)}`;
         }
     };
 
