@@ -64,9 +64,13 @@ function renderDetailsLayout(container, dealId) {
         </div>
 
         <!-- Segmented Control Tabs -->
-        <div class="flex border-b border-gray-200 mb-8">
-            <button class="tab-btn px-6 py-3 font-semibold text-sm transition-all duration-200 border-b-2" data-tab="discovery">Discovery</button>
-            <button class="tab-btn px-6 py-3 font-semibold text-sm transition-all duration-200 border-b-2" data-tab="assessment">Assessment</button>
+        <div class="inline-flex p-1.5 bg-gray-100 rounded-xl mb-8 border border-gray-200 shadow-sm">
+            <button class="tab-btn flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200" data-tab="discovery">
+                <i class="fa-regular fa-compass"></i> Discovery
+            </button>
+            <button class="tab-btn flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200" data-tab="assessment">
+                <i class="fa-solid fa-chart-pie"></i> Assessment
+            </button>
         </div>
 
         <div id="tab-content"></div>
@@ -113,13 +117,19 @@ function renderDetailsLayout(container, dealId) {
 
     function switchTab(tabName) {
         tabs.forEach(t => {
-            if(t.dataset.tab === tabName) {
-                // Active State: Border Bottom, Text Color
-                t.className = 'tab-btn px-6 py-3 font-bold text-sm transition-all duration-200 border-b-2 border-indigo-600 text-indigo-700';
+            const isTarget = t.dataset.tab === tabName;
+            
+            // Base classes
+            let cls = 'tab-btn flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm transition-all duration-200 ';
+            
+            if(isTarget) {
+                // Active State: White bg, shadow, dark text
+                cls += 'bg-white text-gray-900 font-bold shadow-sm ring-1 ring-black/5';
             } else {
-                // Inactive State: Transparent Border, Gray Text
-                t.className = 'tab-btn px-6 py-3 font-medium text-sm transition-all duration-200 border-b-2 border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300';
+                // Inactive State: Gray text, hover effect
+                cls += 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50 font-medium';
             }
+            t.className = cls;
         });
 
         if (tabName === 'discovery') {
