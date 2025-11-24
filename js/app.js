@@ -1,3 +1,4 @@
+
 import { renderDeals } from './views/deals.js';
 import { renderDiscovery } from './views/discovery.js';
 import { renderAssessment } from './views/assessment.js';
@@ -55,7 +56,7 @@ function renderDetailsLayout(container, dealId) {
                  </div>
                  <div class="flex justify-between items-start">
                      <h1 class="text-3xl font-bold text-gray-900 tracking-tight leading-tight">${deal.dealName}</h1>
-                     <button class="text-gray-400 hover:text-gray-900 transition-colors w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200" id="btn-deal-info">
+                     <button class="text-gray-400 hover:text-gray-900 transition-colors w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200" id="btn-deal-info" title="상세 정보">
                         <i class="fa-solid fa-circle-info text-lg"></i>
                      </button>
                  </div>
@@ -79,27 +80,27 @@ function renderDetailsLayout(container, dealId) {
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
 
-                <h3 class="text-xl font-bold mb-6 text-gray-900">Deal Details</h3>
+                <h3 class="text-xl font-bold mb-6 text-gray-900">Deal 상세 정보</h3>
                 
                 <div class="space-y-6">
                     <div class="grid grid-cols-2 gap-6">
                          <div>
-                            <span class="block text-xs font-semibold text-gray-500 mb-1">Client Contact</span>
+                            <span class="block text-xs font-semibold text-gray-500 mb-1">고객 담당자</span>
                             <div class="text-sm font-bold text-gray-900">${deal.clientContact || '-'}</div>
                         </div>
                         <div>
-                            <span class="block text-xs font-semibold text-gray-500 mb-1">Internal Lead</span>
+                            <span class="block text-xs font-semibold text-gray-500 mb-1">내부 담당자</span>
                             <div class="text-sm font-bold text-gray-900">${deal.internalContact || '-'}</div>
                         </div>
                     </div>
                     <div>
-                         <span class="block text-xs font-semibold text-gray-500 mb-1">Target Date</span>
+                         <span class="block text-xs font-semibold text-gray-500 mb-1">수주 목표일</span>
                          <div class="text-sm font-bold text-gray-900">${deal.purchaseDate || '-'}</div>
                     </div>
                     <div>
-                         <span class="block text-xs font-semibold text-gray-500 mb-1">Memo</span>
+                         <span class="block text-xs font-semibold text-gray-500 mb-1">메모</span>
                          <div class="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200 leading-relaxed font-medium">
-                            ${deal.memo || '<span class="text-gray-400 italic font-normal">No memo</span>'}
+                            ${deal.memo || '<span class="text-gray-400 italic font-normal">메모 없음</span>'}
                          </div>
                     </div>
                 </div>

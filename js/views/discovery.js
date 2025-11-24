@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showToast, setButtonLoading } from '../utils.js';
@@ -14,7 +15,7 @@ export function renderDiscovery(container, dealId) {
         <div class="mb-6 flex items-end justify-between">
             <div>
                 <h2 class="text-lg font-bold text-gray-900">Discovery Analysis</h2>
-                <p class="text-gray-500 text-sm mt-0.5">Stage-by-stage customer journey analysis</p>
+                <p class="text-gray-500 text-sm mt-0.5">단계별 고객 여정 분석</p>
             </div>
         </div>
         <div class="space-y-6" id="stages-container">
@@ -28,17 +29,17 @@ export function renderDiscovery(container, dealId) {
 function renderStage(stageConfig, data) {
     const isStale = !data.frozen && data.result; 
 
-    let statusHtml = '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Pending Input</span>';
+    let statusHtml = '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> 입력 대기</span>';
     if (data.frozen) {
-        statusHtml = '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
+        statusHtml = '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> 분석 완료</span>';
     }
 
     const staleAlert = isStale ? `
         <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg flex items-start gap-3 text-amber-800 text-sm mb-6">
             <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
             <div>
-                <strong class="font-semibold block mb-0.5">Inputs Changed</strong>
-                Please regenerate insights to reflect your latest changes.
+                <strong class="font-semibold block mb-0.5">입력 데이터 변경됨</strong>
+                최신 입력을 반영하려면 인사이트를 재생성하세요.
             </div>
         </div>
     ` : '';
@@ -125,7 +126,7 @@ function renderSkeleton() {
         <div class="space-y-5 animate-pulse pt-2">
             <div class="flex items-center gap-3 justify-center mb-6">
                  <div class="h-px bg-gray-200 flex-1"></div>
-                 <span class="text-xs font-semibold text-gray-500 tracking-wide bg-transparent px-2">AI Analyzing</span>
+                 <span class="text-xs font-semibold text-gray-500 tracking-wide bg-transparent px-2">AI 분석 중</span>
                  <div class="h-px bg-gray-200 flex-1"></div>
             </div>
             
@@ -178,7 +179,7 @@ function renderResult(result, isStale) {
     const scItemsHtml = renderListItems(result.sc);
     const jtbdItemsHtml = renderListItems(result.jtbd);
 
-    let todoItemsHtml = '<div class="text-sm text-gray-400">No specific actions generated.</div>';
+    let todoItemsHtml = '<div class="text-sm text-gray-400">생성된 액션 아이템이 없습니다.</div>';
     if (result.todo && typeof result.todo === 'object') {
         const todos = Object.entries(result.todo)
             .filter(([role]) => {
@@ -210,7 +211,7 @@ function renderResult(result, isStale) {
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50/50 rounded-bl-full -mr-8 -mt-8"></div>
                     <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
-                        <i class="fa-solid fa-bullseye text-blue-600"></i> Jobs to be Done
+                        <i class="fa-solid fa-bullseye text-blue-600"></i> 해결 과제 (JTBD)
                     </h4>
                     <ul class="space-y-2 relative z-10">
                         ${jtbdItemsHtml}
@@ -221,7 +222,7 @@ function renderResult(result, isStale) {
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
                     <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-50/50 rounded-bl-full -mr-8 -mt-8"></div>
                     <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
-                        <i class="fa-solid fa-flag-checkered text-emerald-600"></i> Success Criteria
+                        <i class="fa-solid fa-flag-checkered text-emerald-600"></i> 성공 기준
                     </h4>
                     <ul class="space-y-2 relative z-10">
                          ${scItemsHtml}
@@ -232,7 +233,7 @@ function renderResult(result, isStale) {
             <!-- To-Do List -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-violet-600"></i> Recommended Actions
+                    <i class="fa-solid fa-list-check text-violet-600"></i> 추천 액션 아이템
                 </h4>
                 <div class="grid grid-cols-1 gap-2">
                     ${todoItemsHtml}
@@ -246,7 +247,7 @@ function renderResult(result, isStale) {
                 </div>
                 <div>
                     <h4 class="text-sm font-bold text-gray-900 mb-1">감지된 신호</h4>
-                    <p class="text-sm text-gray-600 leading-relaxed italic">"${result.evidenceSummary || 'No significant signals detected yet.'}"</p>
+                    <p class="text-sm text-gray-600 leading-relaxed italic">"${result.evidenceSummary || '특이 신호가 감지되지 않았습니다.'}"</p>
                 </div>
             </div>
         </div>
@@ -302,11 +303,11 @@ function attachEvents(deal) {
             const resultAreaContainer = card.querySelector('.result-area');
 
             if (!stageData.behavior && !stageData.problem && !stageData.emotion) {
-                showToast('Please provide some inputs first.', 'error');
+                showToast('분석을 위해 정보를 먼저 입력해주세요.', 'error');
                 return;
             }
 
-            setButtonLoading(btn, true, "Analyzing...");
+            setButtonLoading(btn, true, "분석 중...");
             resultAreaContainer.classList.remove('hidden');
             resultAreaContainer.innerHTML = renderSkeleton();
 
@@ -360,10 +361,10 @@ ${jsonStructure}
                 
                 resultAreaContainer.innerHTML = renderResult(result, false);
                 
-                showToast('Insights Generated', 'success');
+                showToast('인사이트 생성 완료', 'success');
                 
                 const statusSpan = card.querySelector('.toggle-header h3').nextElementSibling;
-                statusSpan.innerHTML = '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
+                statusSpan.innerHTML = '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> 분석 완료</span>';
 
             } catch (error) {
                 console.error(error);
@@ -371,8 +372,8 @@ ${jsonStructure}
                 showToast(msg, 'error');
                 
                 resultAreaContainer.innerHTML = `<div class="bg-red-50 p-4 rounded-lg text-red-600 text-sm border border-red-200">
-                    <strong>Analysis Failed:</strong> ${error.message}<br>
-                    <span class="text-xs text-red-500 mt-1 block">Please check the console for details.</span>
+                    <strong>분석 실패:</strong> ${error.message}<br>
+                    <span class="text-xs text-red-500 mt-1 block">잠시 후 다시 시도해주세요.</span>
                 </div>`;
             } finally {
                 setButtonLoading(btn, false);

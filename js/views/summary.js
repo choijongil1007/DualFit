@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -15,14 +16,14 @@ export function renderSummary(container, dealId) {
             <!-- Action Bar (Outside Report) -->
             <div class="flex justify-between items-center mb-6 px-1 no-print">
                 <button id="btn-back-details" class="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium text-sm">
-                    <i class="fa-solid fa-arrow-left"></i> Back to Details
+                    <i class="fa-solid fa-arrow-left"></i> 상세 화면으로
                 </button>
                 <div class="flex gap-3">
                     <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> Print / PDF
+                        <i class="fa-solid fa-print"></i> 인쇄 / PDF 저장
                     </button>
                     <button id="btn-recalc" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 text-sm font-medium shadow-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-rotate"></i> Regenerate Strategy
+                        <i class="fa-solid fa-rotate"></i> 전략 재생성
                     </button>
                 </div>
             </div>
@@ -48,7 +49,7 @@ export function renderSummary(container, dealId) {
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs text-gray-400 font-medium mb-1">Report Date</div>
+                            <div class="text-xs text-gray-400 font-medium mb-1">생성일</div>
                             <div class="text-lg font-bold text-white font-mono tracking-tight">${reportDate}</div>
                         </div>
                     </div>
@@ -61,14 +62,14 @@ export function renderSummary(container, dealId) {
                         <!-- Left: Quadrant Chart (5 cols) -->
                         <div class="lg:col-span-5 flex flex-col items-center">
                             <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
-                                Fit Analysis Matrix
+                                적합성 분석 매트릭스
                             </h3>
                             <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-lg">
                                 <div class="quadrant-bg">
-                                    <div class="q-zone q-zone-tl"><span class="q-label-inner text-[10px]">Tech OK<br>Biz Weak</span></div>
-                                    <div class="q-zone q-zone-tr"><span class="q-label-inner text-[10px] text-emerald-600">Best Fit</span></div>
-                                    <div class="q-zone q-zone-bl"><span class="q-label-inner text-[10px] text-gray-400">Drop</span></div>
-                                    <div class="q-zone q-zone-br"><span class="q-label-inner text-[10px]">Biz OK<br>Tech Weak</span></div>
+                                    <div class="q-zone q-zone-tl"><span class="q-label-inner text-[10px]">기술 양호<br>사업성 부족</span></div>
+                                    <div class="q-zone q-zone-tr"><span class="q-label-inner text-[10px] text-emerald-600">최적 (Best Fit)</span></div>
+                                    <div class="q-zone q-zone-bl"><span class="q-label-inner text-[10px] text-gray-400">부적합 (Drop)</span></div>
+                                    <div class="q-zone q-zone-br"><span class="q-label-inner text-[10px]">사업성 양호<br>기술 부족</span></div>
                                 </div>
                                 <div class="quadrant-line-x"></div>
                                 <div class="quadrant-line-y"></div>
@@ -94,7 +95,7 @@ export function renderSummary(container, dealId) {
                         <!-- Right: Detailed Score Breakdown (7 cols) -->
                         <div class="lg:col-span-7">
                             <h3 class="text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
-                                Detailed Scoring
+                                세부 평가 점수
                             </h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
@@ -127,7 +128,7 @@ export function renderSummary(container, dealId) {
                 <!-- 3. AI Strategic Analysis -->
                 <div class="p-10 md:p-12 bg-gray-50/50">
                     <h3 class="text-lg font-bold text-gray-900 border-l-4 border-indigo-500 pl-4 mb-8 flex items-center gap-2">
-                        AI Strategy Analysis <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
+                        AI 전략 분석 <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
                     </h3>
 
                     <div id="summary-ai-content" class="min-h-[200px]">
@@ -149,7 +150,7 @@ export function renderSummary(container, dealId) {
                 ${lowItems.length > 0 ? `
                 <div class="p-10 md:p-12 border-t border-gray-200 bg-red-50/30">
                     <h3 class="text-lg font-bold text-red-700 border-l-4 border-red-500 pl-4 mb-8 flex items-center gap-3">
-                        Risk Factors <span class="bg-red-100 text-red-600 text-xs px-2.5 py-0.5 rounded-full font-bold">${lowItems.length}</span>
+                        리스크 요인 <span class="bg-red-100 text-red-600 text-xs px-2.5 py-0.5 rounded-full font-bold">${lowItems.length}</span>
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -170,13 +171,13 @@ export function renderSummary(container, dealId) {
                 ` : `
                 <div class="p-10 md:p-12 border-t border-gray-200 bg-emerald-50/30 flex items-center justify-center gap-3 text-emerald-700">
                     <i class="fa-solid fa-circle-check text-xl"></i>
-                    <span class="font-medium">No critical risk factors detected. Deal looks healthy.</span>
+                    <span class="font-medium">치명적인 리스크가 발견되지 않았습니다. 딜 건전성이 높습니다.</span>
                 </div>
                 `}
 
                 <!-- Footer -->
                 <div class="bg-gray-100 p-8 text-center border-t border-gray-200">
-                    <p class="text-xs text-gray-500 font-medium">Generated by DualFit AI • Confidential</p>
+                    <p class="text-xs text-gray-500 font-medium">DualFit AI 생성 • 대외비 (Confidential)</p>
                 </div>
             </div>
             
@@ -299,15 +300,15 @@ function renderAIContent(result) {
         <div class="flex flex-col gap-10">
             <!-- Executive Summary -->
             <div class="w-full">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Executive Summary</h4>
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">요약 (Executive Summary)</h4>
                 <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-sm text-gray-800 leading-relaxed text-sm whitespace-pre-line font-medium">
-                    ${result.executiveSummary || 'Executive summary not generated.'}
+                    ${result.executiveSummary || '요약이 생성되지 않았습니다.'}
                 </div>
             </div>
             
             <!-- Action Plan -->
             <div class="w-full">
-                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Strategic Actions</h4>
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">전략적 제언 (Action Plan)</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     ${result.actions ? result.actions.map(act => {
                         let icon = 'fa-check';
@@ -326,7 +327,7 @@ function renderAIContent(result) {
                                 </div>
                             </div>
                         `;
-                    }).join('') : '<div class="text-gray-400 text-sm col-span-2">No recommended actions.</div>'}
+                    }).join('') : '<div class="text-gray-400 text-sm col-span-2">추천 액션이 없습니다.</div>'}
                 </div>
             </div>
         </div>
@@ -347,7 +348,7 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
                 <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
             </div>
         </div>
-        <p class="text-center text-xs text-gray-400 mt-6 font-medium">AI evaluating deal strategy...</p>
+        <p class="text-center text-xs text-gray-400 mt-6 font-medium">AI 전략 분석 중...</p>
     `;
 
     try {
@@ -397,8 +398,8 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
         container.innerHTML = `
             <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center">
                 <i class="fa-solid fa-circle-exclamation text-red-500 text-2xl mb-3"></i>
-                <p class="text-red-700 font-bold text-sm">Failed to generate strategy report</p>
-                <p class="text-red-500 text-xs mt-1">Please check your network and try again.</p>
+                <p class="text-red-700 font-bold text-sm">전략 보고서 생성 실패</p>
+                <p class="text-red-500 text-xs mt-1">네트워크 상태를 확인하고 다시 시도해주세요.</p>
             </div>
         `;
     }

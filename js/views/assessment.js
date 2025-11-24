@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
@@ -21,14 +22,14 @@ export function renderAssessment(container, dealId) {
         <div class="mb-6 flex justify-between items-center">
             <div>
                 <h2 class="text-lg font-bold text-gray-900">Assessment</h2>
-                <p class="text-gray-500 text-sm mt-0.5">Deal Fit Evaluation</p>
+                <p class="text-gray-500 text-sm mt-0.5">딜 적합성(Fit) 평가</p>
             </div>
             <div class="flex gap-3">
                 <button id="btn-refresh-ai" class="bg-white text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-xs text-indigo-500"></i> AI Recommendation
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs text-indigo-500"></i> AI 추천 점수
                 </button>
                 <button id="btn-calc-result" class="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black text-sm font-medium shadow-md flex items-center gap-2 transition-transform active:scale-95">
-                    <i class="fa-solid fa-check"></i> Save & Complete
+                    <i class="fa-solid fa-check"></i> 저장 및 결과 보기
                 </button>
             </div>
         </div>
@@ -42,20 +43,20 @@ export function renderAssessment(container, dealId) {
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h3 class="text-lg font-bold text-gray-900">Biz Fit Analysis</h3>
+                            <h3 class="text-lg font-bold text-gray-900">비즈니스 적합성(Biz Fit) 분석</h3>
                             <span id="biz-weight-display" class="text-xs font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(bizWeightSum)}">
-                                Total Weight: <span class="val">${bizWeightSum}</span>%
+                                가중치 합계: <span class="val">${bizWeightSum}</span>%
                             </span>
                         </div>
-                        <p class="text-gray-500 text-sm mt-0.5">BANT (Budget, Authority, Need, Timeline)</p>
+                        <p class="text-gray-500 text-sm mt-0.5">BANT (예산, 권한, 니즈, 일정)</p>
                     </div>
                 </div>
 
                 <!-- Scoring Guide -->
                 <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: Poor</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: Average</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: Excellent</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 미흡</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 우수</span>
                 </div>
                 
                 <!-- 2x2 Grid for Biz Categories -->
@@ -72,20 +73,20 @@ export function renderAssessment(container, dealId) {
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h3 class="text-lg font-bold text-gray-900">Tech Fit Analysis</h3>
+                            <h3 class="text-lg font-bold text-gray-900">기술 적합성(Tech Fit) 분석</h3>
                             <span id="tech-weight-display" class="text-xs font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(techWeightSum)}">
-                                Total Weight: <span class="val">${techWeightSum}</span>%
+                                가중치 합계: <span class="val">${techWeightSum}</span>%
                             </span>
                         </div>
-                        <p class="text-gray-500 text-sm mt-0.5">Requirements, Architecture, Data, Operations</p>
+                        <p class="text-gray-500 text-sm mt-0.5">요구사항, 아키텍처, 데이터, 운영</p>
                     </div>
                 </div>
 
                 <!-- Scoring Guide -->
                 <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: Poor</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: Average</span>
-                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: Excellent</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: 미흡</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: 보통</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: 우수</span>
                 </div>
 
                 <!-- 2x2 Grid for Tech Categories -->
@@ -104,14 +105,14 @@ export function renderAssessment(container, dealId) {
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                 </div>
                 
-                <h3 class="text-lg font-bold mb-2 text-gray-900">Check Score</h3>
+                <h3 class="text-lg font-bold mb-2 text-gray-900">점수 확인</h3>
                 <p id="score-confirm-msg" class="text-gray-500 text-sm mb-8 leading-relaxed whitespace-pre-line">
-                    Significant deviation from AI recommendation.<br>Confirm this score?
+                    AI 추천 점수와 차이가 큽니다.<br>이 점수로 확정하시겠습니까?
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors">Cancel</button>
-                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg text-sm font-medium shadow-md transition-colors">Confirm</button>
+                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors">취소</button>
+                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg text-sm font-medium shadow-md transition-colors">확인</button>
                 </div>
             </div>
         </div>
@@ -161,7 +162,7 @@ function renderScoreSection(type, deal) {
                         <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i>
                         <span>${aiScore}</span>
                         <div class="tooltip text-left p-3 min-w-[240px] pointer-events-none bg-gray-800 text-white rounded-lg shadow-xl">
-                            <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-600 text-xs">AI Score: ${aiScore} (Confidence: ${confKo})</div>
+                            <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-600 text-xs">AI 추천 점수: ${aiScore} (신뢰도: ${confKo})</div>
                             <div class="text-xs text-gray-300 leading-relaxed mt-1">${aiItem.reason}</div>
                         </div>
                     </div>
@@ -199,7 +200,7 @@ function renderScoreSection(type, deal) {
                 <div class="flex justify-between items-center mb-4">
                     <h4 class="font-bold text-gray-800 text-sm">${cat.label}</h4>
                     <div class="flex items-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
-                        <span class="text-[10px] text-gray-500 font-semibold mr-1.5">Weight</span>
+                        <span class="text-[10px] text-gray-500 font-semibold mr-1.5">가중치</span>
                         <input type="number" 
                             class="weight-input w-10 text-right text-xs font-bold text-gray-900 bg-transparent border-none p-0 focus:ring-0" 
                             value="${currentWeight}" 
@@ -244,7 +245,7 @@ function attachEvents(deal) {
                 pendingSliderElement = e.target;
                 
                 const msg = document.getElementById('score-confirm-msg');
-                msg.innerHTML = `Significant deviation from AI score (${aiItemRec.score}).<br>Set score to ${newVal}?`;
+                msg.innerHTML = `AI 추천 점수(${aiItemRec.score}점)와 차이가 큽니다.<br>${newVal}점으로 확정하시겠습니까?`;
                 
                 modal.classList.remove('hidden');
             } else {
@@ -309,12 +310,12 @@ function attachEvents(deal) {
             const techSum = getWeightSum(deal, 'tech');
 
             if (bizSum !== 100) {
-                showToast(`Biz Fit total weight must be 100% (Current: ${bizSum}%)`, 'error');
+                showToast(`Biz Fit 가중치 합계는 100%여야 합니다. (현재: ${bizSum}%)`, 'error');
                 return;
             }
 
             if (techSum !== 100) {
-                showToast(`Tech Fit total weight must be 100% (Current: ${techSum}%)`, 'error');
+                showToast(`Tech Fit 가중치 합계는 100%여야 합니다. (현재: ${techSum}%)`, 'error');
                 return;
             }
 
@@ -347,14 +348,14 @@ function attachEvents(deal) {
         if (pendingScoreChange) {
             deal.assessment[pendingScoreChange.type].scores[pendingScoreChange.id] = pendingScoreChange.val;
             Store.saveDeal(deal);
-            showToast('Score saved.', 'success');
+            showToast('점수가 저장되었습니다.', 'success');
         }
         closeModal();
     });
 }
 
 async function generateAssessmentAI(deal) {
-    showLoader("AI Analyzing...");
+    showLoader("AI 분석 중...");
     
     // Prepare context from Discovery
     const discoverySummary = Object.entries(deal.discovery).map(([stage, data]) => {
@@ -407,13 +408,13 @@ JSON Output Format:
             deal.assessment.recommendations = result;
             Store.saveDeal(deal);
             renderAssessment(document.getElementById('tab-content'), deal.id); // Re-render tab content
-            showToast('AI Recommendations Updated', 'success');
+            showToast('AI 추천 점수가 업데이트되었습니다.', 'success');
         } else {
             throw new Error('Invalid AI response');
         }
     } catch (e) {
         console.error(e);
-        showToast('AI Update Failed', 'error');
+        showToast('AI 분석 업데이트 실패', 'error');
     } finally {
         hideLoader();
     }

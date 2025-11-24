@@ -11,10 +11,10 @@ export const DISCOVERY_STAGES = [
 export const ASSESSMENT_CONFIG = {
     biz: {
         categories: [
-            { id: 'budget', label: 'Budget', items: ['예산 존재 여부', '예산 적합성'], defaultWeight: 20 },
-            { id: 'authority', label: 'Authority', items: ['의사결정권자 접근성', '내부 지지자 파워'], defaultWeight: 25 },
-            { id: 'need', label: 'Need', items: ['문제 적합성', '도입 필요성'], defaultWeight: 35 },
-            { id: 'timeline', label: 'Timeline', items: ['의사결정 타임라인 명확성', '도입 용이성'], defaultWeight: 20 }
+            { id: 'budget', label: '예산 (Budget)', items: ['예산 존재 여부', '예산 적합성'], defaultWeight: 20 },
+            { id: 'authority', label: '권한 (Authority)', items: ['의사결정권자 접근성', '내부 지지자 파워'], defaultWeight: 25 },
+            { id: 'need', label: '니즈 (Need)', items: ['문제 적합성', '도입 필요성'], defaultWeight: 35 },
+            { id: 'timeline', label: '일정 (Timeline)', items: ['의사결정 타임라인 명확성', '도입 용이성'], defaultWeight: 20 }
         ]
     },
     tech: {
