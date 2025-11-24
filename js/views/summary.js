@@ -132,7 +132,7 @@ export function renderSummary(container, dealId) {
                     </h3>
 
                     <div id="summary-ai-content" class="min-h-[200px]">
-                        <!-- Skeleton Loader -->
+                        <!-- Content will be injected here (Skeleton or Result) -->
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
                             <div class="lg:col-span-2 space-y-3">
                                 <div class="h-32 bg-gray-200 rounded-xl w-full"></div>
@@ -143,7 +143,6 @@ export function renderSummary(container, dealId) {
                                 <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
                             </div>
                         </div>
-                        <p class="text-center text-xs text-gray-400 mt-4">Generating strategic report...</p>
                     </div>
                 </div>
 
@@ -194,7 +193,12 @@ export function renderSummary(container, dealId) {
          generateSummaryAI(deal, bizScore, techScore, lowItems);
     });
 
-    generateSummaryAI(deal, bizScore, techScore, lowItems);
+    // Initial Load Logic: Use Cached or Generate New
+    if (deal.summaryReport) {
+        renderAIContent(deal.summaryReport);
+    } else {
+        generateSummaryAI(deal, bizScore, techScore, lowItems);
+    }
 }
 
 function renderScoreBars(categoryData) {
@@ -231,8 +235,7 @@ function calculateScores(deal) {
             const item1 = deal.assessment[type].scores[`${cat.id}_0`] || 0;
             const item2 = deal.assessment[type].scores[`${cat.id}_1`] || 0;
             
-            // Treat 0 as 1 for calculation if not set, or keep strictly? 
-            // UI defaults 0 to 1 visually, let's use actual values but floor at 1 for safety if needed.
+            // Treat 0 as 1 for calculation
             const val1 = item1 === 0 ? 1 : item1;
             const val2 = item2 === 0 ? 1 : item2;
 
@@ -248,8 +251,7 @@ function calculateScores(deal) {
         });
 
         return { 
-            score: Math.round(totalWeightedScore / 5), // Normalize to 0-100 range? The previous logic seemed to aim for 1-5 scale mapped to something.
-            // Wait, previous logic was: totalWeightedScore (max 500 if weight sum 100) / 5 -> max 100.
+            score: Math.round(totalWeightedScore / 5), 
             catScores 
         };
     };
@@ -264,7 +266,6 @@ function calculateScores(deal) {
             cat.items.forEach((label, idx) => {
                 const id = `${cat.id}_${idx}`;
                 const val = deal.assessment[type].scores[id] || 0;
-                // Treat 0 as 1 for display
                 const displayVal = val === 0 ? 1 : val;
                 if (displayVal <= 2) {
                     lowItems.push({ catLabel: cat.label, label, val: displayVal });
@@ -282,6 +283,48 @@ function calculateScores(deal) {
             tech: techData.catScores
         }
     };
+}
+
+function renderAIContent(result) {
+    const container = document.getElementById('summary-ai-content');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="flex flex-col gap-8">
+            <!-- Executive Summary -->
+            <div class="w-full">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Executive Summary</h4>
+                <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+                    ${result.executiveSummary || '종합 분석 내용을 생성하지 못했습니다.'}
+                </div>
+            </div>
+            
+            <!-- Action Plan -->
+            <div class="w-full">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Strategic Actions</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${result.actions ? result.actions.map(act => {
+                        let icon = 'fa-check';
+                        let bgClass = 'bg-white border-gray-200';
+                        if (act.type === 'strategic') { icon = 'fa-chess'; bgClass = 'bg-indigo-50 border-indigo-100 text-indigo-900'; }
+                        if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
+                        
+                        return `
+                            <div class="${bgClass} border p-4 rounded-xl shadow-sm hover:shadow-md transition-all h-full">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
+                                    <div>
+                                        <div class="text-sm font-bold mb-1">${act.title}</div>
+                                        <div class="text-xs opacity-80 leading-relaxed">${act.desc}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('') : '<div class="text-gray-400 text-sm col-span-2">추천 액션이 없습니다.</div>'}
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
@@ -339,43 +382,12 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
 
         const result = await callGemini(prompt);
         
+        // Save Result to Deal and Store
+        deal.summaryReport = result;
+        Store.saveDeal(deal);
+        
         // Render Final AI Content
-        container.innerHTML = `
-            <div class="flex flex-col gap-8">
-                <!-- Executive Summary -->
-                <div class="w-full">
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Executive Summary</h4>
-                    <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm text-gray-700 leading-relaxed text-sm whitespace-pre-line">
-                        ${result.executiveSummary || '종합 분석 내용을 생성하지 못했습니다.'}
-                    </div>
-                </div>
-                
-                <!-- Action Plan -->
-                <div class="w-full">
-                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Strategic Actions</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${result.actions ? result.actions.map(act => {
-                            let icon = 'fa-check';
-                            let bgClass = 'bg-white border-gray-200';
-                            if (act.type === 'strategic') { icon = 'fa-chess'; bgClass = 'bg-indigo-50 border-indigo-100 text-indigo-900'; }
-                            if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
-                            
-                            return `
-                                <div class="${bgClass} border p-4 rounded-xl shadow-sm hover:shadow-md transition-all h-full">
-                                    <div class="flex items-start gap-3">
-                                        <div class="mt-0.5"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
-                                        <div>
-                                            <div class="text-sm font-bold mb-1">${act.title}</div>
-                                            <div class="text-xs opacity-80 leading-relaxed">${act.desc}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('') : '<div class="text-gray-400 text-sm col-span-2">추천 액션이 없습니다.</div>'}
-                    </div>
-                </div>
-            </div>
-        `;
+        renderAIContent(result);
 
     } catch (e) {
         console.error(e);
