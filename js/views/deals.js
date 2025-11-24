@@ -15,7 +15,7 @@ export function renderDeals(container) {
                 <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Deals</h1>
                 <p class="text-gray-500 mt-1 text-sm">영업 기회 및 파이프라인 관리</p>
             </div>
-            <button id="btn-create-deal" class="bg-indigo-600 hover:bg-indigo-700 text-white pl-4 pr-5 py-2.5 rounded-lg shadow-sm transition-all text-sm font-medium flex items-center gap-2 active:scale-95 border border-transparent">
+            <button id="btn-create-deal" class="bg-gray-900 hover:bg-black text-white pl-4 pr-5 py-2.5 rounded-lg shadow-sm transition-all text-sm font-medium flex items-center gap-2 active:scale-95 border border-transparent">
                 <i class="fa-solid fa-plus text-xs"></i> New Deal
             </button>
         </div>
