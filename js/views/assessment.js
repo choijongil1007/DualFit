@@ -174,9 +174,10 @@ async function runAIRecommendations(deal, forceRefresh = false) {
 
     try {
         // Coupling Logic Rules are explicitly added to the prompt
+        // Added stricter instruction for Korean reason
         const prompt = `
             Task: B2B Deal Scoring recommendation (1-5 scale).
-            Language: Korean (Must output strictly in Korean).
+            Language: Korean (Output MUST be in Korean).
             Deal: ${deal.dealName}
             Evidence: ${evidence}
             
@@ -186,12 +187,13 @@ async function runAIRecommendations(deal, forceRefresh = false) {
             3. **Complexity vs Tech Fit**: If environment is complex/legacy, Tech Fit scores (Integration/Arch) should be conservative.
             4. **Timeline**: If timeline is unrealistic or very tight, 'Timeline' score should be Low (risk is high).
             
-            Return JSON with recommended scores and brief reason for ALL items below.
+            Return JSON with recommended scores and brief reason (in Korean) for ALL items below.
+            
             REQUIRED KEYS:
             - budget_0, budget_1, authority_0, authority_1, need_0, need_1, timeline_0, timeline_1
             - req_0, req_1, arch_0, arch_1, data_0, data_1, ops_0, ops_1
             
-            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "reason..."}, "req_0": { ... }, ... }}
+            Format: {"items": {"budget_0": {"score": 4, "confidence": "High", "reason": "이유를 한글로 작성하세요..."}, "req_0": { ... }, ... }}
         `;
 
         const result = await callGemini(prompt);
