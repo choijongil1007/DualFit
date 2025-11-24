@@ -18,49 +18,44 @@ export function renderAssessment(container, dealId) {
     const techWeightSum = getWeightSum(deal, 'tech');
 
     container.innerHTML = `
-        <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
+        <div class="mb-6 flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-bold text-gray-900 mb-1">Assessment</h2>
-                <p class="text-gray-500 text-sm">Deal 적합성 평가</p>
+                <h2 class="text-lg font-bold text-gray-900">Assessment</h2>
+                <p class="text-gray-500 text-sm mt-0.5">Deal Fit Evaluation</p>
             </div>
             <div class="flex gap-3">
-                <button id="btn-refresh-ai" class="bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm flex items-center gap-2 btn-pill">
-                    <i class="fa-solid fa-wand-magic-sparkles text-xs text-indigo-500"></i> AI 추천 점수
+                <button id="btn-refresh-ai" class="bg-white text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs text-indigo-500"></i> AI Recommendation
                 </button>
-                <button id="btn-calc-result" class="bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-black text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill transition-transform active:scale-95">
-                    <i class="fa-solid fa-check"></i> 저장 & 완료
+                <button id="btn-calc-result" class="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black text-sm font-medium shadow-md flex items-center gap-2 transition-transform active:scale-95">
+                    <i class="fa-solid fa-check"></i> Save & Complete
                 </button>
             </div>
         </div>
 
-        <div class="space-y-10 pb-10">
+        <div class="space-y-6 pb-10">
             <!-- Biz Fit Box -->
-            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative">
-                <!-- Decorative bg container -->
-                <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
-                </div>
-
+            <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-card relative">
                 <div class="relative z-10 mb-6 pb-4 border-b border-gray-100 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
                         <i class="fa-solid fa-briefcase text-lg"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h3 class="text-xl font-bold text-gray-900">Biz Fit Analysis</h3>
-                            <span id="biz-weight-display" class="text-xs font-bold px-2 py-0.5 rounded-md border ${getWeightColorClass(bizWeightSum)}">
+                            <h3 class="text-lg font-bold text-gray-900">Biz Fit Analysis</h3>
+                            <span id="biz-weight-display" class="text-xs font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(bizWeightSum)}">
                                 Total Weight: <span class="val">${bizWeightSum}</span>%
                             </span>
                         </div>
-                        <p class="text-gray-500 text-sm mt-0.5 font-medium">BANT (Budget, Authority, Need, Timeline)</p>
+                        <p class="text-gray-500 text-sm mt-0.5">BANT (Budget, Authority, Need, Timeline)</p>
                     </div>
                 </div>
 
                 <!-- Scoring Guide -->
-                <div class="relative z-10 flex items-center justify-end gap-4 mb-6 text-xs text-gray-500">
-                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> 1점: 매우 미흡</span>
-                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> 3점: 보통</span>
-                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span> 5점: 매우 적합</span>
+                <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: Poor</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: Average</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: Excellent</span>
                 </div>
                 
                 <!-- 2x2 Grid for Biz Categories -->
@@ -70,32 +65,27 @@ export function renderAssessment(container, dealId) {
             </div>
 
             <!-- Tech Fit Box -->
-            <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative">
-                <!-- Decorative bg container -->
-                <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
-                </div>
-
+            <div class="bg-white border border-gray-200 rounded-xl p-6 md:p-8 shadow-card relative">
                 <div class="relative z-10 mb-6 pb-4 border-b border-gray-100 flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
                         <i class="fa-solid fa-server text-lg"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-3">
-                            <h3 class="text-xl font-bold text-gray-900">Tech Fit Analysis</h3>
-                            <span id="tech-weight-display" class="text-xs font-bold px-2 py-0.5 rounded-md border ${getWeightColorClass(techWeightSum)}">
+                            <h3 class="text-lg font-bold text-gray-900">Tech Fit Analysis</h3>
+                            <span id="tech-weight-display" class="text-xs font-semibold px-2 py-0.5 rounded border ${getWeightColorClass(techWeightSum)}">
                                 Total Weight: <span class="val">${techWeightSum}</span>%
                             </span>
                         </div>
-                        <p class="text-gray-500 text-sm mt-0.5 font-medium">Requirements, Architecture, Data, Operations</p>
+                        <p class="text-gray-500 text-sm mt-0.5">Requirements, Architecture, Data, Operations</p>
                     </div>
                 </div>
 
                 <!-- Scoring Guide -->
-                <div class="relative z-10 flex items-center justify-end gap-4 mb-6 text-xs text-gray-500">
-                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span> 1점: 매우 미흡</span>
-                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> 3점: 보통</span>
-                     <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span> 5점: 매우 적합</span>
+                <div class="relative z-10 flex items-center justify-end gap-5 mb-6 text-xs text-gray-500 font-medium">
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-200"></span> 1: Poor</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-gray-400"></span> 3: Average</span>
+                     <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-600"></span> 5: Excellent</span>
                 </div>
 
                 <!-- 2x2 Grid for Tech Categories -->
@@ -105,23 +95,23 @@ export function renderAssessment(container, dealId) {
             </div>
         </div>
 
-        <!-- Score Confirmation Modal (Premium White) -->
+        <!-- Score Confirmation Modal -->
         <div id="score-confirm-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-gray-900/20 backdrop-blur-sm modal-backdrop transition-opacity"></div>
-            <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-modal p-8 animate-modal-in text-center">
+            <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm modal-backdrop transition-opacity"></div>
+            <div class="relative w-full max-w-sm bg-white rounded-xl shadow-modal p-8 animate-modal-in text-center border border-gray-100">
                 
-                <div class="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-5 text-amber-500 border border-amber-100">
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-5 text-amber-500 border border-amber-100">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                 </div>
                 
-                <h3 class="text-lg font-bold mb-2 text-gray-900">점수 확인</h3>
+                <h3 class="text-lg font-bold mb-2 text-gray-900">Check Score</h3>
                 <p id="score-confirm-msg" class="text-gray-500 text-sm mb-8 leading-relaxed whitespace-pre-line">
-                    AI 추천 점수와 차이가 큽니다.<br>이 점수로 설정하시겠습니까?
+                    Significant deviation from AI recommendation.<br>Confirm this score?
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-semibold transition-colors btn-pill">취소</button>
-                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-full text-sm font-semibold shadow-lg shadow-gray-900/10 transition-colors btn-pill">확인</button>
+                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg text-sm font-medium shadow-md transition-colors">Confirm</button>
                 </div>
             </div>
         </div>
@@ -138,8 +128,8 @@ function getWeightSum(deal, type) {
 
 function getWeightColorClass(sum) {
     return sum === 100 
-        ? 'bg-emerald-50 border-emerald-100 text-emerald-600' 
-        : 'bg-red-50 border-red-100 text-red-600';
+        ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+        : 'bg-red-50 border-red-200 text-red-600';
 }
 
 function renderScoreSection(type, deal) {
@@ -167,11 +157,11 @@ function renderScoreSection(type, deal) {
                 const confKo = confMap[aiItem.confidence] || '보통';
 
                 aiIndicator = `
-                    <div class="has-tooltip relative group inline-flex items-center gap-1 bg-gray-100 text-gray-900 px-1.5 py-0.5 rounded-md text-[10px] font-bold cursor-help border border-gray-200 transition-colors hover:bg-gray-200 ml-2">
-                        <i class="fa-solid fa-wand-magic-sparkles text-[9px] text-gray-600"></i>
+                    <div class="has-tooltip relative group inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[10px] font-bold cursor-help border border-indigo-100 transition-colors hover:bg-indigo-100 ml-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i>
                         <span>${aiScore}</span>
-                        <div class="tooltip text-left p-3 min-w-[240px] pointer-events-none">
-                            <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-700">AI 추천 점수: ${aiScore}점. 신뢰도: ${confKo}</div>
+                        <div class="tooltip text-left p-3 min-w-[240px] pointer-events-none bg-gray-800 text-white rounded-lg shadow-xl">
+                            <div class="font-bold text-emerald-300 mb-1 pb-1 border-b border-gray-600 text-xs">AI Score: ${aiScore} (Confidence: ${confKo})</div>
                             <div class="text-xs text-gray-300 leading-relaxed mt-1">${aiItem.reason}</div>
                         </div>
                     </div>
@@ -179,16 +169,16 @@ function renderScoreSection(type, deal) {
             }
 
             return `
-                <div class="mb-4 last:mb-0">
+                <div class="mb-5 last:mb-0">
                     <div class="flex justify-between items-center mb-2">
                         <div class="flex items-center">
-                            <label class="text-xs font-semibold text-gray-600">${itemLabel}</label>
+                            <label class="text-xs font-semibold text-gray-700">${itemLabel}</label>
                             ${aiIndicator}
                         </div>
-                        <span class="text-xs font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">${displayVal} / 5</span>
+                        <span class="text-xs font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded border border-gray-200">${displayVal} / 5</span>
                     </div>
                     <input type="range" min="1" max="5" step="1" value="${displayVal}" 
-                        class="score-slider w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-gray-900 hover:accent-primary-600 transition-all"
+                        class="score-slider w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-900 hover:accent-indigo-600 transition-all"
                         data-type="${type}" data-id="${itemId}" data-cat="${cat.id}" data-idx="${idx}">
                     <div class="flex justify-between px-1 mt-1 text-[10px] text-gray-400 font-medium">
                         <span class="w-3 text-center">1</span>
@@ -205,13 +195,13 @@ function renderScoreSection(type, deal) {
         const currentWeight = deal.assessment[type].weights[cat.id] || cat.defaultWeight || 0;
 
         return `
-            <div class="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
+            <div class="bg-gray-50/50 rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
                 <div class="flex justify-between items-center mb-4">
-                    <h4 class="font-bold text-gray-800 text-sm tracking-tight">${cat.label}</h4>
-                    <div class="flex items-center bg-white border border-gray-200 rounded-lg px-2 py-1 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
-                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mr-1.5">Weight</span>
+                    <h4 class="font-bold text-gray-800 text-sm">${cat.label}</h4>
+                    <div class="flex items-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
+                        <span class="text-[10px] text-gray-500 font-semibold mr-1.5">Weight</span>
                         <input type="number" 
-                            class="weight-input w-10 text-right text-xs font-bold text-gray-700 bg-transparent border-none p-0 focus:ring-0" 
+                            class="weight-input w-10 text-right text-xs font-bold text-gray-900 bg-transparent border-none p-0 focus:ring-0" 
                             value="${currentWeight}" 
                             data-type="${type}" 
                             data-cat="${cat.id}"
@@ -254,7 +244,7 @@ function attachEvents(deal) {
                 pendingSliderElement = e.target;
                 
                 const msg = document.getElementById('score-confirm-msg');
-                msg.innerHTML = `AI 추천 점수(${aiItemRec.score}점)와 2점 이상 차이가 납니다.<br>현재 입력하신 ${newVal}점으로 설정하시겠습니까?`;
+                msg.innerHTML = `Significant deviation from AI score (${aiItemRec.score}).<br>Set score to ${newVal}?`;
                 
                 modal.classList.remove('hidden');
             } else {
@@ -271,7 +261,7 @@ function attachEvents(deal) {
         if (display) {
             const valSpan = display.querySelector('.val');
             valSpan.innerText = sum;
-            display.className = `text-xs font-bold px-2 py-0.5 rounded-md border transition-colors ${getWeightColorClass(sum)}`;
+            display.className = `text-xs font-semibold px-2 py-0.5 rounded border transition-colors ${getWeightColorClass(sum)}`;
         }
     };
 
@@ -319,12 +309,12 @@ function attachEvents(deal) {
             const techSum = getWeightSum(deal, 'tech');
 
             if (bizSum !== 100) {
-                showToast(`Biz Fit 가중치 합이 100%가 되어야 합니다. (현재: ${bizSum}%)`, 'error');
+                showToast(`Biz Fit total weight must be 100% (Current: ${bizSum}%)`, 'error');
                 return;
             }
 
             if (techSum !== 100) {
-                showToast(`Tech Fit 가중치 합이 100%가 되어야 합니다. (현재: ${techSum}%)`, 'error');
+                showToast(`Tech Fit total weight must be 100% (Current: ${techSum}%)`, 'error');
                 return;
             }
 
@@ -357,14 +347,14 @@ function attachEvents(deal) {
         if (pendingScoreChange) {
             deal.assessment[pendingScoreChange.type].scores[pendingScoreChange.id] = pendingScoreChange.val;
             Store.saveDeal(deal);
-            showToast('점수가 반영되었습니다.', 'success');
+            showToast('Score saved.', 'success');
         }
         closeModal();
     });
 }
 
 async function generateAssessmentAI(deal) {
-    showLoader("AI 분석 중...");
+    showLoader("AI Analyzing...");
     
     // Prepare context from Discovery
     const discoverySummary = Object.entries(deal.discovery).map(([stage, data]) => {

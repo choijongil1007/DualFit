@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -12,59 +11,59 @@ export function renderSummary(container, dealId) {
     const reportDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     container.innerHTML = `
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-5xl mx-auto">
             <!-- Action Bar (Outside Report) -->
-            <div class="flex justify-between items-center mb-6 px-2 no-print">
+            <div class="flex justify-between items-center mb-6 px-1 no-print">
                 <button id="btn-back-details" class="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium text-sm">
-                    <i class="fa-solid fa-arrow-left"></i> 돌아가기
+                    <i class="fa-solid fa-arrow-left"></i> Back to Details
                 </button>
                 <div class="flex gap-3">
-                    <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-full text-sm font-semibold shadow-sm transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-print"></i> 인쇄 / PDF 저장
+                    <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> Print / PDF
                     </button>
-                    <button id="btn-recalc" class="bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-black text-sm font-semibold shadow-lg shadow-gray-900/20 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-rotate"></i> AI 전략 재생성
+                    <button id="btn-recalc" class="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-rotate"></i> Regenerate Strategy
                     </button>
                 </div>
             </div>
 
             <!-- Report Container (Paper Style) -->
-            <div class="bg-white rounded-t-3xl rounded-b-3xl shadow-2xl border border-gray-200 overflow-hidden relative" id="report-content">
+            <div class="bg-white rounded-none md:rounded-xl shadow-float border border-gray-200 overflow-hidden relative print:shadow-none print:border-none" id="report-content">
                 
                 <!-- 1. Report Header -->
-                <div class="bg-[#1e293b] text-white p-8 md:p-10 relative overflow-hidden">
+                <div class="bg-gray-900 text-white p-10 md:p-12 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-bl-full -mr-16 -mt-16 pointer-events-none"></div>
                     <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-tr-full -ml-10 -mb-10 pointer-events-none"></div>
                     
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                         <div>
-                            <div class="inline-block px-3 py-1 rounded-full bg-white/10 text-white/90 text-xs font-bold uppercase tracking-wider mb-3 border border-white/10">
+                            <div class="inline-block px-3 py-1 rounded bg-white/10 text-white/90 text-xs font-semibold mb-4 border border-white/10">
                                 Final Strategy Report
                             </div>
-                            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white mb-2">${deal.dealName}</h1>
-                            <div class="flex items-center gap-4 text-gray-300 text-sm">
-                                <span class="flex items-center gap-1.5"><i class="fa-regular fa-building"></i> ${deal.clientName}</span>
-                                <span class="w-1 h-1 rounded-full bg-gray-500"></span>
-                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-box-open"></i> ${deal.solution}</span>
+                            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white mb-3 leading-tight">${deal.dealName}</h1>
+                            <div class="flex items-center gap-5 text-gray-300 text-sm font-medium">
+                                <span class="flex items-center gap-2"><i class="fa-regular fa-building text-gray-400"></i> ${deal.clientName}</span>
+                                <span class="w-1 h-1 rounded-full bg-gray-600"></span>
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-box-open text-gray-400"></i> ${deal.solution}</span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Report Date</div>
-                            <div class="text-lg font-bold text-white font-mono">${reportDate}</div>
+                            <div class="text-xs text-gray-400 font-medium mb-1">Report Date</div>
+                            <div class="text-lg font-bold text-white font-mono tracking-tight">${reportDate}</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. Executive Dashboard (Quadrant & Score Breakdown) -->
-                <div class="p-8 md:p-10 border-b border-gray-100">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                <div class="p-10 md:p-12 border-b border-gray-100">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                         
                         <!-- Left: Quadrant Chart (5 cols) -->
                         <div class="lg:col-span-5 flex flex-col items-center">
-                            <h3 class="w-full text-xl font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
-                                적합도 분석 매트릭스
+                            <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
+                                Fit Analysis Matrix
                             </h3>
-                            <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-xl">
+                            <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-lg">
                                 <div class="quadrant-bg">
                                     <div class="q-zone q-zone-tl"><span class="q-label-inner text-[10px]">Tech OK<br>Biz Weak</span></div>
                                     <div class="q-zone q-zone-tr"><span class="q-label-inner text-[10px] text-emerald-600">Best Fit</span></div>
@@ -80,43 +79,43 @@ export function renderSummary(container, dealId) {
                             </div>
                             
                             <!-- Total Score Badges -->
-                            <div class="flex gap-4 mt-6 w-full">
-                                <div class="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500">Biz Score</span>
-                                    <span class="text-xl font-bold text-gray-900">${bizScore}</span>
+                            <div class="flex gap-4 mt-8 w-full">
+                                <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Biz Score</span>
+                                    <span class="text-2xl font-bold text-gray-900">${bizScore}</span>
                                 </div>
-                                <div class="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500">Tech Score</span>
-                                    <span class="text-xl font-bold text-gray-900">${techScore}</span>
+                                <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">Tech Score</span>
+                                    <span class="text-2xl font-bold text-gray-900">${techScore}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Right: Detailed Score Breakdown (7 cols) -->
                         <div class="lg:col-span-7">
-                            <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide border-l-4 border-gray-900 pl-3 mb-6">
-                                적합도 점수 상세
+                            <h3 class="text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
+                                Detailed Scoring
                             </h3>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                                 <!-- Biz Column -->
                                 <div>
-                                    <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                                    <div class="flex items-center gap-2 mb-5 pb-2 border-b border-gray-100">
                                         <i class="fa-solid fa-briefcase text-purple-600"></i>
                                         <span class="font-bold text-gray-800 text-sm">Biz Fit</span>
                                     </div>
-                                    <div class="space-y-4">
+                                    <div class="space-y-5">
                                         ${renderScoreBars(categoryScores.biz)}
                                     </div>
                                 </div>
 
                                 <!-- Tech Column -->
                                 <div>
-                                    <div class="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                                    <div class="flex items-center gap-2 mb-5 pb-2 border-b border-gray-100">
                                         <i class="fa-solid fa-server text-blue-600"></i>
                                         <span class="font-bold text-gray-800 text-sm">Tech Fit</span>
                                     </div>
-                                    <div class="space-y-4">
+                                    <div class="space-y-5">
                                         ${renderScoreBars(categoryScores.tech)}
                                     </div>
                                 </div>
@@ -126,21 +125,21 @@ export function renderSummary(container, dealId) {
                 </div>
 
                 <!-- 3. AI Strategic Analysis -->
-                <div class="p-8 md:p-10 bg-gray-50/50">
-                    <h3 class="text-xl font-bold text-gray-900 uppercase tracking-wide border-l-4 border-indigo-500 pl-3 mb-6 flex items-center gap-2">
-                        AI 전략 분석 <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
+                <div class="p-10 md:p-12 bg-gray-50/50">
+                    <h3 class="text-lg font-bold text-gray-900 border-l-4 border-indigo-500 pl-4 mb-8 flex items-center gap-2">
+                        AI Strategy Analysis <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
                     </h3>
 
                     <div id="summary-ai-content" class="min-h-[200px]">
                         <!-- Content will be injected here (Skeleton or Result) -->
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
-                            <div class="lg:col-span-2 space-y-3">
-                                <div class="h-32 bg-gray-200 rounded-xl w-full"></div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-pulse">
+                            <div class="lg:col-span-2 space-y-4">
+                                <div class="h-40 bg-gray-200 rounded-lg w-full"></div>
                             </div>
-                            <div class="space-y-3">
-                                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
-                                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
-                                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+                            <div class="space-y-4">
+                                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
+                                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
+                                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
                             </div>
                         </div>
                     </div>
@@ -148,36 +147,36 @@ export function renderSummary(container, dealId) {
 
                 <!-- 4. Risk Factors (Full Width) -->
                 ${lowItems.length > 0 ? `
-                <div class="p-8 md:p-10 border-t border-gray-200 bg-red-50/30">
-                    <h3 class="text-xl font-bold text-red-700 uppercase tracking-wide border-l-4 border-red-500 pl-3 mb-6 flex items-center gap-2">
-                        주의 사항 <span class="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full">${lowItems.length}</span>
+                <div class="p-10 md:p-12 border-t border-gray-200 bg-red-50/30">
+                    <h3 class="text-lg font-bold text-red-700 border-l-4 border-red-500 pl-4 mb-8 flex items-center gap-3">
+                        Risk Factors <span class="bg-red-100 text-red-600 text-xs px-2.5 py-0.5 rounded-full font-bold">${lowItems.length}</span>
                     </h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         ${lowItems.map(item => `
-                            <div class="bg-white border border-red-100 p-4 rounded-xl shadow-sm flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 text-red-500 mt-1">
+                            <div class="bg-white border border-red-100 p-5 rounded-lg shadow-sm flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 text-red-500 mt-0.5">
                                     <i class="fa-solid fa-triangle-exclamation text-xs"></i>
                                 </div>
                                 <div>
-                                    <div class="text-xs font-bold text-gray-400 uppercase mb-0.5">${item.catLabel}</div>
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">${item.catLabel}</div>
                                     <div class="text-sm font-bold text-gray-800 mb-1 leading-tight">${item.label}</div>
-                                    <div class="text-xs text-red-600 font-medium">Score: ${item.val} / 5 (Risky)</div>
+                                    <div class="text-xs text-red-600 font-medium">Score: ${item.val} / 5</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
                 ` : `
-                <div class="p-8 md:p-10 border-t border-gray-200 bg-emerald-50/30 flex items-center justify-center gap-3 text-emerald-700">
+                <div class="p-10 md:p-12 border-t border-gray-200 bg-emerald-50/30 flex items-center justify-center gap-3 text-emerald-700">
                     <i class="fa-solid fa-circle-check text-xl"></i>
                     <span class="font-medium">No critical risk factors detected. Deal looks healthy.</span>
                 </div>
                 `}
 
                 <!-- Footer -->
-                <div class="bg-gray-100 p-6 text-center border-t border-gray-200">
-                    <p class="text-xs text-gray-400 font-medium">Generated by DualFit AI • Confidential</p>
+                <div class="bg-gray-100 p-8 text-center border-t border-gray-200">
+                    <p class="text-xs text-gray-500 font-medium">Generated by DualFit AI • Confidential</p>
                 </div>
             </div>
             
@@ -194,12 +193,9 @@ export function renderSummary(container, dealId) {
     });
 
     // Initial Load Logic: Use Cached or Generate New
-    // Ensure we check strictly for existing report data
     if (deal.summaryReport && typeof deal.summaryReport === 'object' && deal.summaryReport.executiveSummary) {
-        console.log("DualFit: Loading Summary from Cache");
         renderAIContent(deal.summaryReport);
     } else {
-        console.log("DualFit: Generating New Summary");
         generateSummaryAI(deal, bizScore, techScore, lowItems);
     }
 }
@@ -216,7 +212,7 @@ function renderScoreBars(categoryData) {
 
         return `
             <div>
-                <div class="flex justify-between items-end mb-1">
+                <div class="flex justify-between items-end mb-1.5">
                     <span class="text-xs font-semibold text-gray-600">${cat.label}</span>
                     <span class="text-xs font-bold text-gray-900">${cat.avg.toFixed(1)}</span>
                 </div>
@@ -292,30 +288,27 @@ function renderAIContent(result) {
     const container = document.getElementById('summary-ai-content');
     if (!container) return;
 
-    // Helper to format text: render bold, replace hyphens with bullets
     const formatText = (text) => {
         if (!text) return '';
-        // 1. Replace markdown bold with HTML bold
         let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
-        // 2. Replace hyphens with bullets (handles start of string or newline followed by hyphen)
         formatted = formatted.replace(/(^|\n)[-]\s+/g, '$1• ');
         return formatted;
     };
 
     container.innerHTML = `
-        <div class="flex flex-col gap-8">
+        <div class="flex flex-col gap-10">
             <!-- Executive Summary -->
             <div class="w-full">
-                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Executive Summary</h4>
-                <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm text-gray-700 leading-relaxed text-sm whitespace-pre-line">
-                    ${result.executiveSummary || '종합 분석 내용을 생성하지 못했습니다.'}
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Executive Summary</h4>
+                <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-sm text-gray-800 leading-relaxed text-sm whitespace-pre-line font-medium">
+                    ${result.executiveSummary || 'Executive summary not generated.'}
                 </div>
             </div>
             
             <!-- Action Plan -->
             <div class="w-full">
-                <h4 class="text-xs font-bold text-gray-500 uppercase mb-3">Strategic Actions</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Strategic Actions</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     ${result.actions ? result.actions.map(act => {
                         let icon = 'fa-check';
                         let bgClass = 'bg-white border-gray-200';
@@ -323,17 +316,17 @@ function renderAIContent(result) {
                         if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
                         
                         return `
-                            <div class="${bgClass} border p-5 rounded-xl shadow-sm hover:shadow-md transition-all h-full">
+                            <div class="${bgClass} border p-6 rounded-lg shadow-sm hover:shadow-md transition-all h-full">
                                 <div class="flex items-start gap-3">
                                     <div class="mt-1 flex-shrink-0"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
                                     <div class="w-full">
-                                        <div class="text-base font-bold mb-2 text-gray-900">${act.title}</div>
+                                        <div class="text-base font-bold mb-3 text-gray-900">${act.title}</div>
                                         <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line pl-1">${formatText(act.desc)}</div>
                                     </div>
                                 </div>
                             </div>
                         `;
-                    }).join('') : '<div class="text-gray-400 text-sm col-span-2">추천 액션이 없습니다.</div>'}
+                    }).join('') : '<div class="text-gray-400 text-sm col-span-2">No recommended actions.</div>'}
                 </div>
             </div>
         </div>
@@ -343,19 +336,18 @@ function renderAIContent(result) {
 async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
     const container = document.getElementById('summary-ai-content');
     
-    // Show Skeleton
     container.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
-            <div class="lg:col-span-2 space-y-3">
-                <div class="h-32 bg-gray-200 rounded-xl w-full"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-pulse">
+            <div class="lg:col-span-2 space-y-4">
+                <div class="h-40 bg-gray-200 rounded-lg w-full"></div>
             </div>
-            <div class="space-y-3">
-                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
-                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
-                <div class="h-8 bg-gray-200 rounded-lg w-full"></div>
+            <div class="space-y-4">
+                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
+                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
             </div>
         </div>
-        <p class="text-center text-xs text-gray-400 mt-4">AI evaluating deal strategy...</p>
+        <p class="text-center text-xs text-gray-400 mt-6 font-medium">AI evaluating deal strategy...</p>
     `;
 
     try {
@@ -395,21 +387,18 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
 
         const result = await callGemini(prompt);
         
-        // Save Result to Deal and Store
-        // Update the deal object strictly before saving
         deal.summaryReport = result;
         Store.saveDeal(deal);
         
-        // Render Final AI Content
         renderAIContent(result);
 
     } catch (e) {
         console.error(e);
         container.innerHTML = `
-            <div class="bg-red-50 p-6 rounded-xl border border-red-100 text-center">
-                <i class="fa-solid fa-circle-exclamation text-red-400 text-2xl mb-2"></i>
-                <p class="text-red-700 font-medium text-sm">AI 전략 리포트 생성 실패</p>
-                <p class="text-red-500 text-xs mt-1">네트워크 상태를 확인하고 다시 시도해주세요.</p>
+            <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center">
+                <i class="fa-solid fa-circle-exclamation text-red-500 text-2xl mb-3"></i>
+                <p class="text-red-700 font-bold text-sm">Failed to generate strategy report</p>
+                <p class="text-red-500 text-xs mt-1">Please check your network and try again.</p>
             </div>
         `;
     }

@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showToast, setButtonLoading } from '../utils.js';
@@ -12,9 +11,11 @@ export function renderDiscovery(container, dealId) {
     if (!deal) return;
 
     container.innerHTML = `
-        <div class="mb-8 pl-1">
-            <h2 class="text-xl font-bold text-gray-900 mb-1">Discovery Analysis</h2>
-            <p class="text-gray-500 text-sm">고객 여정 단계별 이해</p>
+        <div class="mb-6 flex items-end justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">Discovery Analysis</h2>
+                <p class="text-gray-500 text-sm mt-0.5">Stage-by-stage customer journey analysis</p>
+            </div>
         </div>
         <div class="space-y-6" id="stages-container">
             ${DISCOVERY_STAGES.map(stage => renderStage(stage, deal.discovery[stage.id])).join('')}
@@ -29,15 +30,15 @@ function renderStage(stageConfig, data) {
 
     let statusHtml = '<span class="text-xs text-gray-400 font-medium mt-0.5 block flex items-center gap-1.5"><i class="fa-regular fa-circle"></i> Pending Input</span>';
     if (data.frozen) {
-        statusHtml = '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
+        statusHtml = '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
     }
 
     const staleAlert = isStale ? `
-        <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 text-amber-800 text-sm animate-pulse">
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg flex items-start gap-3 text-amber-800 text-sm mb-6">
             <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-500"></i>
             <div>
-                <strong class="font-semibold block mb-0.5">내용 변경됨</strong>
-                입력값이 변경되었습니다. 최신 인사이트를 얻으려면 분석을 다시 실행해주세요.
+                <strong class="font-semibold block mb-0.5">Inputs Changed</strong>
+                Please regenerate insights to reflect your latest changes.
             </div>
         </div>
     ` : '';
@@ -47,38 +48,40 @@ function renderStage(stageConfig, data) {
     const resultClass = (!data.result && !isStale) ? 'hidden' : '';
 
     return `
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 stage-card overflow-hidden group" data-stage="${stageConfig.id}">
-            <div class="p-5 md:p-6 flex justify-between items-center cursor-pointer toggle-header select-none">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-card hover:shadow-md transition-all duration-300 stage-card overflow-hidden group" data-stage="${stageConfig.id}">
+            <div class="p-5 flex justify-between items-center cursor-pointer toggle-header select-none bg-white">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-sm ${stageConfig.iconStyle} transition-transform group-hover:scale-105 duration-300">
-                        <i class="fa-solid ${getIconForStage(stageConfig.id)}"></i>
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shadow-sm border border-gray-100 ${stageConfig.iconStyle.replace('bg-', 'bg-opacity-20 bg-').replace('text-', 'text-opacity-90 text-')}">
+                        <i class="fa-solid ${getIconForStage(stageConfig.id)} text-sm"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-gray-900 text-lg tracking-tight group-hover:text-primary-600 transition-colors">${stageConfig.label.split('. ')[1]}</h3>
+                        <h3 class="font-bold text-gray-900 text-base tracking-tight">${stageConfig.label.split('. ')[1]}</h3>
                         ${statusHtml}
                     </div>
                 </div>
-                <div class="w-9 h-9 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center transition-all duration-300 icon-chevron border border-transparent group-hover:border-gray-200 group-hover:bg-white group-hover:text-gray-900">
-                    <i class="fa-solid fa-chevron-down text-sm"></i>
+                <div class="w-8 h-8 rounded-md bg-gray-50 text-gray-400 flex items-center justify-center transition-all duration-300 icon-chevron border border-transparent hover:border-gray-200 hover:text-gray-600">
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
                 </div>
             </div>
             
-            <div class="hidden toggle-content border-t border-gray-100">
-                <div class="p-6 md:p-8 space-y-8">
+            <div class="hidden toggle-content border-t border-gray-100 bg-gray-50/30">
+                <div class="p-6 md:p-8">
                     ${staleAlert}
 
-                    <div class="bg-gray-50/80 rounded-2xl p-6 border border-gray-100/50">
-                        <h4 class="text-base font-bold text-gray-800 tracking-tight mb-5">Discovery Inputs</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                    <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mb-8">
+                        <h4 class="text-base font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            Discovery Inputs
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
                             ${renderInput('고객 행동', 'behavior', data.behavior, stageConfig.id, '고객이 하는 행동')}
                             ${renderInput('고객 감정', 'emotion', data.emotion, stageConfig.id, '고객이 느끼는 감정과 그 이유')}
                             ${renderInput('고객 접점', 'touchpoint', data.touchpoint, stageConfig.id, '고객이 정보를 수집하는 채널')}
                             ${renderInput('고객 문제', 'problem', data.problem, stageConfig.id, '고객의 Pain Point')}
                         </div>
                         
-                        <div class="flex justify-end pt-4 mt-2">
-                             <button class="btn-analyze bg-gray-900 text-white px-6 py-2.5 rounded-full hover:bg-black transition-all text-sm font-semibold shadow-lg shadow-gray-900/10 flex items-center gap-2 btn-pill active:scale-95 justify-center min-w-[160px]" data-stage="${stageConfig.id}">
-                                <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i> 
+                        <div class="flex justify-end pt-6 mt-2 border-t border-gray-100">
+                             <button class="btn-analyze bg-gray-900 text-white px-5 py-2.5 rounded-lg hover:bg-black transition-all text-sm font-semibold shadow-md flex items-center gap-2 active:scale-95 justify-center min-w-[150px]" data-stage="${stageConfig.id}">
+                                <i class="fa-solid fa-wand-magic-sparkles text-yellow-300 text-xs"></i> 
                                 ${btnText}
                              </button>
                         </div>
@@ -106,9 +109,9 @@ function getIconForStage(id) {
 function renderInput(label, key, value, stageId, placeholder) {
     return `
         <div class="space-y-2">
-            <label class="text-sm font-bold text-gray-700 uppercase ml-1 tracking-wide">${label}</label>
+            <label class="text-sm font-semibold text-gray-800 block">${label}</label>
             <textarea 
-                class="input-premium w-full min-h-[80px] resize-none leading-relaxed text-gray-800 text-sm focus:bg-white bg-white shadow-sm"
+                class="input-premium w-full min-h-[100px] resize-none leading-relaxed text-gray-900 text-sm focus:bg-white bg-gray-50 border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg p-3 transition-colors"
                 data-stage="${stageId}" 
                 data-key="${key}"
                 placeholder="${placeholder}"
@@ -120,81 +123,74 @@ function renderInput(label, key, value, stageId, placeholder) {
 function renderSkeleton() {
     return `
         <div class="space-y-5 animate-pulse pt-2">
-            <div class="flex items-center gap-3 justify-center mb-4">
-                 <div class="h-px bg-gray-100 flex-1"></div>
-                 <span class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-white px-2">AI Processing</span>
-                 <div class="h-px bg-gray-100 flex-1"></div>
+            <div class="flex items-center gap-3 justify-center mb-6">
+                 <div class="h-px bg-gray-200 flex-1"></div>
+                 <span class="text-xs font-semibold text-gray-500 tracking-wide bg-transparent px-2">AI Analyzing</span>
+                 <div class="h-px bg-gray-200 flex-1"></div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="h-32 rounded-2xl skeleton-shimmer border border-gray-100"></div>
-                <div class="h-32 rounded-2xl skeleton-shimmer border border-gray-100"></div>
+                <div class="h-40 rounded-xl bg-white border border-gray-200"></div>
+                <div class="h-40 rounded-xl bg-white border border-gray-200"></div>
             </div>
-            <div class="h-40 rounded-2xl skeleton-shimmer border border-gray-100"></div>
+            <div class="h-48 rounded-xl bg-white border border-gray-200"></div>
         </div>
     `;
 }
 
 function renderResult(result, isStale) {
-    const opacity = isStale ? 'opacity-40 grayscale blur-[1px]' : 'opacity-100';
+    const opacity = isStale ? 'opacity-50 grayscale-[0.5]' : 'opacity-100';
     
-    // 1. Handle String Response (Fallback)
+    // 1. Handle String Response
     if (typeof result === 'string') {
         return `
             <div class="${opacity} transition-all duration-500">
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
                     ${result.replace(/<br>/g, '\n')} 
                 </div>
             </div>
         `;
     }
 
-    // 2. Handle Error / Invalid Format
     if (typeof result !== 'object' || result === null) {
-        return `<div class="bg-red-50 p-4 rounded-xl text-sm text-red-600 border border-red-100">Parse Error: Invalid result format.</div>`;
+        return `<div class="bg-red-50 p-4 rounded-lg text-sm text-red-600 border border-red-200">Parse Error: Invalid result format.</div>`;
     }
 
-    // Helper function to render list items uniformly, handling both Array and String inputs
     const renderListItems = (inputData) => {
         let items = [];
         if (Array.isArray(inputData)) {
             items = inputData;
         } else if (typeof inputData === 'string') {
-            // Split by newlines if it's a string block
             items = inputData.split(/\n/).map(s => s.trim()).filter(s => s.length > 0);
         }
 
-        if (items.length === 0) return '<li class="text-gray-500 italic">-</li>';
+        if (items.length === 0) return '<li class="text-gray-400 italic text-sm">-</li>';
 
         return items.map(item => {
-            // Clean leading dashes or bullets if included in the text
             const cleanText = item.replace(/^[-*•]\s*/, '');
             return `<li class="flex items-start gap-3">
-                <span class="w-1.5 h-1.5 rounded-full bg-gray-900 mt-1.5 flex-shrink-0"></span>
-                <span class="text-gray-700 leading-relaxed">${cleanText}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2 flex-shrink-0"></span>
+                <span class="text-gray-700 text-sm leading-relaxed">${cleanText}</span>
             </li>`;
         }).join('');
     };
 
-    // 3. Render Lists (SC and JTBD)
     const scItemsHtml = renderListItems(result.sc);
     const jtbdItemsHtml = renderListItems(result.jtbd);
 
-    // 4. Render To-Do (Strictly Filter out TechSupport)
     let todoItemsHtml = '<div class="text-sm text-gray-400">No specific actions generated.</div>';
     if (result.todo && typeof result.todo === 'object') {
         const todos = Object.entries(result.todo)
             .filter(([role]) => {
                 const r = role.toLowerCase().replace(/\s+/g, '');
-                // Strict filter for tech support
                 return r !== 'techsupport' && r !== 'technicalsupport' && r !== '기술지원';
             });
 
         if (todos.length > 0) {
             todoItemsHtml = todos.map(([role, task]) => `
-                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
-                    <span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wide min-w-[70px] text-center mt-0.5">${role}</span>
-                    <span class="text-sm text-gray-600 leading-snug pt-0.5">${task}</span>
+                <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-colors">
+                    <span class="text-[11px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded border border-gray-200 min-w-[70px] text-center mt-0.5">${role}</span>
+                    <span class="text-sm text-gray-700 leading-snug pt-0.5">${task}</span>
                 </div>
             `).join('');
         }
@@ -205,51 +201,51 @@ function renderResult(result, isStale) {
             
             <div class="flex items-center gap-3 justify-center">
                  <div class="h-px bg-gray-200 flex-1"></div>
-                 <span class="text-base font-bold text-primary-600 tracking-wide bg-white px-4">분석 결과</span>
+                 <span class="text-base font-bold text-indigo-700 bg-transparent px-4">분석 결과</span>
                  <div class="h-px bg-gray-200 flex-1"></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <!-- JTBD Card -->
-                <div class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
-                    <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 relative z-10">
-                        <i class="fa-solid fa-bullseye text-blue-500"></i> Jobs to be Done
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-blue-50/50 rounded-bl-full -mr-8 -mt-8"></div>
+                    <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
+                        <i class="fa-solid fa-bullseye text-blue-600"></i> Jobs to be Done
                     </h4>
-                    <ul class="text-sm space-y-2 relative z-10">
+                    <ul class="space-y-2 relative z-10">
                         ${jtbdItemsHtml}
                     </ul>
                 </div>
 
                 <!-- Success Criteria Card -->
-                <div class="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
-                    <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 relative z-10">
-                        <i class="fa-solid fa-flag-checkered text-emerald-500"></i> Success Criteria
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-emerald-50/50 rounded-bl-full -mr-8 -mt-8"></div>
+                    <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
+                        <i class="fa-solid fa-flag-checkered text-emerald-600"></i> Success Criteria
                     </h4>
-                    <ul class="text-sm space-y-2 relative z-10">
+                    <ul class="space-y-2 relative z-10">
                          ${scItemsHtml}
                     </ul>
                 </div>
             </div>
 
             <!-- To-Do List -->
-            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-violet-500"></i> Recommended Actions
+                    <i class="fa-solid fa-list-check text-violet-600"></i> Recommended Actions
                 </h4>
-                <div class="grid grid-cols-1 gap-3">
+                <div class="grid grid-cols-1 gap-2">
                     ${todoItemsHtml}
                 </div>
             </div>
 
             <!-- Evidence Summary -->
-            <div class="bg-gradient-to-r from-gray-50 to-white p-5 rounded-2xl border border-gray-200 flex items-start gap-4">
-                <div class="w-8 h-8 rounded-full bg-gray-800 text-white flex-shrink-0 flex items-center justify-center shadow-sm">
+            <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 flex items-start gap-4">
+                <div class="w-8 h-8 rounded-full bg-gray-800 text-white flex-shrink-0 flex items-center justify-center shadow-sm mt-1">
                     <i class="fa-solid fa-fingerprint text-xs"></i>
                 </div>
                 <div>
-                    <h4 class="text-sm font-bold text-gray-900 uppercase mb-1 tracking-wide">감지된 신호</h4>
+                    <h4 class="text-sm font-bold text-gray-900 mb-1">감지된 신호</h4>
                     <p class="text-sm text-gray-600 leading-relaxed italic">"${result.evidenceSummary || 'No significant signals detected yet.'}"</p>
                 </div>
             </div>
@@ -290,7 +286,7 @@ function attachEvents(deal) {
                 const resultAreaContainer = stageCard.querySelector('.result-area');
                 const resultArea = resultAreaContainer.querySelector('div'); 
                 if (resultArea) {
-                   resultArea.className = 'opacity-40 grayscale blur-[1px] space-y-6 transition-all duration-500';
+                   resultArea.className = 'opacity-50 grayscale-[0.5] space-y-6 transition-all duration-500';
                 }
             } else {
                 Store.saveDeal(deal);
@@ -367,18 +363,16 @@ ${jsonStructure}
                 showToast('Insights Generated', 'success');
                 
                 const statusSpan = card.querySelector('.toggle-header h3').nextElementSibling;
-                statusSpan.innerHTML = '<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
-                statusSpan.className = "text-xs text-emerald-600 font-semibold flex items-center gap-1.5 mt-0.5";
+                statusSpan.innerHTML = '<span class="text-xs text-emerald-600 font-medium flex items-center gap-1.5 mt-0.5"><i class="fa-solid fa-circle-check"></i> Analysis Complete</span>';
 
             } catch (error) {
                 console.error(error);
-                // Show more detailed error info in the toast if available
                 const msg = error.message && error.message.includes('Proxy') ? "AI Service Error" : error.message;
                 showToast(msg, 'error');
                 
-                resultAreaContainer.innerHTML = `<div class="bg-red-50 p-4 rounded-xl text-red-600 text-sm border border-red-100">
+                resultAreaContainer.innerHTML = `<div class="bg-red-50 p-4 rounded-lg text-red-600 text-sm border border-red-200">
                     <strong>Analysis Failed:</strong> ${error.message}<br>
-                    <span class="text-xs text-red-400 mt-1 block">Please check the console for details.</span>
+                    <span class="text-xs text-red-500 mt-1 block">Please check the console for details.</span>
                 </div>`;
             } finally {
                 setButtonLoading(btn, false);
