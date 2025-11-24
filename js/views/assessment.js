@@ -96,23 +96,23 @@ export function renderAssessment(container, dealId) {
             </div>
         </div>
 
-        <!-- Score Confirmation Modal -->
+        <!-- Score Confirmation Modal (Alert Style - Black) -->
         <div id="score-confirm-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm modal-backdrop transition-opacity"></div>
-            <div class="relative w-full max-w-sm bg-white rounded-xl shadow-modal p-8 animate-modal-in text-center border border-gray-100">
+            <div class="relative w-full max-w-sm bg-gray-900 rounded-xl shadow-modal p-8 animate-modal-in text-center border border-gray-800">
                 
-                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-5 text-amber-500 border border-amber-100">
+                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-5 text-amber-500 border border-gray-700">
                     <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                 </div>
                 
-                <h3 class="text-lg font-bold mb-2 text-gray-900">점수 확인</h3>
-                <p id="score-confirm-msg" class="text-gray-500 text-sm mb-8 leading-relaxed whitespace-pre-line">
+                <h3 class="text-lg font-bold mb-2 text-white">점수 확인</h3>
+                <p id="score-confirm-msg" class="text-gray-300 text-sm mb-8 leading-relaxed whitespace-pre-line">
                     AI 추천 점수와 차이가 큽니다.<br>이 점수로 확정하시겠습니까?
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors">취소</button>
-                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white rounded-lg text-sm font-medium shadow-md transition-colors">확인</button>
+                    <button type="button" class="btn-close-confirm-modal px-5 py-2.5 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-300 rounded-lg text-sm font-medium transition-colors">취소</button>
+                    <button type="button" id="btn-force-score" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-md transition-colors">확인</button>
                 </div>
             </div>
         </div>

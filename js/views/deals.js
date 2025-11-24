@@ -133,22 +133,22 @@ export function renderDeals(container) {
             </div>
         </div>
 
-        <!-- Delete Modal -->
+        <!-- Delete Modal (Alert Style - Black) -->
         <div id="delete-modal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm delete-modal-backdrop transition-opacity"></div>
-            <div class="relative w-full max-w-sm bg-white rounded-2xl shadow-modal p-6 animate-modal-in text-center border border-gray-100">
+            <div class="relative w-full max-w-sm bg-gray-900 rounded-2xl shadow-modal p-6 animate-modal-in text-center border border-gray-800">
                 
-                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4 text-red-500 border border-red-100">
+                <div class="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4 text-red-500 border border-gray-700">
                     <i class="fa-solid fa-trash-can text-lg"></i>
                 </div>
                 
-                <h3 class="text-lg font-bold mb-2 text-gray-900">Deal 삭제</h3>
-                <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+                <h3 class="text-lg font-bold mb-2 text-white">Deal 삭제</h3>
+                <p class="text-gray-400 text-sm mb-6 leading-relaxed">
                     삭제된 데이터는 복구할 수 없습니다.<br>정말 삭제하시겠습니까?
                 </p>
                 
                 <div class="flex gap-3 justify-center">
-                    <button type="button" class="btn-close-delete-modal px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors">취소</button>
+                    <button type="button" class="btn-close-delete-modal px-4 py-2 bg-gray-800 border border-gray-700 hover:bg-gray-700 text-gray-300 rounded-lg text-sm font-medium transition-colors">취소</button>
                     <button type="button" id="btn-confirm-delete" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium shadow-sm transition-colors">삭제</button>
                 </div>
             </div>
@@ -176,174 +176,3 @@ function createDealCard(deal) {
                     <h3 class="font-bold text-lg text-gray-900 truncate leading-snug">${deal.dealName}</h3>
                 </div>
                 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 -mr-1 -mt-1">
-                    <button type="button" class="btn-edit-deal text-gray-300 hover:text-indigo-600 p-1.5 rounded-md hover:bg-indigo-50 transition-colors" title="수정">
-                        <i class="fa-solid fa-pen text-sm"></i>
-                    </button>
-                    <button type="button" class="btn-delete-deal text-gray-300 hover:text-red-500 p-1.5 rounded-md hover:bg-red-50 transition-colors" title="삭제">
-                        <i class="fa-solid fa-trash-can text-sm"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <p class="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed flex-grow font-normal">${deal.memo || '메모 없음'}</p>
-            
-            <div class="space-y-3 mt-auto pt-4 border-t border-gray-50">
-                <div>
-                    <div class="flex justify-between text-xs font-medium text-gray-500 mb-1.5">
-                        <span>Discovery</span>
-                        <span class="text-gray-700 font-semibold">${discoveryPct}%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: ${discoveryPct}%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between text-xs font-medium text-gray-500 mb-1.5">
-                        <span>Assessment</span>
-                        <span class="text-gray-700 font-semibold">${assessPct}%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: ${assessPct}%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function attachEvents() {
-    /* Create Modal Events */
-    const createModal = document.getElementById('create-modal');
-    const createBtn = document.getElementById('btn-create-deal');
-    const createForm = document.getElementById('create-form');
-
-    const toggleCreateModal = (show) => createModal.classList.toggle('hidden', !show);
-
-    if (createBtn) createBtn.addEventListener('click', () => toggleCreateModal(true));
-
-    createModal.querySelectorAll('.btn-close-modal').forEach(btn => {
-        btn.addEventListener('click', () => toggleCreateModal(false));
-    });
-    createModal.querySelector('.modal-backdrop').addEventListener('click', () => toggleCreateModal(false));
-    
-    createForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(createForm);
-        const newDeal = Store.createEmptyDeal();
-        
-        newDeal.id = generateId();
-        newDeal.clientName = formData.get('clientName');
-        newDeal.dealName = formData.get('dealName');
-        newDeal.clientContact = formData.get('clientContact');
-        newDeal.internalContact = formData.get('internalContact');
-        newDeal.solution = formData.get('solution');
-        newDeal.purchaseDate = formData.get('purchaseDate');
-        newDeal.memo = formData.get('memo');
-        
-        Store.saveDeal(newDeal);
-        toggleCreateModal(false);
-        showToast('성공적으로 등록되었습니다.', 'success');
-        renderDeals(document.getElementById('app'));
-    });
-
-    /* Edit Modal Events */
-    const editModal = document.getElementById('edit-modal');
-    const editForm = document.getElementById('edit-form');
-    
-    const toggleEditModal = (show) => editModal.classList.toggle('hidden', !show);
-
-    // Close Edit Modal
-    editModal.querySelectorAll('.btn-close-edit-modal').forEach(btn => {
-        btn.addEventListener('click', () => toggleEditModal(false));
-    });
-    editModal.querySelector('.edit-modal-backdrop').addEventListener('click', () => toggleEditModal(false));
-
-    // Submit Edit Form
-    editForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(editForm);
-        const dealId = editTargetId;
-        const existingDeal = Store.getDeal(dealId);
-        
-        if (existingDeal) {
-            existingDeal.clientName = formData.get('clientName');
-            existingDeal.dealName = formData.get('dealName');
-            existingDeal.clientContact = formData.get('clientContact');
-            existingDeal.internalContact = formData.get('internalContact');
-            existingDeal.solution = formData.get('solution');
-            existingDeal.purchaseDate = formData.get('purchaseDate');
-            existingDeal.memo = formData.get('memo');
-            existingDeal.updatedAt = new Date().toISOString();
-            
-            Store.saveDeal(existingDeal);
-            toggleEditModal(false);
-            showToast('수정되었습니다.', 'success');
-            renderDeals(document.getElementById('app'));
-        }
-    });
-
-    /* Delete Modal Events */
-    const deleteModal = document.getElementById('delete-modal');
-    
-    const toggleDeleteModal = (show) => {
-        deleteModal.classList.toggle('hidden', !show);
-        if (!show) deleteTargetId = null;
-    };
-
-    deleteModal.querySelectorAll('.btn-close-delete-modal').forEach(btn => {
-        btn.addEventListener('click', () => toggleDeleteModal(false));
-    });
-    deleteModal.querySelector('.delete-modal-backdrop').addEventListener('click', () => toggleDeleteModal(false));
-
-    document.getElementById('btn-confirm-delete').addEventListener('click', () => {
-        if (deleteTargetId) {
-            Store.deleteDeal(deleteTargetId);
-            showToast('삭제되었습니다.', 'success');
-            toggleDeleteModal(false);
-            renderDeals(document.getElementById('app'));
-        }
-    });
-
-    /* Card Events */
-    document.querySelectorAll('.btn-edit-deal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            const card = btn.closest('.deal-card');
-            const dealId = card.dataset.id;
-            const deal = Store.getDeal(dealId);
-            
-            if (deal) {
-                editTargetId = dealId;
-                // Populate Edit Form
-                editForm.elements['id'].value = deal.id;
-                editForm.elements['clientName'].value = deal.clientName;
-                editForm.elements['dealName'].value = deal.dealName;
-                editForm.elements['clientContact'].value = deal.clientContact || '';
-                editForm.elements['internalContact'].value = deal.internalContact || '';
-                editForm.elements['solution'].value = deal.solution || '';
-                editForm.elements['purchaseDate'].value = deal.purchaseDate || '';
-                editForm.elements['memo'].value = deal.memo || '';
-                
-                toggleEditModal(true);
-            }
-        });
-    });
-
-    document.querySelectorAll('.btn-delete-deal').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            deleteTargetId = btn.dataset.id;
-            toggleDeleteModal(true);
-        });
-    });
-
-    document.querySelectorAll('.deal-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const id = card.dataset.id;
-            navigateTo('details', { id });
-        });
-    });
-}

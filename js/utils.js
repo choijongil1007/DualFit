@@ -51,15 +51,22 @@ export function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     
-    const colors = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-emerald-600' : 'bg-gray-800';
+    // Alert창 배경색 검정색으로 통일
+    const bgClass = 'bg-gray-900 border border-gray-800';
     
-    toast.className = `${colors} text-white px-5 py-3 rounded-full shadow-2xl text-sm font-medium transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-3 backdrop-blur-md`;
+    // 아이콘 색상으로 구분
+    let iconHtml = '';
+    if (type === 'success') {
+        iconHtml = '<i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>';
+    } else if (type === 'error') {
+        iconHtml = '<i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>';
+    } else {
+        iconHtml = '<i class="fa-solid fa-circle-info text-blue-400 text-lg"></i>';
+    }
     
-    let icon = type === 'success' ? '<i class="fa-solid fa-check"></i>' : 
-               type === 'error' ? '<i class="fa-solid fa-triangle-exclamation"></i>' : 
-               '<i class="fa-solid fa-circle-info"></i>';
-
-    toast.innerHTML = `${icon} <span>${message}</span>`;
+    toast.className = `${bgClass} text-white px-5 py-3 rounded-full shadow-2xl text-sm font-medium transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-3 backdrop-blur-md`;
+    
+    toast.innerHTML = `${iconHtml} <span>${message}</span>`;
     
     container.appendChild(toast);
     
