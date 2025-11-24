@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -194,9 +193,12 @@ export function renderSummary(container, dealId) {
     });
 
     // Initial Load Logic: Use Cached or Generate New
-    if (deal.summaryReport) {
+    // Ensure we check strictly for existing report data
+    if (deal.summaryReport && typeof deal.summaryReport === 'object' && deal.summaryReport.executiveSummary) {
+        console.log("DualFit: Loading Summary from Cache");
         renderAIContent(deal.summaryReport);
     } else {
+        console.log("DualFit: Generating New Summary");
         generateSummaryAI(deal, bizScore, techScore, lowItems);
     }
 }
@@ -330,7 +332,7 @@ function renderAIContent(result) {
 async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
     const container = document.getElementById('summary-ai-content');
     
-    // Reset to Skeleton
+    // Show Skeleton
     container.innerHTML = `
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
             <div class="lg:col-span-2 space-y-3">
@@ -383,6 +385,7 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
         const result = await callGemini(prompt);
         
         // Save Result to Deal and Store
+        // Update the deal object strictly before saving
         deal.summaryReport = result;
         Store.saveDeal(deal);
         
