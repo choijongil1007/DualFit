@@ -126,7 +126,7 @@ function renderScoreSection(type, deal) {
                                 <!-- AI Recommendation -->
                                 <div class="ai-recommendation has-tooltip relative w-6 h-6 flex items-center justify-center rounded-full bg-gray-50 text-gray-300 cursor-help hover:bg-blue-50 hover:text-blue-500 transition-colors" id="ai-rec-${type}-${itemId}">
                                     <i class="fa-solid fa-robot text-xs"></i>
-                                    <span class="tooltip">AI analyzing...</span>
+                                    <span class="tooltip">AI 분석 중...</span>
                                 </div>
                                 
                                 <div class="relative">
@@ -239,9 +239,16 @@ function applyAIRecommendations(items) {
             }
 
             const confColor = rec.confidence === 'High' ? 'text-green-400' : rec.confidence === 'Medium' ? 'text-yellow-400' : 'text-red-400';
+            
+            // Translate Confidence
+            let confDisplay = rec.confidence;
+            if (rec.confidence === 'High') confDisplay = '높음';
+            else if (rec.confidence === 'Medium') confDisplay = '보통';
+            else if (rec.confidence === 'Low') confDisplay = '낮음';
+
             el.querySelector('.tooltip').innerHTML = `
                 <div class="text-left">
-                    <div class="font-bold mb-1 text-white">AI 추천: ${rec.score} <span class="${confColor} text-[10px]">(${rec.confidence})</span></div>
+                    <div class="font-bold mb-1 text-white">AI 추천: ${rec.score}점 <span class="${confColor} text-[10px]">(${confDisplay})</span></div>
                     <div class="leading-tight text-gray-300 text-xs font-normal">${rec.reason}</div>
                 </div>
             `;
