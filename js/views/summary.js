@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -65,10 +66,10 @@ export function renderSummary(container, dealId) {
                             </h3>
                             <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-lg">
                                 <div class="quadrant-bg">
-                                    <div class="q-zone q-zone-tl"><span class="q-label-inner text-[10px]">기술 양호<br>사업성 부족</span></div>
-                                    <div class="q-zone q-zone-tr"><span class="q-label-inner text-[10px] text-emerald-600">최적 (Best Fit)</span></div>
-                                    <div class="q-zone q-zone-bl"><span class="q-label-inner text-[10px] text-gray-400">부적합 (Drop)</span></div>
-                                    <div class="q-zone q-zone-br"><span class="q-label-inner text-[10px]">사업성 양호<br>기술 부족</span></div>
+                                    <div class="q-zone q-zone-tl"><span class="q-label-inner text-xl font-extrabold leading-tight">기술 양호<br>사업성 부족</span></div>
+                                    <div class="q-zone q-zone-tr"><span class="q-label-inner text-xl font-extrabold leading-tight text-emerald-600">최적 (Best Fit)</span></div>
+                                    <div class="q-zone q-zone-bl"><span class="q-label-inner text-xl font-extrabold leading-tight text-gray-400">부적합 (Drop)</span></div>
+                                    <div class="q-zone q-zone-br"><span class="q-label-inner text-xl font-extrabold leading-tight">사업성 양호<br>기술 부족</span></div>
                                 </div>
                                 <div class="quadrant-line-x"></div>
                                 <div class="quadrant-line-y"></div>
@@ -300,7 +301,7 @@ function renderAIContent(result) {
             <!-- Executive Summary -->
             <div class="w-full">
                 <h4 class="text-xl font-bold text-gray-900 mb-4">요약</h4>
-                <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-sm text-gray-800 leading-relaxed text-sm whitespace-pre-line font-medium">
+                <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-sm text-gray-800 leading-relaxed text-xl whitespace-pre-line font-medium">
                     ${result.executiveSummary || '요약이 생성되지 않았습니다.'}
                 </div>
             </div>
