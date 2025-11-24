@@ -299,3 +299,32 @@ details > summary::-webkit-details-marker {
 .btn-pill:active {
     transform: scale(0.96);
 }
+
+/* Print Optimization */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background-color: white !important;
+    }
+
+    #app {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+    }
+
+    /* Force background colors/images to print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Remove shadows for cleaner print */
+    .shadow-2xl, .shadow-xl, .shadow-lg, .shadow-md, .shadow-sm, .shadow-modal, .shadow-soft {
+        box-shadow: none !important;
+    }
+}

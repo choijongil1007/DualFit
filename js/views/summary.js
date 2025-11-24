@@ -14,7 +14,7 @@ export function renderSummary(container, dealId) {
     container.innerHTML = `
         <div class="max-w-4xl mx-auto">
             <!-- Action Bar (Outside Report) -->
-            <div class="flex justify-between items-center mb-6 px-2">
+            <div class="flex justify-between items-center mb-6 px-2 no-print">
                 <button id="btn-back-details" class="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium text-sm">
                     <i class="fa-solid fa-arrow-left"></i> 돌아가기
                 </button>
@@ -182,7 +182,7 @@ export function renderSummary(container, dealId) {
                 </div>
             </div>
             
-            <div class="h-20"></div> <!-- Spacer -->
+            <div class="h-20 no-print"></div> <!-- Spacer -->
         </div>
     `;
 

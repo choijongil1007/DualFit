@@ -59,7 +59,7 @@
 <body class="bg-gray-50 text-gray-900 font-sans antialiased selection:bg-primary-100 selection:text-primary-700">
     
     <!-- Global Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md h-16 flex items-center justify-between px-6 md:px-10 transition-all duration-300">
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md h-16 flex items-center justify-between px-6 md:px-10 transition-all duration-300 no-print">
         <div class="flex items-center gap-3 cursor-pointer group" id="nav-logo">
             <div class="w-8 h-8 bg-gray-900 text-white flex items-center justify-center rounded-lg text-sm font-bold shadow-lg shadow-gray-900/20 group-hover:scale-105 transition-transform duration-200">D</div>
             <span class="font-bold text-lg tracking-tight text-gray-900">DualFit</span>
@@ -77,13 +77,13 @@
     </main>
 
     <!-- Global Loading Overlay -->
-    <div id="global-loader" class="fixed inset-0 bg-white/90 z-[60] hidden flex flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+    <div id="global-loader" class="fixed inset-0 bg-white/90 z-[60] hidden flex flex-col items-center justify-center backdrop-blur-sm transition-opacity duration-300 no-print">
         <div class="spinner mb-5"></div>
         <p class="text-gray-500 font-medium text-sm tracking-wide animate-pulse" id="loader-text">Processing...</p>
     </div>
 
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-8 right-8 z-[70] flex flex-col gap-3"></div>
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[70] flex flex-col gap-3 no-print"></div>
 
     <script type="module" src="js/app.js"></script>
 </body>
