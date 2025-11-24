@@ -182,11 +182,11 @@ function createDealCard(deal) {
         <div class="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-card hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer deal-card flex flex-col h-full" data-id="${deal.id}">
             <div class="flex justify-between items-start mb-3">
                 <div class="overflow-hidden pr-2">
-                    <span class="text-xs font-semibold text-indigo-600 mb-1 inline-block">${deal.clientName}</span>
+                    <span class="text-xs font-semibold text-gray-600 mb-1 inline-block">${deal.clientName}</span>
                     <h3 class="font-bold text-lg text-gray-900 truncate leading-snug">${deal.dealName}</h3>
                 </div>
                 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 -mr-1 -mt-1">
-                    <button type="button" class="btn-edit-deal text-gray-300 hover:text-indigo-600 p-1.5 rounded-md hover:bg-indigo-50 transition-colors" title="수정">
+                    <button type="button" class="btn-edit-deal text-gray-300 hover:text-gray-900 p-1.5 rounded-md hover:bg-gray-100 transition-colors" title="수정">
                         <i class="fa-solid fa-pen text-sm"></i>
                     </button>
                     <button type="button" class="btn-delete-deal text-gray-300 hover:text-red-500 p-1.5 rounded-md hover:bg-red-50 transition-colors" title="삭제">
@@ -204,7 +204,7 @@ function createDealCard(deal) {
                         <span class="text-gray-700 font-semibold">${discoveryPct}%</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: ${discoveryPct}%"></div>
+                        <div class="bg-gray-400 h-1.5 rounded-full transition-all duration-500" style="width: ${discoveryPct}%"></div>
                     </div>
                 </div>
                 <div>
@@ -213,7 +213,7 @@ function createDealCard(deal) {
                         <span class="text-gray-700 font-semibold">${assessPct}%</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: ${assessPct}%"></div>
+                        <div class="bg-gray-900 h-1.5 rounded-full transition-all duration-500" style="width: ${assessPct}%"></div>
                     </div>
                 </div>
             </div>
