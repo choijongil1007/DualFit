@@ -81,7 +81,7 @@ details > summary::-webkit-details-marker {
     position: relative;
     width: 100%;
     max-width: 420px;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 5 / 4;
     margin: 0 auto;
     background: #FFFFFF;
     border: 1px solid #E5E7EB;
