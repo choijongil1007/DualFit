@@ -1,3 +1,4 @@
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -81,11 +82,11 @@ export function renderSummary(container, dealId) {
                             <!-- Total Score Badges -->
                             <div class="flex gap-4 mt-6 w-full">
                                 <div class="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 uppercase">Biz Score</span>
+                                    <span class="text-xs font-bold text-gray-500">Biz Score</span>
                                     <span class="text-xl font-bold text-gray-900">${bizScore}</span>
                                 </div>
                                 <div class="flex-1 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 uppercase">Tech Score</span>
+                                    <span class="text-xs font-bold text-gray-500">Tech Score</span>
                                     <span class="text-xl font-bold text-gray-900">${techScore}</span>
                                 </div>
                             </div>
@@ -317,7 +318,7 @@ function renderAIContent(result) {
                                     <div class="mt-0.5"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
                                     <div>
                                         <div class="text-sm font-bold mb-1">${act.title}</div>
-                                        <div class="text-xs opacity-80 leading-relaxed">${act.desc}</div>
+                                        <div class="text-xs opacity-80 leading-relaxed whitespace-pre-line">${act.desc}</div>
                                     </div>
                                 </div>
                             </div>
@@ -373,11 +374,11 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
             
             JSON Requirements:
             {
-                "executiveSummary": "A comprehensive paragraph (3-4 sentences) diagnosing the deal's health, main strengths, and critical weaknesses. Be direct and professional.",
+                "executiveSummary": "A comprehensive summary diagnosing the deal's health, main strengths, and critical weaknesses. Split into 2-3 paragraphs separated by line breaks(\\n\\n). Be direct and professional.",
                 "actions": [
-                    { "type": "strategic", "title": "Action Title", "desc": "Detailed explanation..." },
-                    { "type": "tactical", "title": "Action Title", "desc": "Detailed explanation..." },
-                    { "type": "risk", "title": "Action Title", "desc": "Detailed explanation..." }
+                    { "type": "strategic", "title": "Action Title", "desc": "Detailed explanation. Use bullet points (- ) and line breaks if there are multiple steps." },
+                    { "type": "tactical", "title": "Action Title", "desc": "Detailed explanation. Use bullet points (- ) and line breaks if there are multiple steps." },
+                    { "type": "risk", "title": "Action Title", "desc": "Detailed explanation. Use bullet points (- ) and line breaks if there are multiple steps." }
                 ]
             }
         `;
