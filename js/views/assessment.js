@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
@@ -13,6 +12,10 @@ export function renderAssessment(container, dealId) {
     currentDealId = dealId;
     const deal = Store.getDeal(dealId);
     if (!deal) return;
+
+    // Calculate initial weight sums for display
+    const bizWeightSum = getWeightSum(deal, 'biz');
+    const techWeightSum = getWeightSum(deal, 'tech');
 
     container.innerHTML = `
         <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
@@ -33,7 +36,7 @@ export function renderAssessment(container, dealId) {
         <div class="space-y-10 pb-10">
             <!-- Biz Fit Box -->
             <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm relative">
-                <!-- Decorative bg container (Clipped here to allow Tooltips to overflow the main card) -->
+                <!-- Decorative bg container -->
                 <div class="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-bl-full -mr-10 -mt-10 opacity-50"></div>
                 </div>
@@ -43,7 +46,12 @@ export function renderAssessment(container, dealId) {
                         <i class="fa-solid fa-briefcase text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900">Biz Fit Analysis</h3>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-xl font-bold text-gray-900">Biz Fit Analysis</h3>
+                            <span id="biz-weight-display" class="text-xs font-bold px-2 py-0.5 rounded-md border ${getWeightColorClass(bizWeightSum)}">
+                                Total Weight: <span class="val">${bizWeightSum}</span>%
+                            </span>
+                        </div>
                         <p class="text-gray-500 text-sm mt-0.5 font-medium">BANT (Budget, Authority, Need, Timeline)</p>
                     </div>
                 </div>
@@ -73,7 +81,12 @@ export function renderAssessment(container, dealId) {
                         <i class="fa-solid fa-server text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900">Tech Fit Analysis</h3>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-xl font-bold text-gray-900">Tech Fit Analysis</h3>
+                            <span id="tech-weight-display" class="text-xs font-bold px-2 py-0.5 rounded-md border ${getWeightColorClass(techWeightSum)}">
+                                Total Weight: <span class="val">${techWeightSum}</span>%
+                            </span>
+                        </div>
                         <p class="text-gray-500 text-sm mt-0.5 font-medium">Requirements, Architecture, Data, Operations</p>
                     </div>
                 </div>
@@ -117,12 +130,24 @@ export function renderAssessment(container, dealId) {
     attachEvents(deal);
 }
 
+function getWeightSum(deal, type) {
+    const weights = deal.assessment[type].weights;
+    if (!weights) return 0;
+    return Object.values(weights).reduce((a, b) => a + (parseInt(b) || 0), 0);
+}
+
+function getWeightColorClass(sum) {
+    return sum === 100 
+        ? 'bg-emerald-50 border-emerald-100 text-emerald-600' 
+        : 'bg-red-50 border-red-100 text-red-600';
+}
+
 function renderScoreSection(type, deal) {
     const config = ASSESSMENT_CONFIG[type];
     const recs = deal.assessment.recommendations ? deal.assessment.recommendations[type] : null;
 
     return config.categories.map(cat => {
-        // AI Recommendations for this Category (Should be an Array corresponding to items)
+        // AI Recommendations for this Category
         const aiCategoryData = recs ? recs[cat.id] : null;
 
         const itemsHtml = cat.items.map((itemLabel, idx) => {
@@ -176,7 +201,7 @@ function renderScoreSection(type, deal) {
             `;
         }).join('');
 
-        // Weight Input - Restored
+        // Weight Input
         const currentWeight = deal.assessment[type].weights[cat.id] || cat.defaultWeight || 0;
 
         return `
@@ -209,13 +234,11 @@ function attachEvents(deal) {
     
     // 1. Slider Events
     sliders.forEach(slider => {
-        // 'input' event: Update UI immediately while dragging
         slider.addEventListener('input', (e) => {
             const val = parseInt(e.target.value);
             e.target.previousElementSibling.querySelector('span:last-child').innerText = `${val} / 5`;
         });
 
-        // 'change' event: Handle Deviation Logic & Saving
         slider.addEventListener('change', (e) => {
             const type = e.target.dataset.type;
             const itemId = e.target.dataset.id;
@@ -223,13 +246,10 @@ function attachEvents(deal) {
             const idx = parseInt(e.target.dataset.idx);
             const newVal = parseInt(e.target.value);
 
-            // Get AI Recommendation for this SPECIFIC item
             const aiCatData = deal.assessment.recommendations?.[type]?.[catId];
             const aiItemRec = (aiCatData && Array.isArray(aiCatData)) ? aiCatData[idx] : null;
             
-            // Check Deviation (If AI score exists and diff >= 2)
             if (aiItemRec && Math.abs(newVal - aiItemRec.score) >= 2) {
-                // Trigger Warning
                 pendingScoreChange = { type, id: itemId, val: newVal };
                 pendingSliderElement = e.target;
                 
@@ -238,16 +258,26 @@ function attachEvents(deal) {
                 
                 modal.classList.remove('hidden');
             } else {
-                // Safe to save immediately
                 deal.assessment[type].scores[itemId] = newVal;
                 Store.saveDeal(deal);
             }
         });
     });
 
-    // 2. Weight Input Events
+    // 2. Weight Input Events & Live UI Update
+    const updateWeightUI = (type) => {
+        const sum = getWeightSum(deal, type);
+        const display = document.getElementById(`${type}-weight-display`);
+        if (display) {
+            const valSpan = display.querySelector('.val');
+            valSpan.innerText = sum;
+            display.className = `text-xs font-bold px-2 py-0.5 rounded-md border transition-colors ${getWeightColorClass(sum)}`;
+        }
+    };
+
     weightInputs.forEach(input => {
-        input.addEventListener('change', (e) => {
+        // Handle input change (UI Update + Data Save)
+        const handleWeightChange = (e) => {
             const type = e.target.dataset.type;
             const catId = e.target.dataset.cat;
             let val = parseInt(e.target.value);
@@ -255,13 +285,22 @@ function attachEvents(deal) {
             if (isNaN(val) || val < 0) val = 0;
             if (val > 100) val = 100;
             
+            // Visual Update in input
             e.target.value = val;
             
+            // Data Update
             if (!deal.assessment[type].weights) deal.assessment[type].weights = {};
             deal.assessment[type].weights[catId] = val;
             
             Store.saveDeal(deal);
-        });
+            
+            // Update Total Indicator
+            updateWeightUI(type);
+        };
+
+        // Listen to both input (typing) and change (blur/enter) for responsiveness
+        input.addEventListener('input', handleWeightChange);
+        input.addEventListener('change', handleWeightChange);
     });
 
     // 3. Refresh AI
@@ -272,10 +311,24 @@ function attachEvents(deal) {
         });
     }
 
-    // 4. Calculate
+    // 4. Calculate / Save & Complete (With Validation)
     const calcBtn = document.getElementById('btn-calc-result');
     if (calcBtn) {
         calcBtn.addEventListener('click', () => {
+            const bizSum = getWeightSum(deal, 'biz');
+            const techSum = getWeightSum(deal, 'tech');
+
+            if (bizSum !== 100) {
+                showToast(`Biz Fit 가중치 합이 100%가 되어야 합니다. (현재: ${bizSum}%)`, 'error');
+                return;
+            }
+
+            if (techSum !== 100) {
+                showToast(`Tech Fit 가중치 합이 100%가 되어야 합니다. (현재: ${techSum}%)`, 'error');
+                return;
+            }
+
+            // If valid, proceed
             navigateTo('summary', { id: deal.id });
         });
     }
@@ -287,11 +340,9 @@ function attachEvents(deal) {
         pendingSliderElement = null;
     };
 
-    // Cancel: Revert Slider to previous saved value
     modal.querySelectorAll('.btn-close-confirm-modal').forEach(btn => {
         btn.addEventListener('click', () => {
             if (pendingScoreChange && pendingSliderElement) {
-                // Revert visual slider
                 const savedVal = deal.assessment[pendingScoreChange.type].scores[pendingScoreChange.id] || 0;
                 const revertVal = savedVal === 0 ? 1 : savedVal;
                 
@@ -302,7 +353,6 @@ function attachEvents(deal) {
         });
     });
 
-    // Confirm: Save the risky score
     confirmBtn.addEventListener('click', () => {
         if (pendingScoreChange) {
             deal.assessment[pendingScoreChange.type].scores[pendingScoreChange.id] = pendingScoreChange.val;
