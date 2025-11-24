@@ -292,6 +292,16 @@ function renderAIContent(result) {
     const container = document.getElementById('summary-ai-content');
     if (!container) return;
 
+    // Helper to format text: render bold, replace hyphens with bullets
+    const formatText = (text) => {
+        if (!text) return '';
+        // 1. Replace markdown bold with HTML bold
+        let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
+        // 2. Replace hyphens with bullets
+        formatted = formatted.replace(/(^|\n)-\s/g, '$1• ');
+        return formatted;
+    };
+
     container.innerHTML = `
         <div class="flex flex-col gap-8">
             <!-- Executive Summary -->
@@ -313,12 +323,12 @@ function renderAIContent(result) {
                         if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
                         
                         return `
-                            <div class="${bgClass} border p-4 rounded-xl shadow-sm hover:shadow-md transition-all h-full">
+                            <div class="${bgClass} border p-5 rounded-xl shadow-sm hover:shadow-md transition-all h-full">
                                 <div class="flex items-start gap-3">
-                                    <div class="mt-0.5"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
-                                    <div>
-                                        <div class="text-sm font-bold mb-1">${act.title}</div>
-                                        <div class="text-xs opacity-80 leading-relaxed whitespace-pre-line">${act.desc}</div>
+                                    <div class="mt-1 flex-shrink-0"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
+                                    <div class="w-full">
+                                        <div class="text-base font-bold mb-2 text-gray-900">${act.title}</div>
+                                        <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line pl-1">${formatText(act.desc)}</div>
                                     </div>
                                 </div>
                             </div>
