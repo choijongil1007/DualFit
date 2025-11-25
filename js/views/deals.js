@@ -345,7 +345,8 @@ function attachEvents() {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             e.preventDefault();
-            deleteTargetId = btn.dataset.id;
+            const card = btn.closest('.deal-card');
+            deleteTargetId = card.dataset.id;
             toggleDeleteModal(true);
         });
     });
