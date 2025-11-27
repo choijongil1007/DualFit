@@ -101,7 +101,7 @@ export function renderStrategy(container, dealId, isTab = false) {
                 </div>
 
                 <!-- Dashboard -->
-                 <div class="p-10 md:p-12 border-b border-gray-100">
+                 <div class="px-5 py-3 md:p-12 border-b border-gray-100">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                          <!-- Left Column: Quadrant Only -->
                         <div class="lg:col-span-5 flex flex-col items-center space-y-8">
@@ -653,6 +653,11 @@ RULES:
 3. **DECOUPLING**: Biz Score and Tech Score MUST NOT move in parallel. 
    - Example: "Tech is perfect, but Budget is low" -> Tech=90, Biz=30.
 4. **Final alignment**: The 'purchase' stage score should logically approach the 'assessmentFinal' score provided in context, but the path there should reflect the struggle in the logs.
+5. **WIN PROBABILITY (totalScore) IS NOT AVERAGE**:
+   - Win Probability (totalScore) is NOT just (Biz + Tech) / 2.
+   - It represents the actual likelihood of closing the deal.
+   - **PENALIZE**: If there are competitors, budget freezes, or decision delays, Win Probability MUST be lower than the average fit.
+   - **BOOST**: If there is high urgency or a strong internal champion, Win Probability can be higher than the fit.
 
 CRITICAL TASK 2: Strategy Generation
 1. Top 3 Recommendations: 3 specific execution strategies.
