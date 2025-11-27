@@ -312,12 +312,12 @@ function renderScoreBars(catScores) {
 
 function renderTrendChart(trendData) {
     if (!trendData || !Array.isArray(trendData)) {
-        return `<div class="h-[200px] flex items-center justify-center text-gray-400 text-sm">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
+        return `<div class="h-[350px] flex items-center justify-center text-gray-400 text-sm bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
     }
 
-    const width = 500;
-    const height = 250;
-    const padding = 40;
+    const width = 600;
+    const height = 350;
+    const padding = 50;
     
     // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
     const stages = ['인식', '고려', '평가', '구매'];
@@ -343,21 +343,21 @@ function renderTrendChart(trendData) {
         // Biz
         const yBiz = getY(data.bizScore || 0);
         pathBiz += (index === 0 || !trendData[index-1]) ? `M ${x} ${yBiz}` : ` L ${x} ${yBiz}`;
-        pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="3" fill="#9333ea" />`;
+        pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="6" fill="#9333ea" stroke="white" stroke-width="2" />`;
 
         // Tech
         const yTech = getY(data.techScore || 0);
         pathTech += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTech}` : ` L ${x} ${yTech}`;
-        pointsTech += `<circle cx="${x}" cy="${yTech}" r="3" fill="#2563eb" />`;
+        pointsTech += `<circle cx="${x}" cy="${yTech}" r="6" fill="#2563eb" stroke="white" stroke-width="2" />`;
 
         // Total
         const yTotal = getY(data.totalScore || 0);
         pathTotal += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTotal}` : ` L ${x} ${yTotal}`;
-        pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="4" fill="#059669" stroke="white" stroke-width="2" />`;
+        pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="7" fill="#059669" stroke="white" stroke-width="3" />`;
     });
 
     return `
-        <div class="relative w-full aspect-[2/1] overflow-hidden">
+        <div class="relative w-full h-[350px] overflow-hidden">
             <svg viewBox="0 0 ${width} ${height}" class="w-full h-full">
                 <!-- Grid Lines -->
                 <line x1="${padding}" y1="${getY(0)}" x2="${width-padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" />
@@ -365,19 +365,19 @@ function renderTrendChart(trendData) {
                 <line x1="${padding}" y1="${getY(100)}" x2="${width-padding}" y2="${getY(100)}" stroke="#e5e7eb" stroke-width="1" />
                 
                 <!-- Y Axis Labels -->
-                <text x="${padding-10}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="10" fill="#9ca3af">0</text>
-                <text x="${padding-10}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="10" fill="#9ca3af">50</text>
-                <text x="${padding-10}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="10" fill="#9ca3af">100</text>
+                <text x="${padding-10}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="12" fill="#9ca3af">0</text>
+                <text x="${padding-10}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="12" fill="#9ca3af">50</text>
+                <text x="${padding-10}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="12" fill="#9ca3af">100</text>
 
                 <!-- X Axis Labels -->
                 ${stages.map((label, i) => `
-                    <text x="${getX(i)}" y="${height - 15}" text-anchor="middle" font-size="11" font-weight="bold" fill="#4b5563">${label}</text>
+                    <text x="${getX(i)}" y="${height - 15}" text-anchor="middle" font-size="13" font-weight="bold" fill="#4b5563">${label}</text>
                 `).join('')}
 
                 <!-- Lines -->
-                <path d="${pathBiz}" fill="none" stroke="#9333ea" stroke-width="2" opacity="0.6" />
-                <path d="${pathTech}" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.6" />
-                <path d="${pathTotal}" fill="none" stroke="#059669" stroke-width="3" />
+                <path d="${pathBiz}" fill="none" stroke="#9333ea" stroke-width="3" opacity="0.6" />
+                <path d="${pathTech}" fill="none" stroke="#2563eb" stroke-width="3" opacity="0.6" />
+                <path d="${pathTotal}" fill="none" stroke="#059669" stroke-width="4" />
 
                 <!-- Points -->
                 ${pointsBiz}
@@ -386,10 +386,10 @@ function renderTrendChart(trendData) {
             </svg>
             
             <!-- Legend overlay -->
-            <div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-2 rounded-lg border border-gray-100 shadow-sm flex gap-3 text-[10px]">
-                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-600"></span>Biz</div>
-                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>Tech</div>
-                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-600"></span>Win Prob</div>
+            <div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-100 shadow-sm flex gap-4 text-xs">
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>Biz</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>Tech</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 border border-emerald-700"></span>Win Prob</div>
             </div>
         </div>
     `;
