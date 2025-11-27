@@ -101,7 +101,7 @@ export function renderStrategy(container, dealId, isTab = false) {
 
                 <!-- Dashboard -->
                  <div class="p-10 md:p-12 border-b border-gray-100">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-12">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                          <!-- Left Column: Quadrant Only -->
                         <div class="lg:col-span-5 flex flex-col items-center space-y-8">
                             <!-- Section Title -->
@@ -137,43 +137,46 @@ export function renderStrategy(container, dealId, isTab = false) {
                             </div>
                         </div>
                         
-                        <!-- Breakdown -->
-                        <div class="lg:col-span-7">
-                            <h3 class="text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
-                                세부 평가 점수
-                            </h3>
-                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                                <!-- Biz -->
-                                <div>
-                                    <div class="flex items-center gap-2 mb-5 pb-2 border-b border-gray-100">
-                                        <i class="fa-solid fa-briefcase text-purple-600"></i>
-                                        <span class="font-bold text-gray-800 text-sm">Biz Fit</span>
+                        <!-- Right Column: Breakdown + Trend Chart -->
+                        <div class="lg:col-span-7 flex flex-col gap-12">
+                            <!-- Breakdown -->
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
+                                    세부 평가 점수
+                                </h3>
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                                    <!-- Biz -->
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-5 pb-2 border-b border-gray-100">
+                                            <i class="fa-solid fa-briefcase text-purple-600"></i>
+                                            <span class="font-bold text-gray-800 text-sm">Biz Fit</span>
+                                        </div>
+                                        <div class="space-y-5">
+                                            ${renderScoreBars(categoryScores.biz)}
+                                        </div>
                                     </div>
-                                    <div class="space-y-5">
-                                        ${renderScoreBars(categoryScores.biz)}
+                                    <!-- Tech -->
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-5 pb-2 border-b border-gray-100">
+                                            <i class="fa-solid fa-server text-blue-600"></i>
+                                            <span class="font-bold text-gray-800 text-sm">Tech Fit</span>
+                                        </div>
+                                        <div class="space-y-5">
+                                            ${renderScoreBars(categoryScores.tech)}
+                                        </div>
                                     </div>
+                                 </div>
+                            </div>
+                            
+                            <!-- Trend Chart (Moved here) -->
+                            <div>
+                                <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
+                                    Win Probability 추이
+                                </h3>
+                                <div class="w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm relative h-auto">
+                                    ${renderTrendChart(deal.strategyReport?.winProbabilityTrend)}
                                 </div>
-                                <!-- Tech -->
-                                <div>
-                                    <div class="flex items-center gap-2 mb-5 pb-2 border-b border-gray-100">
-                                        <i class="fa-solid fa-server text-blue-600"></i>
-                                        <span class="font-bold text-gray-800 text-sm">Tech Fit</span>
-                                    </div>
-                                    <div class="space-y-5">
-                                        ${renderScoreBars(categoryScores.tech)}
-                                    </div>
-                                </div>
-                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Full Width Trend Chart -->
-                    <div class="pt-10 border-t border-gray-100">
-                        <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
-                            Win Probability 추이
-                        </h3>
-                        <div class="w-full bg-white border border-gray-200 rounded-lg p-8 shadow-sm relative h-auto">
-                            ${renderTrendChart(deal.strategyReport?.winProbabilityTrend)}
+                            </div>
                         </div>
                     </div>
                  </div>
@@ -312,13 +315,13 @@ function renderScoreBars(catScores) {
 
 function renderTrendChart(trendData) {
     if (!trendData || !Array.isArray(trendData)) {
-        return `<div class="h-[500px] flex items-center justify-center text-gray-400 text-lg bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
+        return `<div class="h-[400px] flex items-center justify-center text-gray-400 text-lg bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
     }
 
-    // Increased width and height for larger visualization
-    const width = 1200; 
-    const height = 600; // Increased height significantly for vertical spacing
-    const padding = 80; // Increased padding for larger labels
+    // Adjusted dimensions for column layout
+    const width = 800; // Reduced from 1200 to match column width better
+    const height = 500; // Maintained height for vertical spacing
+    const padding = 70; 
     
     // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
     const stages = ['인식', '고려', '평가', '구매'];
@@ -345,42 +348,42 @@ function renderTrendChart(trendData) {
         const yBiz = getY(data.bizScore || 0);
         pathBiz += (index === 0 || !trendData[index-1]) ? `M ${x} ${yBiz}` : ` L ${x} ${yBiz}`;
         pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="8" fill="#9333ea" stroke="white" stroke-width="3" />`;
-        // Text label removed as requested
+        
 
         // Tech
         const yTech = getY(data.techScore || 0);
         pathTech += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTech}` : ` L ${x} ${yTech}`;
         pointsTech += `<circle cx="${x}" cy="${yTech}" r="8" fill="#2563eb" stroke="white" stroke-width="3" />`;
-        // Text label removed as requested
+        
 
         // Total
         const yTotal = getY(data.totalScore || 0);
         pathTotal += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTotal}` : ` L ${x} ${yTotal}`;
         pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="10" fill="#059669" stroke="white" stroke-width="4" />`;
-        // Text label (with white stroke for contrast if needed, but here simple fill)
+        // Text label
         pointsTotal += `<text x="${x}" y="${yTotal - 22}" text-anchor="middle" font-size="16" font-weight="800" fill="white" stroke="white" stroke-width="4">${data.totalScore || 0}</text>`;
         pointsTotal += `<text x="${x}" y="${yTotal - 22}" text-anchor="middle" font-size="16" font-weight="800" fill="#059669">${data.totalScore || 0}</text>`;
     });
 
     return `
         <div class="relative w-full h-auto overflow-hidden">
-            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 500px;">
+            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 400px;">
                 <!-- Grid Lines -->
                 <line x1="${padding}" y1="${getY(0)}" x2="${width-padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" />
                 <line x1="${padding}" y1="${getY(50)}" x2="${width-padding}" y2="${getY(50)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="6 6" />
                 <line x1="${padding}" y1="${getY(100)}" x2="${width-padding}" y2="${getY(100)}" stroke="#e5e7eb" stroke-width="1" />
                 
-                <!-- Y Axis Labels (Larger Text) -->
-                <text x="${padding-20}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="16" font-weight="500" fill="#9ca3af">0</text>
-                <text x="${padding-20}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="16" font-weight="500" fill="#9ca3af">50</text>
-                <text x="${padding-20}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="16" font-weight="500" fill="#9ca3af">100</text>
+                <!-- Y Axis Labels -->
+                <text x="${padding-15}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">0</text>
+                <text x="${padding-15}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">50</text>
+                <text x="${padding-15}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">100</text>
 
-                <!-- X Axis Labels (Larger Text) -->
+                <!-- X Axis Labels -->
                 ${stages.map((label, i) => `
-                    <text x="${getX(i)}" y="${height - 30}" text-anchor="middle" font-size="20" font-weight="bold" fill="#374151">${label}</text>
+                    <text x="${getX(i)}" y="${height - 25}" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">${label}</text>
                 `).join('')}
 
-                <!-- Lines (Thicker) -->
+                <!-- Lines -->
                 <path d="${pathBiz}" fill="none" stroke="#9333ea" stroke-width="4" opacity="0.5" />
                 <path d="${pathTech}" fill="none" stroke="#2563eb" stroke-width="4" opacity="0.5" />
                 <path d="${pathTotal}" fill="none" stroke="#059669" stroke-width="6" />
@@ -392,10 +395,10 @@ function renderTrendChart(trendData) {
             </svg>
             
             <!-- Legend overlay -->
-            <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex gap-6 text-sm">
-                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-600 opacity-60"></span>Biz Fit</div>
-                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-600 opacity-60"></span>Tech Fit</div>
-                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-600 border-2 border-emerald-700"></span>Win Prob</div>
+            <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-200 shadow-sm flex gap-4 text-xs">
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 opacity-60"></span>Biz Fit</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 opacity-60"></span>Tech Fit</div>
+                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 border-2 border-emerald-700"></span>Win Prob</div>
             </div>
         </div>
     `;
