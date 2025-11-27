@@ -207,7 +207,7 @@ function renderScoreSection(type, deal) {
 
         return `
             <div class="bg-gray-50/50 rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-center mb-4 border-b border-gray-200 pb-3">
                     <h4 class="font-bold text-gray-800 text-sm">${cat.label}</h4>
                     <div class="flex items-center bg-white border border-gray-200 rounded-md px-2 py-1 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
                         <span class="text-[10px] text-gray-500 font-semibold mr-1.5">가중치</span>
