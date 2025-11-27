@@ -299,6 +299,10 @@ function renderScoreBars(catScores) {
 
 function renderStrategyContent(report) {
     if (!report) return '';
+    
+    // Safety check: ensure actionItems is an array
+    const actionItems = Array.isArray(report.actionItems) ? report.actionItems : [];
+
     return `
         <div class="space-y-8 animate-modal-in">
              <!-- 1. Executive Summary -->
@@ -335,12 +339,12 @@ function renderStrategyContent(report) {
                     <i class="fa-solid fa-check-double text-emerald-400"></i> Key Action Items
                 </h4>
                 <div class="grid grid-cols-1 gap-4">
-                    ${report.actionItems.map((item, i) => `
+                    ${actionItems.length > 0 ? actionItems.map((item, i) => `
                         <div class="flex items-start gap-3 p-3 rounded-lg bg-white/10 border border-white/5">
                             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5">${i+1}</span>
                             <span class="text-sm text-gray-200 leading-relaxed">${item}</span>
                         </div>
-                    `).join('')}
+                    `).join('') : '<div class="text-gray-400 text-sm italic p-2">추천 액션 아이템이 없습니다.</div>'}
                 </div>
             </div>
         </div>
