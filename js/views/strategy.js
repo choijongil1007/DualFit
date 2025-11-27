@@ -1,5 +1,6 @@
 
 
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -346,16 +347,23 @@ function renderTrendChart(trendData) {
         const yBiz = getY(data.bizScore || 0);
         pathBiz += (index === 0 || !trendData[index-1]) ? `M ${x} ${yBiz}` : ` L ${x} ${yBiz}`;
         pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="8" fill="#9333ea" stroke="white" stroke-width="3" />`;
+        // Text label
+        pointsBiz += `<text x="${x}" y="${yBiz - 15}" text-anchor="middle" font-size="14" font-weight="bold" fill="#9333ea">${data.bizScore || 0}</text>`;
 
         // Tech
         const yTech = getY(data.techScore || 0);
         pathTech += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTech}` : ` L ${x} ${yTech}`;
         pointsTech += `<circle cx="${x}" cy="${yTech}" r="8" fill="#2563eb" stroke="white" stroke-width="3" />`;
+        // Text label
+        pointsTech += `<text x="${x}" y="${yTech - 15}" text-anchor="middle" font-size="14" font-weight="bold" fill="#2563eb">${data.techScore || 0}</text>`;
 
         // Total
         const yTotal = getY(data.totalScore || 0);
         pathTotal += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTotal}` : ` L ${x} ${yTotal}`;
         pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="10" fill="#059669" stroke="white" stroke-width="4" />`;
+        // Text label (with white stroke for contrast if needed, but here simple fill)
+        pointsTotal += `<text x="${x}" y="${yTotal - 22}" text-anchor="middle" font-size="16" font-weight="800" fill="white" stroke="white" stroke-width="4">${data.totalScore || 0}</text>`;
+        pointsTotal += `<text x="${x}" y="${yTotal - 22}" text-anchor="middle" font-size="16" font-weight="800" fill="#059669">${data.totalScore || 0}</text>`;
     });
 
     return `
