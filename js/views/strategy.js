@@ -323,7 +323,7 @@ function renderTrendChart(trendData) {
     const padding = 80; // Increased padding for larger labels
     
     // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
-    const stages = ['1. 인식 (Awareness)', '2. 고려 (Consideration)', '3. 평가 (Evaluation)', '4. 구매 (Purchase)'];
+    const stages = ['인식', '고려', '평가', '구매'];
     
     // Helper to scale points
     const getX = (index) => padding + (index * (width - 2 * padding) / 3);
@@ -347,15 +347,13 @@ function renderTrendChart(trendData) {
         const yBiz = getY(data.bizScore || 0);
         pathBiz += (index === 0 || !trendData[index-1]) ? `M ${x} ${yBiz}` : ` L ${x} ${yBiz}`;
         pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="8" fill="#9333ea" stroke="white" stroke-width="3" />`;
-        // Text label
-        pointsBiz += `<text x="${x}" y="${yBiz - 15}" text-anchor="middle" font-size="14" font-weight="bold" fill="#9333ea">${data.bizScore || 0}</text>`;
+        // Text label removed as requested
 
         // Tech
         const yTech = getY(data.techScore || 0);
         pathTech += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTech}` : ` L ${x} ${yTech}`;
         pointsTech += `<circle cx="${x}" cy="${yTech}" r="8" fill="#2563eb" stroke="white" stroke-width="3" />`;
-        // Text label
-        pointsTech += `<text x="${x}" y="${yTech - 15}" text-anchor="middle" font-size="14" font-weight="bold" fill="#2563eb">${data.techScore || 0}</text>`;
+        // Text label removed as requested
 
         // Total
         const yTotal = getY(data.totalScore || 0);
