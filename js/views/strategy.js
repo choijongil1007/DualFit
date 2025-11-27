@@ -188,12 +188,17 @@ export function renderStrategy(container, dealId, isTab = false) {
         }
     }
 
-    // Initial Load Logic: Use Cached or Generate New
-    // Migration helper: use summaryReport if strategyReport is missing (legacy support)
-    const existingReport = deal.strategyReport || deal.summaryReport;
+    // Initial Load Logic: Data Migration (Summary -> Strategy)
+    // If we have data in the old key but not the new key, migrate it.
+    if (!deal.strategyReport && deal.summaryReport) {
+        console.log(`Migrating Deal ${dealId} Summary to Strategy...`);
+        deal.strategyReport = deal.summaryReport;
+        delete deal.summaryReport;
+        Store.saveDeal(deal);
+    }
 
-    if (existingReport && existingReport.top3) {
-        renderAIContent(existingReport);
+    if (deal.strategyReport && deal.strategyReport.top3) {
+        renderAIContent(deal.strategyReport);
     } else {
         generateStrategyAI(deal, bizScore, techScore, lowItems);
     }

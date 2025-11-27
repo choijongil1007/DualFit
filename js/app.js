@@ -28,10 +28,6 @@ export function navigateTo(view, params = {}) {
             // Pass the 'tab' parameter to renderDetailsLayout
             renderDetailsLayout(appContainer, params.id, params.tab);
             break;
-        case 'summary': 
-            // Legacy support: redirect 'summary' view to 'details' view with 'strategy' tab
-            renderDetailsLayout(appContainer, params.id, 'strategy');
-            break;
         case 'strategy':
             renderDetailsLayout(appContainer, params.id, 'strategy');
             break;
