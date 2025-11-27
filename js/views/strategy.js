@@ -1,4 +1,5 @@
 
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -173,7 +174,7 @@ export function renderStrategy(container, dealId, isTab = false) {
                                 <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
                                     Win Probability 추이
                                 </h3>
-                                <div class="w-full bg-white border border-gray-200 rounded-lg p-6 shadow-sm relative h-auto">
+                                <div class="w-full bg-white border border-gray-200 rounded-lg px-5 py-3 shadow-sm relative h-auto">
                                     ${renderTrendChart(deal.strategyReport?.winProbabilityTrend)}
                                 </div>
                             </div>
@@ -315,13 +316,13 @@ function renderScoreBars(catScores) {
 
 function renderTrendChart(trendData) {
     if (!trendData || !Array.isArray(trendData)) {
-        return `<div class="h-[300px] flex items-center justify-center text-gray-400 text-lg bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
+        return `<div class="h-[250px] flex items-center justify-center text-gray-400 text-lg bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
     }
 
     // Adjusted dimensions for column layout
     const width = 800; 
-    const height = 300; // Reduced height for more compact view
-    const padding = 40; // Reduced padding
+    const height = 260; // Reduced height to tighten layout
+    const padding = 25; // Tight padding
     
     // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
     const stages = ['인식', '고려', '평가', '구매'];
@@ -367,7 +368,7 @@ function renderTrendChart(trendData) {
 
     return `
         <div class="relative w-full h-auto overflow-hidden">
-            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 250px;">
+            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 200px;">
                 <!-- Grid Lines -->
                 <line x1="${padding}" y1="${getY(0)}" x2="${width-padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" />
                 <line x1="${padding}" y1="${getY(50)}" x2="${width-padding}" y2="${getY(50)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="6 6" />
@@ -380,7 +381,7 @@ function renderTrendChart(trendData) {
 
                 <!-- X Axis Labels -->
                 ${stages.map((label, i) => `
-                    <text x="${getX(i)}" y="${height - 10}" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">${label}</text>
+                    <text x="${getX(i)}" y="${height - 8}" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">${label}</text>
                 `).join('')}
 
                 <!-- Lines -->
