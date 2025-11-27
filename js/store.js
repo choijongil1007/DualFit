@@ -51,7 +51,7 @@ export const Store = {
                 tech: { scores: {}, weights: { req: 30, arch: 25, data: 25, ops: 20 } },
                 recommendations: null // Store AI recommendations here
             },
-            summaryReport: null, // AI Final Report Cache
+            strategyReport: null, // Renamed from summaryReport for Strategy feature
             updatedAt: new Date().toISOString()
         };
     }

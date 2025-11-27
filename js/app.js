@@ -2,7 +2,7 @@
 import { renderDeals } from './views/deals.js';
 import { renderDiscovery } from './views/discovery.js';
 import { renderAssessment } from './views/assessment.js';
-import { renderSummary } from './views/summary.js';
+import { renderStrategy } from './views/strategy.js';
 import { Store } from './store.js';
 
 const appContainer = document.getElementById('app');
@@ -30,6 +30,9 @@ export function navigateTo(view, params = {}) {
             break;
         case 'summary': 
             // Legacy support: redirect 'summary' view to 'details' view with 'strategy' tab
+            renderDetailsLayout(appContainer, params.id, 'strategy');
+            break;
+        case 'strategy':
             renderDetailsLayout(appContainer, params.id, 'strategy');
             break;
         default:
@@ -148,7 +151,7 @@ function renderDetailsLayout(container, dealId, initialTab = 'discovery') {
             renderAssessment(tabContent, dealId);
         } else if (tabName === 'strategy') {
             // Pass 'isTab=true' to hide the top navigation bar inside the Strategy tab
-            renderSummary(tabContent, dealId, true);
+            renderStrategy(tabContent, dealId, true);
         }
     }
 
