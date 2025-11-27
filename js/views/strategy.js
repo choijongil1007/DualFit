@@ -102,34 +102,47 @@ export function renderStrategy(container, dealId, isTab = false) {
                 <!-- Dashboard -->
                  <div class="p-10 md:p-12 border-b border-gray-100">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-                         <!-- Quadrant -->
-                        <div class="lg:col-span-5 flex flex-col items-center">
-                            <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-8">
-                                적합성 분석 매트릭스
-                            </h3>
-                            <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-lg">
-                                <div class="quadrant-bg">
-                                    <div class="q-zone q-zone-tl"><span class="q-label-inner text-xl font-extrabold leading-tight">기술 양호<br>사업성 부족</span></div>
-                                    <div class="q-zone q-zone-tr"><span class="q-label-inner text-xl font-extrabold leading-tight text-emerald-600">최적 (Best Fit)</span></div>
-                                    <div class="q-zone q-zone-bl"><span class="q-label-inner text-xl font-extrabold leading-tight text-gray-400">부적합 (Drop)</span></div>
-                                    <div class="q-zone q-zone-br"><span class="q-label-inner text-xl font-extrabold leading-tight">사업성 양호<br>기술 부족</span></div>
+                         <!-- Left Column: Quadrant & Trend -->
+                        <div class="lg:col-span-5 flex flex-col items-center space-y-8">
+                            <!-- Section Title -->
+                            <div class="w-full">
+                                <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
+                                    적합성 분석 매트릭스
+                                </h3>
+                                <div class="quadrant-container w-full shadow-sm border border-gray-200 rounded-lg">
+                                    <div class="quadrant-bg">
+                                        <div class="q-zone q-zone-tl"><span class="q-label-inner text-xl font-extrabold leading-tight">기술 양호<br>사업성 부족</span></div>
+                                        <div class="q-zone q-zone-tr"><span class="q-label-inner text-xl font-extrabold leading-tight text-emerald-600">최적 (Best Fit)</span></div>
+                                        <div class="q-zone q-zone-bl"><span class="q-label-inner text-xl font-extrabold leading-tight text-gray-400">부적합 (Drop)</span></div>
+                                        <div class="q-zone q-zone-br"><span class="q-label-inner text-xl font-extrabold leading-tight">사업성 양호<br>기술 부족</span></div>
+                                    </div>
+                                    <div class="quadrant-line-x"></div>
+                                    <div class="quadrant-line-y"></div>
+                                    <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;">
+                                        <div class="quadrant-dot-pulse"></div>
+                                        <div class="quadrant-tooltip">Biz ${bizScore} / Tech ${techScore}</div>
+                                    </div>
                                 </div>
-                                <div class="quadrant-line-x"></div>
-                                <div class="quadrant-line-y"></div>
-                                <div class="quadrant-dot" style="left: ${bizScore}%; bottom: ${techScore}%;">
-                                    <div class="quadrant-dot-pulse"></div>
-                                    <div class="quadrant-tooltip">Biz ${bizScore} / Tech ${techScore}</div>
+                                <!-- Score Badges -->
+                                 <div class="flex gap-4 mt-6 w-full">
+                                    <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+                                        <span class="text-xs font-bold text-gray-500 tracking-wide">Biz Score</span>
+                                        <span class="text-2xl font-bold text-gray-900">${bizScore}</span>
+                                    </div>
+                                    <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+                                        <span class="text-xs font-bold text-gray-500 tracking-wide">Tech Score</span>
+                                        <span class="text-2xl font-bold text-gray-900">${techScore}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Score Badges -->
-                             <div class="flex gap-4 mt-8 w-full">
-                                <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 tracking-wide">Biz Score</span>
-                                    <span class="text-2xl font-bold text-gray-900">${bizScore}</span>
-                                </div>
-                                <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 shadow-sm flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-500 tracking-wide">Tech Score</span>
-                                    <span class="text-2xl font-bold text-gray-900">${techScore}</span>
+
+                            <!-- New: Win Probability Trend Chart -->
+                            <div class="w-full">
+                                <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
+                                    Win Probability 추이
+                                </h3>
+                                <div class="w-full bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative">
+                                    ${renderTrendChart(deal.strategyReport?.winProbabilityTrend)}
                                 </div>
                             </div>
                         </div>
@@ -295,6 +308,91 @@ function renderScoreBars(catScores) {
             </div>
         `;
     }).join('');
+}
+
+function renderTrendChart(trendData) {
+    if (!trendData || !Array.isArray(trendData)) {
+        return `<div class="h-[200px] flex items-center justify-center text-gray-400 text-sm">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
+    }
+
+    const width = 500;
+    const height = 250;
+    const padding = 40;
+    
+    // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
+    const stages = ['인식', '고려', '평가', '구매'];
+    
+    // Helper to scale points
+    const getX = (index) => padding + (index * (width - 2 * padding) / 3);
+    const getY = (score) => height - padding - (score / 100 * (height - 2 * padding));
+
+    // Construct Paths
+    let pathBiz = '';
+    let pathTech = '';
+    let pathTotal = '';
+    
+    let pointsBiz = '';
+    let pointsTech = '';
+    let pointsTotal = '';
+
+    trendData.forEach((data, index) => {
+        if (!data) return; // Skip empty stages
+
+        const x = getX(index);
+        
+        // Biz
+        const yBiz = getY(data.bizScore || 0);
+        pathBiz += (index === 0 || !trendData[index-1]) ? `M ${x} ${yBiz}` : ` L ${x} ${yBiz}`;
+        pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="3" fill="#9333ea" />`;
+
+        // Tech
+        const yTech = getY(data.techScore || 0);
+        pathTech += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTech}` : ` L ${x} ${yTech}`;
+        pointsTech += `<circle cx="${x}" cy="${yTech}" r="3" fill="#2563eb" />`;
+
+        // Total
+        const yTotal = getY(data.totalScore || 0);
+        pathTotal += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTotal}` : ` L ${x} ${yTotal}`;
+        pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="4" fill="#059669" stroke="white" stroke-width="2" />`;
+    });
+
+    return `
+        <div class="relative w-full aspect-[2/1] overflow-hidden">
+            <svg viewBox="0 0 ${width} ${height}" class="w-full h-full">
+                <!-- Grid Lines -->
+                <line x1="${padding}" y1="${getY(0)}" x2="${width-padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" />
+                <line x1="${padding}" y1="${getY(50)}" x2="${width-padding}" y2="${getY(50)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4" />
+                <line x1="${padding}" y1="${getY(100)}" x2="${width-padding}" y2="${getY(100)}" stroke="#e5e7eb" stroke-width="1" />
+                
+                <!-- Y Axis Labels -->
+                <text x="${padding-10}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="10" fill="#9ca3af">0</text>
+                <text x="${padding-10}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="10" fill="#9ca3af">50</text>
+                <text x="${padding-10}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="10" fill="#9ca3af">100</text>
+
+                <!-- X Axis Labels -->
+                ${stages.map((label, i) => `
+                    <text x="${getX(i)}" y="${height - 15}" text-anchor="middle" font-size="11" font-weight="bold" fill="#4b5563">${label}</text>
+                `).join('')}
+
+                <!-- Lines -->
+                <path d="${pathBiz}" fill="none" stroke="#9333ea" stroke-width="2" opacity="0.6" />
+                <path d="${pathTech}" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.6" />
+                <path d="${pathTotal}" fill="none" stroke="#059669" stroke-width="3" />
+
+                <!-- Points -->
+                ${pointsBiz}
+                ${pointsTech}
+                ${pointsTotal}
+            </svg>
+            
+            <!-- Legend overlay -->
+            <div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-2 rounded-lg border border-gray-100 shadow-sm flex gap-3 text-[10px]">
+                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-600"></span>Biz</div>
+                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span>Tech</div>
+                <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-600"></span>Win Prob</div>
+            </div>
+        </div>
+    `;
 }
 
 function renderStrategyContent(report) {
@@ -506,13 +604,21 @@ async function generateStrategy(deal) {
     `;
 
     try {
+        // Prepare detailed discovery logs for retrospective inference
+        const discoveryHistory = {
+            awareness: deal.discovery.awareness,
+            consideration: deal.discovery.consideration,
+            evaluation: deal.discovery.evaluation,
+            purchase: deal.discovery.purchase
+        };
+
         // Construct prompt context
         const context = {
             dealName: deal.dealName,
             client: deal.clientName,
             solution: deal.solution,
-            discovery: deal.discovery,
-            assessment: deal.assessment
+            discoveryLogs: discoveryHistory,
+            assessmentFinal: deal.assessment
         };
         
         // Helper to safe stringify
@@ -527,10 +633,20 @@ Context:
 ${safeJSON(context)}
 
 Task:
-Analyze the Discovery data (customer journey, pain points) and Assessment data (Biz/Tech fit scores) to create a winning strategy.
+1. Analyze the 'DiscoveryLogs' (customer journey, pain points) and 'AssessmentFinal' (Biz/Tech fit scores).
+2. Retrospective Inference: Based on the qualitative logs in each Discovery stage (Awareness -> Consideration -> Evaluation -> Purchase), estimate what the Biz Fit and Tech Fit scores (0-100 scale) would have been at that specific time.
+   - If a stage has no meaningful data/logs, return null for that stage.
+   - Calculate 'totalScore' as the average of bizScore and techScore.
+3. Create a winning strategy and risk mitigation plan.
 
 Output JSON Structure (Must follow this exact schema):
 {
+  "winProbabilityTrend": [
+    { "stage": "awareness", "bizScore": 30, "techScore": 20, "totalScore": 25 },
+    { "stage": "consideration", "bizScore": 50, "techScore": 40, "totalScore": 45 },
+    { "stage": "evaluation", "bizScore": 70, "techScore": 60, "totalScore": 65 },
+    { "stage": "purchase", "bizScore": 85, "techScore": 80, "totalScore": 82.5 }
+  ],
   "executiveSummary": "Overall assessment of the deal health and key status (3-4 sentences).",
   "top3Recommendations": [
     "Strategy 1 (Action-oriented execution strategy)",
@@ -538,14 +654,14 @@ Output JSON Structure (Must follow this exact schema):
     "Strategy 3"
   ],
   "opportunityStrategies": [
-    "Opportunity Strategy 1 (Based on SO/WO analysis, linked to Pain/Success Criteria. Max 150 characters. End sentences concisely e.g., '~음', '~함', '~추천'. Do NOT use polite forms like '~습니다'.)",
-    "Opportunity Strategy 2 (Max 150 characters. Concise ending style.)",
-    "Opportunity Strategy 3 (Max 150 characters. Concise ending style.)"
+    "Opportunity Strategy 1 (Based on SO/WO analysis. Max 150 chars. End concisely '~음', '~함'.)",
+    "Opportunity Strategy 2 (Max 150 chars. Concise ending style.)",
+    "Opportunity Strategy 3 (Max 150 chars. Concise ending style.)"
   ],
   "riskMitigationStrategies": [
-    "Risk Strategy 1 (Based on ST/WT analysis, addressing Authority/Budget/Timeline or Tech Fit risks. Max 150 characters. End sentences concisely e.g., '~음', '~함', '~추천'. Do NOT use polite forms like '~습니다'.)",
-    "Risk Strategy 2 (Max 150 characters. Concise ending style.)",
-    "Risk Strategy 3 (Max 150 characters. Concise ending style.)"
+    "Risk Strategy 1 (Based on ST/WT analysis. Max 150 chars. End concisely '~음', '~함'.)",
+    "Risk Strategy 2 (Max 150 chars. Concise ending style.)",
+    "Risk Strategy 3 (Max 150 chars. Concise ending style.)"
   ],
   "differentiationMessages": [
     "Message 1 (Value-based, no feature comparison, aligned with JTBD)",
@@ -565,6 +681,10 @@ Output JSON Structure (Must follow this exact schema):
         Store.saveDeal(deal);
         
         contentArea.innerHTML = renderStrategyContent(result);
+        
+        // Re-render the whole view to show the new graph immediately (since it's outside the contentArea)
+        renderStrategy(document.getElementById('tab-content'), deal.id, true);
+
         showToast('전략 보고서가 생성되었습니다.', 'success');
 
     } catch (error) {
