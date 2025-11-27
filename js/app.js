@@ -1,4 +1,3 @@
-
 import { renderDeals } from './views/deals.js';
 import { renderDiscovery } from './views/discovery.js';
 import { renderAssessment } from './views/assessment.js';
@@ -25,18 +24,20 @@ export function navigateTo(view, params = {}) {
             renderDeals(appContainer);
             break;
         case 'details':
-            renderDetailsLayout(appContainer, params.id);
+            // Pass the 'tab' parameter to renderDetailsLayout
+            renderDetailsLayout(appContainer, params.id, params.tab);
             break;
-        case 'summary':
-            renderSummary(appContainer, params.id);
+        case 'summary': 
+            // Legacy support: redirect 'summary' view to 'details' view with 'strategy' tab
+            renderDetailsLayout(appContainer, params.id, 'strategy');
             break;
         default:
             renderDeals(appContainer);
     }
 }
 
-// Layout for Discovery & Assessment tabs
-function renderDetailsLayout(container, dealId) {
+// Layout for Discovery & Assessment & Strategy tabs
+function renderDetailsLayout(container, dealId, initialTab = 'discovery') {
     const deal = Store.getDeal(dealId);
     if (!deal) {
         navigateTo('deals');
@@ -70,6 +71,9 @@ function renderDetailsLayout(container, dealId) {
             </button>
             <button class="tab-btn flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200" data-tab="assessment">
                 <i class="fa-solid fa-chart-pie"></i> Assessment
+            </button>
+            <button class="tab-btn flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200" data-tab="strategy">
+                <i class="fa-solid fa-chess-knight"></i> Strategy
             </button>
         </div>
 
@@ -139,8 +143,11 @@ function renderDetailsLayout(container, dealId) {
 
         if (tabName === 'discovery') {
             renderDiscovery(tabContent, dealId);
-        } else {
+        } else if (tabName === 'assessment') {
             renderAssessment(tabContent, dealId);
+        } else if (tabName === 'strategy') {
+            // Pass 'isTab=true' to hide the top navigation bar inside the Strategy tab
+            renderSummary(tabContent, dealId, true);
         }
     }
 
@@ -148,7 +155,8 @@ function renderDetailsLayout(container, dealId) {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    switchTab('discovery');
+    // Switch to the requested tab or default to 'discovery'
+    switchTab(initialTab || 'discovery');
 
     const infoModal = document.getElementById('info-modal');
     document.getElementById('btn-deal-info').addEventListener('click', () => infoModal.classList.remove('hidden'));

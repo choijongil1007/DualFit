@@ -1,20 +1,21 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
 import { navigateTo } from '../app.js';
 
-export function renderSummary(container, dealId) {
+export function renderSummary(container, dealId, isTab = false) {
     const deal = Store.getDeal(dealId);
     if (!deal) return;
 
     const { bizScore, techScore, lowItems, categoryScores } = calculateScores(deal);
     const reportDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
+    const actionBarClass = isTab ? 'hidden' : 'flex';
+
     container.innerHTML = `
         <div class="w-full">
-            <!-- Action Bar (Outside Report) -->
-            <div class="flex justify-between items-center mb-6 px-1 no-print">
+            <!-- Action Bar (Only visible when not in tab mode) -->
+            <div class="${actionBarClass} justify-between items-center mb-6 px-1 no-print">
                 <button id="btn-back-details" class="text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors font-medium text-sm">
                     <i class="fa-solid fa-arrow-left"></i> 상세 화면으로
                 </button>
@@ -27,6 +28,18 @@ export function renderSummary(container, dealId) {
                     </button>
                 </div>
             </div>
+
+            <!-- If in tab mode, show controls right above the report -->
+            ${isTab ? `
+            <div class="flex justify-end gap-3 mb-6 no-print">
+                <button onclick="window.print()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> 인쇄 / PDF 저장
+                </button>
+                <button id="btn-recalc-tab" class="bg-gray-900 text-white px-5 py-2 rounded-lg hover:bg-black text-sm font-medium shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-rotate"></i> 전략 재생성
+                </button>
+            </div>
+            ` : ''}
 
             <!-- Report Container (Paper Style) -->
             <div class="bg-white rounded-none md:rounded-xl shadow-float border border-gray-200 overflow-hidden relative print:shadow-none print:border-none" id="report-content">
@@ -157,13 +170,22 @@ export function renderSummary(container, dealId) {
         </div>
     `;
 
-    document.getElementById('btn-back-details').addEventListener('click', () => {
-        navigateTo('details', { id: dealId });
-    });
-
-    document.getElementById('btn-recalc').addEventListener('click', () => {
-         generateSummaryAI(deal, bizScore, techScore, lowItems);
-    });
+    // Event Listeners
+    if (!isTab) {
+        document.getElementById('btn-back-details').addEventListener('click', () => {
+            navigateTo('details', { id: dealId });
+        });
+        document.getElementById('btn-recalc').addEventListener('click', () => {
+             generateSummaryAI(deal, bizScore, techScore, lowItems);
+        });
+    } else {
+        const recalcBtn = document.getElementById('btn-recalc-tab');
+        if (recalcBtn) {
+            recalcBtn.addEventListener('click', () => {
+                generateSummaryAI(deal, bizScore, techScore, lowItems);
+            });
+        }
+    }
 
     // Initial Load Logic: Use Cached or Generate New
     if (deal.summaryReport && deal.summaryReport.top3) {

@@ -1,4 +1,3 @@
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { showLoader, hideLoader, showToast } from '../utils.js';
@@ -329,8 +328,8 @@ function attachEvents(deal) {
                 return;
             }
 
-            // If valid, proceed
-            navigateTo('summary', { id: deal.id });
+            // Redirect to strategy tab
+            navigateTo('details', { id: deal.id, tab: 'strategy' });
         });
     }
 
