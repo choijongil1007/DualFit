@@ -300,9 +300,97 @@ function renderScoreBars(catScores) {
 function renderStrategyContent(report) {
     if (!report) return '';
     
-    // Safety check: ensure actionItems is an array
+    // Safety check for legacy or malformed data
     const actionItems = Array.isArray(report.actionItems) ? report.actionItems : [];
 
+    // Helper to render simple string lists
+    const renderList = (items, emptyText = '내용이 없습니다.') => {
+        if (!items || !Array.isArray(items) || items.length === 0) return `<div class="text-gray-400 italic text-sm">${emptyText}</div>`;
+        return `<ul class="list-disc list-outside pl-5 space-y-1 text-sm text-gray-700 leading-relaxed">
+            ${items.map(i => `<li>${renderMarkdownLike(i)}</li>`).join('')}
+        </ul>`;
+    };
+
+    // New format: top3Recommendations check
+    if (report.top3Recommendations) {
+        return `
+        <div class="space-y-8 animate-modal-in">
+             <!-- 1. Executive Summary -->
+             <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+                <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-quote-left text-indigo-500"></i> Executive Summary
+                </h4>
+                <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                    ${renderMarkdownLike(report.executiveSummary)}
+                </div>
+            </div>
+
+            <!-- 2. Top 3 Strategic Recommendations -->
+            <div class="bg-indigo-50/50 p-8 rounded-xl border border-indigo-100 shadow-sm">
+                <h4 class="text-base font-bold text-indigo-900 mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-star text-indigo-600"></i> Top 3 전략 제언
+                </h4>
+                <div class="space-y-3">
+                    ${(report.top3Recommendations || []).map((rec, i) => `
+                        <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-indigo-100 shadow-sm">
+                            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md text-sm">${i+1}</span>
+                            <p class="text-indigo-900 font-medium text-sm leading-relaxed mt-1.5">${renderMarkdownLike(rec)}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 3. Opportunity Utilization Strategy -->
+                <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm border-t-4 border-t-emerald-500">
+                    <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-trend-up text-emerald-600"></i> 기회 활용 전략
+                    </h4>
+                    ${renderList(report.opportunityStrategies)}
+                </div>
+                
+                <!-- 4. Risk Mitigation Strategy -->
+                <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm border-t-4 border-t-rose-500">
+                    <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-rose-600"></i> 리스크 완화 전략
+                    </h4>
+                    ${renderList(report.riskMitigationStrategies)}
+                </div>
+            </div>
+
+            <!-- 5. Differentiation Messages -->
+            <div class="bg-gradient-to-br from-gray-50 to-white p-8 rounded-xl border border-gray-200 shadow-sm">
+                 <h4 class="text-base font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <i class="fa-regular fa-comment-dots text-gray-600"></i> 차별화 메시지
+                </h4>
+                <div class="grid grid-cols-1 gap-4">
+                    ${(report.differentiationMessages || []).map(msg => `
+                        <div class="relative pl-6 py-1 border-l-4 border-gray-300">
+                            <p class="text-gray-700 text-sm font-medium italic leading-relaxed">"${renderMarkdownLike(msg)}"</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- 6. Key Action Items -->
+            <div class="bg-slate-800 text-white p-8 rounded-xl shadow-lg">
+                <h4 class="text-base font-bold text-white mb-6 flex items-center gap-2">
+                    <i class="fa-solid fa-check-double text-emerald-400"></i> Key Action Items
+                </h4>
+                <div class="grid grid-cols-1 gap-4">
+                    ${actionItems.length > 0 ? actionItems.map((item, i) => `
+                        <div class="flex items-start gap-3 p-3 rounded-lg bg-white/10 border border-white/5">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5">${i+1}</span>
+                            <span class="text-sm text-gray-200 leading-relaxed">${renderMarkdownLike(item)}</span>
+                        </div>
+                    `).join('') : '<div class="text-gray-400 text-sm italic p-2">추천 액션 아이템이 없습니다.</div>'}
+                </div>
+            </div>
+        </div>
+        `;
+    }
+
+    // Legacy fallback (Winning Strategy / Risk Mitigation format)
     return `
         <div class="space-y-8 animate-modal-in">
              <!-- 1. Executive Summary -->
@@ -342,7 +430,7 @@ function renderStrategyContent(report) {
                     ${actionItems.length > 0 ? actionItems.map((item, i) => `
                         <div class="flex items-start gap-3 p-3 rounded-lg bg-white/10 border border-white/5">
                             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold mt-0.5">${i+1}</span>
-                            <span class="text-sm text-gray-200 leading-relaxed">${item}</span>
+                            <span class="text-sm text-gray-200 leading-relaxed">${renderMarkdownLike(item)}</span>
                         </div>
                     `).join('') : '<div class="text-gray-400 text-sm italic p-2">추천 액션 아이템이 없습니다.</div>'}
                 </div>
@@ -430,7 +518,7 @@ async function generateStrategy(deal) {
 
         const prompt = `
 Role: Senior B2B Strategy Consultant.
-Goal: Generate a comprehensive Deal Strategy Report.
+Goal: Generate a comprehensive Deal Strategy Report using a structured 5-layer approach.
 Language: Korean.
 
 Context:
@@ -439,15 +527,30 @@ ${safeJSON(context)}
 Task:
 Analyze the Discovery data (customer journey, pain points) and Assessment data (Biz/Tech fit scores) to create a winning strategy.
 
-Output JSON Structure:
+Output JSON Structure (Must follow this exact schema):
 {
   "executiveSummary": "Overall assessment of the deal health and key status (3-4 sentences).",
-  "winningStrategy": "Specific approach to win this deal, focusing on strengths and opportunities.",
-  "riskMitigation": "Analysis of potential risks (low scores, red flags) and how to overcome them.",
+  "top3Recommendations": [
+    "Strategy 1 (Action-oriented execution strategy)",
+    "Strategy 2",
+    "Strategy 3"
+  ],
+  "opportunityStrategies": [
+    "Opportunity Strategy 1 (Based on SO/WO analysis, linked to Pain/Success Criteria)",
+    "Opportunity Strategy 2"
+  ],
+  "riskMitigationStrategies": [
+    "Risk Strategy 1 (Based on ST/WT analysis, addressing Authority/Budget/Timeline or Tech Fit risks)",
+    "Risk Strategy 2"
+  ],
+  "differentiationMessages": [
+    "Message 1 (Value-based, no feature comparison, aligned with JTBD)",
+    "Message 2"
+  ],
   "actionItems": [
-    "Action 1",
-    "Action 2",
-    "Action 3"
+    "Action Item 1",
+    "Action Item 2",
+    "Action Item 3"
   ]
 }
 `;
