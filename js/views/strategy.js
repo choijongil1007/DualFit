@@ -538,14 +538,14 @@ Output JSON Structure (Must follow this exact schema):
     "Strategy 3"
   ],
   "opportunityStrategies": [
-    "Opportunity Strategy 1 (Based on SO/WO analysis, linked to Pain/Success Criteria. Max 100 characters)",
-    "Opportunity Strategy 2 (Max 100 characters)",
-    "Opportunity Strategy 3 (Max 100 characters)"
+    "Opportunity Strategy 1 (Based on SO/WO analysis, linked to Pain/Success Criteria. Max 150 characters. End sentences concisely e.g., '~음', '~함', '~추천'. Do NOT use polite forms like '~습니다'.)",
+    "Opportunity Strategy 2 (Max 150 characters. Concise ending style.)",
+    "Opportunity Strategy 3 (Max 150 characters. Concise ending style.)"
   ],
   "riskMitigationStrategies": [
-    "Risk Strategy 1 (Based on ST/WT analysis, addressing Authority/Budget/Timeline or Tech Fit risks. Max 100 characters)",
-    "Risk Strategy 2 (Max 100 characters)",
-    "Risk Strategy 3 (Max 100 characters)"
+    "Risk Strategy 1 (Based on ST/WT analysis, addressing Authority/Budget/Timeline or Tech Fit risks. Max 150 characters. End sentences concisely e.g., '~음', '~함', '~추천'. Do NOT use polite forms like '~습니다'.)",
+    "Risk Strategy 2 (Max 150 characters. Concise ending style.)",
+    "Risk Strategy 3 (Max 150 characters. Concise ending style.)"
   ],
   "differentiationMessages": [
     "Message 1 (Value-based, no feature comparison, aligned with JTBD)",
