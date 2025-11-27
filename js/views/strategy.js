@@ -536,12 +536,14 @@ Output JSON Structure (Must follow this exact schema):
     "Strategy 3"
   ],
   "opportunityStrategies": [
-    "Opportunity Strategy 1 (Based on SO/WO analysis, linked to Pain/Success Criteria)",
-    "Opportunity Strategy 2"
+    "Opportunity Strategy 1 (Based on SO/WO analysis, linked to Pain/Success Criteria. Max 100 characters)",
+    "Opportunity Strategy 2 (Max 100 characters)",
+    "Opportunity Strategy 3 (Max 100 characters)"
   ],
   "riskMitigationStrategies": [
-    "Risk Strategy 1 (Based on ST/WT analysis, addressing Authority/Budget/Timeline or Tech Fit risks)",
-    "Risk Strategy 2"
+    "Risk Strategy 1 (Based on ST/WT analysis, addressing Authority/Budget/Timeline or Tech Fit risks. Max 100 characters)",
+    "Risk Strategy 2 (Max 100 characters)",
+    "Risk Strategy 3 (Max 100 characters)"
   ],
   "differentiationMessages": [
     "Message 1 (Value-based, no feature comparison, aligned with JTBD)",
