@@ -8,6 +8,10 @@ import { Store } from './store.js';
 const appContainer = document.getElementById('app');
 const backBtn = document.getElementById('nav-back-btn');
 
+// Expose to window to avoid circular dependency issues in views
+window.app = window.app || {};
+window.app.navigateTo = navigateTo;
+
 // Simple Router
 export function navigateTo(view, params = {}) {
     appContainer.innerHTML = '';

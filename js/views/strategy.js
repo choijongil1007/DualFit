@@ -2,7 +2,6 @@
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
-import { navigateTo } from '../app.js';
 import { showToast, setButtonLoading, renderMarkdownLike } from '../utils.js';
 
 export function renderStrategy(container, dealId, isTab = false) {
@@ -16,12 +15,24 @@ export function renderStrategy(container, dealId, isTab = false) {
         Store.saveDeal(deal);
     }
 
-    const { bizScore, techScore, categoryScores } = calculateScores(deal);
+    let bizScore = 0;
+    let techScore = 0;
+    let categoryScores = { biz: {}, tech: {} };
+
+    try {
+        const scores = calculateScores(deal);
+        bizScore = scores.bizScore;
+        techScore = scores.techScore;
+        categoryScores = scores.categoryScores;
+    } catch (e) {
+        console.warn("Score calculation failed:", e);
+    }
+
     const reportDate = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 
     // Check prerequisites
-    // Discovery: At least one stage must be frozen (analyzed)
-    const isDiscoveryDone = Object.values(deal.discovery).some(stage => stage.frozen && stage.result);
+    // Discovery: Relaxed check - consider done if ANY stage has a result (ignoring frozen state for UX)
+    const isDiscoveryDone = deal.discovery && Object.values(deal.discovery).some(stage => !!stage.result);
     // Assessment: Scores must be calculated (non-zero implies some assessment done)
     const isAssessmentDone = (bizScore > 0 && techScore > 0); 
     
@@ -201,7 +212,7 @@ export function renderStrategy(container, dealId, isTab = false) {
     attachEvents(container, deal, isReady);
 }
 
-// Helper: Calculate scores
+// Helper: Calculate scores safely
 function calculateScores(deal) {
     let categoryScores = { biz: {}, tech: {} };
     let bizTotal = 0;
@@ -210,14 +221,23 @@ function calculateScores(deal) {
     let techWeightTotal = 0;
 
     ['biz', 'tech'].forEach(type => {
-        ASSESSMENT_CONFIG[type].categories.forEach(cat => {
+        const config = ASSESSMENT_CONFIG[type];
+        if (!config || !config.categories) return;
+
+        config.categories.forEach(cat => {
             let catSum = 0;
+            // Handle missing scores
+            const scores = (deal.assessment[type] && deal.assessment[type].scores) ? deal.assessment[type].scores : {};
+            
             cat.items.forEach((_, idx) => {
-                const val = deal.assessment[type].scores[`${cat.id}_${idx}`] || 0;
+                const val = scores[`${cat.id}_${idx}`] || 0;
                 catSum += (val === 0 ? 1 : val); // default to 1 if 0
             });
-            const avg = catSum / cat.items.length;
-            const weight = deal.assessment[type].weights[cat.id] || cat.defaultWeight || 0;
+            const avg = catSum / (cat.items.length || 1);
+            
+            // Handle missing weights
+            const weights = (deal.assessment[type] && deal.assessment[type].weights) ? deal.assessment[type].weights : {};
+            const weight = (weights[cat.id] !== undefined) ? weights[cat.id] : (cat.defaultWeight || 0);
             
             categoryScores[type][cat.id] = avg;
 
@@ -247,6 +267,7 @@ function calculateScores(deal) {
 }
 
 function renderScoreBars(catScores) {
+    if (!catScores) return '';
     const labels = {
         // Biz
         budget: "예산 (Budget)",
@@ -330,7 +351,9 @@ function attachEvents(container, deal, isReady) {
     const btnBack = container.querySelector('#btn-back-details');
     if (btnBack) {
         btnBack.addEventListener('click', () => {
-            navigateTo('details', { id: deal.id });
+             if (window.app && window.app.navigateTo) {
+                window.app.navigateTo('details', { id: deal.id });
+             }
         });
     }
 
@@ -353,21 +376,28 @@ function attachEvents(container, deal, isReady) {
     const btnGoDiscovery = container.querySelector('#btn-go-discovery-missing');
     if (btnGoDiscovery) {
         btnGoDiscovery.addEventListener('click', () => {
-            navigateTo('details', { id: deal.id, tab: 'discovery' });
+             if (window.app && window.app.navigateTo) {
+                window.app.navigateTo('details', { id: deal.id, tab: 'discovery' });
+             }
         });
     }
 
     const btnGoAssessment = container.querySelector('#btn-go-assessment-missing');
     if (btnGoAssessment) {
         btnGoAssessment.addEventListener('click', () => {
-            navigateTo('details', { id: deal.id, tab: 'assessment' });
+             if (window.app && window.app.navigateTo) {
+                window.app.navigateTo('details', { id: deal.id, tab: 'assessment' });
+             }
         });
     }
 }
 
 async function generateStrategy(deal) {
     const contentArea = document.getElementById('strategy-ai-content');
-    if (!contentArea) return;
+    if (!contentArea) {
+        console.error("Strategy content area not found.");
+        return;
+    }
 
     // Loading State
     contentArea.innerHTML = `
@@ -427,13 +457,13 @@ Output JSON Structure:
         showToast('전략 보고서가 생성되었습니다.', 'success');
 
     } catch (error) {
-        console.error(error);
+        console.error("Strategy generation error:", error);
         contentArea.innerHTML = `
             <div class="flex flex-col items-center justify-center py-12 text-red-500">
                 <i class="fa-solid fa-triangle-exclamation text-2xl mb-3"></i>
                 <p class="font-bold">분석 실패</p>
                 <p class="text-sm mt-1 text-red-400">${error.message}</p>
-                <button onclick="document.getElementById('btn-recalc-strategy')?.click()" class="mt-4 px-4 py-2 bg-white border border-red-200 rounded text-sm text-red-600 hover:bg-red-50">다시 시도</button>
+                <button onclick="document.getElementById('btn-recalc-strategy')?.click() || document.getElementById('btn-recalc-tab-strategy')?.click()" class="mt-4 px-4 py-2 bg-white border border-red-200 rounded text-sm text-red-600 hover:bg-red-50">다시 시도</button>
             </div>
         `;
         showToast('전략 생성 실패', 'error');
