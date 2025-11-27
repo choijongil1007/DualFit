@@ -1,6 +1,4 @@
 
-
-
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -633,53 +631,45 @@ async function generateStrategy(deal) {
         const safeJSON = (obj) => JSON.stringify(obj, null, 2);
 
         const prompt = `
-Role: Senior B2B Strategy Consultant.
-Goal: Generate a comprehensive Deal Strategy Report using a structured 5-layer approach.
+Role: Senior B2B Strategy Consultant & Data Auditor.
+Goal: Generate a comprehensive Deal Strategy Report.
 Language: Korean.
 
 Context:
 ${safeJSON(context)}
 
-Task:
-1. Analyze the 'DiscoveryLogs' (customer journey, pain points) and 'AssessmentFinal' (Biz/Tech fit scores).
-2. Retrospective Inference: Based on the qualitative logs in each Discovery stage (Awareness -> Consideration -> Evaluation -> Purchase), estimate what the Biz Fit and Tech Fit scores (0-100 scale) would have been at that specific time.
-   - If a stage has no meaningful data/logs, return null for that stage.
-   - Calculate 'totalScore' as the average of bizScore and techScore.
-3. Create a winning strategy and risk mitigation plan.
+CRITICAL TASK 1: Retrospective Scoring (Win Probability Trend)
+You must reverse-engineer the Biz Fit and Tech Fit scores (0-100) for each stage (Awareness -> Purchase).
+RULES:
+1. **ANTI-LINEAR**: DO NOT simply output 20, 40, 60, 80. Real deals have ups and downs.
+2. **SENTIMENT BASED**: 
+   - Look at the text in 'discoveryLogs'. 
+   - If a stage has NEGATIVE words (e.g., "Budget cut", "Complex", "Delay", "Competitor"), the score MUST DROP from the previous stage.
+   - If a stage has NO meaningful text (empty or very short), return NULL for that stage (or a very low score if it's the start).
+3. **DECOUPLING**: Biz Score and Tech Score MUST NOT move in parallel. 
+   - Example: "Tech is perfect, but Budget is low" -> Tech=90, Biz=30.
+4. **Final alignment**: The 'purchase' stage score should logically approach the 'assessmentFinal' score provided in context, but the path there should reflect the struggle in the logs.
 
-Output JSON Structure (Must follow this exact schema):
+CRITICAL TASK 2: Strategy Generation
+1. Top 3 Recommendations: 3 specific execution strategies.
+2. Opportunity Strategies: 3 items. Max 150 chars each. End with "~음", "~함".
+3. Risk Mitigation: 3 items. Max 150 chars each. End with "~음", "~함".
+4. Differentiation: 2 items. Value-based.
+
+Output JSON Structure:
 {
   "winProbabilityTrend": [
-    { "stage": "awareness", "bizScore": 30, "techScore": 20, "totalScore": 25 },
-    { "stage": "consideration", "bizScore": 50, "techScore": 40, "totalScore": 45 },
-    { "stage": "evaluation", "bizScore": 70, "techScore": 60, "totalScore": 65 },
-    { "stage": "purchase", "bizScore": 85, "techScore": 80, "totalScore": 82.5 }
+    { "stage": "awareness", "bizScore": number|null, "techScore": number|null, "totalScore": number|null },
+    { "stage": "consideration", "bizScore": number|null, "techScore": number|null, "totalScore": number|null },
+    { "stage": "evaluation", "bizScore": number|null, "techScore": number|null, "totalScore": number|null },
+    { "stage": "purchase", "bizScore": number|null, "techScore": number|null, "totalScore": number|null }
   ],
-  "executiveSummary": "Overall assessment of the deal health and key status (3-4 sentences).",
-  "top3Recommendations": [
-    "Strategy 1 (Action-oriented execution strategy)",
-    "Strategy 2",
-    "Strategy 3"
-  ],
-  "opportunityStrategies": [
-    "Opportunity Strategy 1 (Based on SO/WO analysis. Max 150 chars. End concisely '~음', '~함'.)",
-    "Opportunity Strategy 2 (Max 150 chars. Concise ending style.)",
-    "Opportunity Strategy 3 (Max 150 chars. Concise ending style.)"
-  ],
-  "riskMitigationStrategies": [
-    "Risk Strategy 1 (Based on ST/WT analysis. Max 150 chars. End concisely '~음', '~함'.)",
-    "Risk Strategy 2 (Max 150 chars. Concise ending style.)",
-    "Risk Strategy 3 (Max 150 chars. Concise ending style.)"
-  ],
-  "differentiationMessages": [
-    "Message 1 (Value-based, no feature comparison, aligned with JTBD)",
-    "Message 2"
-  ],
-  "actionItems": [
-    "Action Item 1",
-    "Action Item 2",
-    "Action Item 3"
-  ]
+  "executiveSummary": "Overall assessment...",
+  "top3Recommendations": ["...", "...", "..."],
+  "opportunityStrategies": ["...", "...", "..."],
+  "riskMitigationStrategies": ["...", "...", "..."],
+  "differentiationMessages": ["...", "..."],
+  "actionItems": ["...", "..."]
 }
 `;
 
