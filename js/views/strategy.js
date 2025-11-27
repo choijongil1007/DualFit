@@ -168,10 +168,10 @@ export function renderStrategy(container, dealId, isTab = false) {
                  <!-- AI Section -->
                  <div class="p-10 md:p-12 bg-gray-50/50">
                     <div class="flex items-center justify-between mb-8">
-                        <h3 class="text-lg font-bold text-gray-900 border-l-4 border-indigo-500 pl-4 flex items-center gap-2">
+                        <h3 class="text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 flex items-center gap-2">
                             AI 전략 분석 (Competitive Strategy)
                         </h3>
-                        <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded hidden md:inline-block">Powered by 5-Layer Strategy Engine</span>
+                        <span class="text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200 px-2 py-1 rounded hidden md:inline-block">Powered by 5-Layer Strategy Engine</span>
                     </div>
                     
                     <div id="strategy-ai-content" class="min-h-[200px]">
@@ -183,7 +183,7 @@ export function renderStrategy(container, dealId, isTab = false) {
                                 <h3 class="text-lg font-bold text-gray-900 mb-2">데이터가 충분하지 않습니다</h3>
                                 <p class="text-gray-500 max-w-md mx-auto mb-8 text-sm leading-relaxed">
                                     효과적인 AI 전략 보고서를 생성하기 위해서는<br>
-                                    <span class="font-semibold text-indigo-600">Discovery</span> 분석과 <span class="font-semibold text-indigo-600">Assessment</span> 평가가 먼저 완료되어야 합니다.
+                                    <span class="font-semibold text-gray-900">Discovery</span> 분석과 <span class="font-semibold text-gray-900">Assessment</span> 평가가 먼저 완료되어야 합니다.
                                 </p>
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <button id="btn-go-discovery-missing" class="px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-all shadow-sm flex items-center justify-center gap-2">
@@ -318,23 +318,25 @@ function renderStrategyContent(report) {
              <!-- 1. Executive Summary -->
              <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
                 <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-quote-left text-indigo-500"></i> Executive Summary
+                    <i class="fa-solid fa-quote-left text-gray-400"></i> Executive Summary
                 </h4>
                 <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                     ${renderMarkdownLike(report.executiveSummary)}
                 </div>
             </div>
 
-            <!-- 2. Top 3 Strategic Recommendations -->
-            <div class="bg-indigo-50/50 p-8 rounded-xl border border-indigo-100 shadow-sm">
-                <h4 class="text-base font-bold text-indigo-900 mb-6 flex items-center gap-2">
-                    <i class="fa-solid fa-star text-indigo-600"></i> Top 3 전략 제언
+            <!-- 2. Top 3 Strategic Recommendations (Premium Theme: Gray/Black/Gold) -->
+            <div class="bg-gray-50 p-8 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gray-100 rounded-bl-full -mr-10 -mt-10 pointer-events-none"></div>
+
+                <h4 class="text-base font-bold text-gray-900 mb-6 flex items-center gap-2 relative z-10">
+                    <i class="fa-solid fa-star text-amber-500"></i> Top 3 전략 제언
                 </h4>
-                <div class="space-y-3">
+                <div class="space-y-3 relative z-10">
                     ${(report.top3Recommendations || []).map((rec, i) => `
-                        <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-indigo-100 shadow-sm">
-                            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md text-sm">${i+1}</span>
-                            <p class="text-indigo-900 font-medium text-sm leading-relaxed mt-1.5">${renderMarkdownLike(rec)}</p>
+                        <div class="flex items-start gap-4 p-4 bg-white rounded-lg border border-gray-200 shadow-sm hover:border-gray-300 transition-colors">
+                            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold shadow-md text-sm">${i+1}</span>
+                            <p class="text-gray-800 font-medium text-sm leading-relaxed mt-1.5">${renderMarkdownLike(rec)}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -396,7 +398,7 @@ function renderStrategyContent(report) {
              <!-- 1. Executive Summary -->
              <div class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
                 <h4 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-quote-left text-indigo-500"></i> Executive Summary
+                    <i class="fa-solid fa-quote-left text-gray-400"></i> Executive Summary
                 </h4>
                 <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                     ${renderMarkdownLike(report.executiveSummary)}
