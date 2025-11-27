@@ -313,13 +313,13 @@ function renderScoreBars(catScores) {
 
 function renderTrendChart(trendData) {
     if (!trendData || !Array.isArray(trendData)) {
-        return `<div class="h-[400px] flex items-center justify-center text-gray-400 text-sm bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
+        return `<div class="h-[500px] flex items-center justify-center text-gray-400 text-lg bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
     }
 
     // Increased width and height for larger visualization
     const width = 1200; 
-    const height = 400;
-    const padding = 70; // Increased padding for larger labels
+    const height = 600; // Increased height significantly for vertical spacing
+    const padding = 80; // Increased padding for larger labels
     
     // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
     const stages = ['1. 인식 (Awareness)', '2. 고려 (Consideration)', '3. 평가 (Evaluation)', '4. 구매 (Purchase)'];
@@ -360,20 +360,20 @@ function renderTrendChart(trendData) {
 
     return `
         <div class="relative w-full h-auto overflow-hidden">
-            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 350px;">
+            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 500px;">
                 <!-- Grid Lines -->
                 <line x1="${padding}" y1="${getY(0)}" x2="${width-padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" />
                 <line x1="${padding}" y1="${getY(50)}" x2="${width-padding}" y2="${getY(50)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="6 6" />
                 <line x1="${padding}" y1="${getY(100)}" x2="${width-padding}" y2="${getY(100)}" stroke="#e5e7eb" stroke-width="1" />
                 
                 <!-- Y Axis Labels (Larger Text) -->
-                <text x="${padding-15}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">0</text>
-                <text x="${padding-15}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">50</text>
-                <text x="${padding-15}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">100</text>
+                <text x="${padding-20}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="16" font-weight="500" fill="#9ca3af">0</text>
+                <text x="${padding-20}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="16" font-weight="500" fill="#9ca3af">50</text>
+                <text x="${padding-20}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="16" font-weight="500" fill="#9ca3af">100</text>
 
                 <!-- X Axis Labels (Larger Text) -->
                 ${stages.map((label, i) => `
-                    <text x="${getX(i)}" y="${height - 20}" text-anchor="middle" font-size="15" font-weight="bold" fill="#374151">${label}</text>
+                    <text x="${getX(i)}" y="${height - 30}" text-anchor="middle" font-size="20" font-weight="bold" fill="#374151">${label}</text>
                 `).join('')}
 
                 <!-- Lines (Thicker) -->
