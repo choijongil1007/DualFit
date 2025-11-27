@@ -125,55 +125,27 @@ export function renderSummary(container, dealId) {
                     </div>
                 </div>
 
-                <!-- 3. AI Strategic Analysis -->
+                <!-- 3. AI Strategic Analysis (New 5-Layer Engine) -->
                 <div class="p-10 md:p-12 bg-gray-50/50">
-                    <h3 class="text-lg font-bold text-gray-900 border-l-4 border-indigo-500 pl-4 mb-8 flex items-center gap-2">
-                        AI 전략 분석 <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-sm"></i>
-                    </h3>
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-lg font-bold text-gray-900 border-l-4 border-indigo-500 pl-4 flex items-center gap-2">
+                            AI 전략 분석 (Competitive Strategy)
+                        </h3>
+                        <span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded hidden md:inline-block">Powered by 5-Layer Strategy Engine</span>
+                    </div>
 
                     <div id="summary-ai-content" class="min-h-[200px]">
-                        <!-- Content will be injected here (Skeleton or Result) -->
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-pulse">
-                            <div class="lg:col-span-2 space-y-4">
-                                <div class="h-40 bg-gray-200 rounded-lg w-full"></div>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
-                                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
-                                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
+                        <!-- Content will be injected here -->
+                        <div class="space-y-8 animate-pulse">
+                            <div class="h-40 bg-gray-200 rounded-lg w-full"></div>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="h-40 bg-gray-200 rounded-lg"></div>
+                                <div class="h-40 bg-gray-200 rounded-lg"></div>
                             </div>
                         </div>
+                        <p class="text-center text-xs text-gray-400 mt-6 font-medium">전략 수립 중...</p>
                     </div>
                 </div>
-
-                <!-- 4. Risk Factors (Full Width) -->
-                ${lowItems.length > 0 ? `
-                <div class="p-10 md:p-12 border-t border-gray-200 bg-red-50/30">
-                    <h3 class="text-lg font-bold text-red-700 border-l-4 border-red-500 pl-4 mb-8 flex items-center gap-3">
-                        리스크 요인 <span class="bg-red-100 text-red-600 text-xs px-2.5 py-0.5 rounded-full font-bold">${lowItems.length}</span>
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        ${lowItems.map(item => `
-                            <div class="bg-white border border-red-100 p-5 rounded-lg shadow-sm flex items-start gap-4">
-                                <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0 text-red-500 mt-0.5">
-                                    <i class="fa-solid fa-triangle-exclamation text-xs"></i>
-                                </div>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">${item.catLabel}</div>
-                                    <div class="text-sm font-bold text-gray-800 mb-1 leading-tight">${item.label}</div>
-                                    <div class="text-xs text-red-600 font-medium">Score: ${item.val} / 5</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : `
-                <div class="p-10 md:p-12 border-t border-gray-200 bg-emerald-50/30 flex items-center justify-center gap-3 text-emerald-700">
-                    <i class="fa-solid fa-circle-check text-xl"></i>
-                    <span class="font-medium">치명적인 리스크가 발견되지 않았습니다. 딜 건전성이 높습니다.</span>
-                </div>
-                `}
 
                 <!-- Footer -->
                 <div class="bg-gray-100 p-8 text-center border-t border-gray-200">
@@ -194,7 +166,7 @@ export function renderSummary(container, dealId) {
     });
 
     // Initial Load Logic: Use Cached or Generate New
-    if (deal.summaryReport && typeof deal.summaryReport === 'object' && deal.summaryReport.executiveSummary) {
+    if (deal.summaryReport && deal.summaryReport.top3) {
         renderAIContent(deal.summaryReport);
     } else {
         generateSummaryAI(deal, bizScore, techScore, lowItems);
@@ -203,7 +175,6 @@ export function renderSummary(container, dealId) {
 
 function renderScoreBars(categoryData) {
     return categoryData.map(cat => {
-        // Calculate width percentage (score / 5 * 100)
         const pct = (cat.avg / 5) * 100;
         let colorClass = 'bg-gray-400';
         if (cat.avg >= 4) colorClass = 'bg-emerald-500';
@@ -235,7 +206,6 @@ function calculateScores(deal) {
             const item1 = deal.assessment[type].scores[`${cat.id}_0`] || 0;
             const item2 = deal.assessment[type].scores[`${cat.id}_1`] || 0;
             
-            // Treat 0 as 1 for calculation
             const val1 = item1 === 0 ? 1 : item1;
             const val2 = item2 === 0 ? 1 : item2;
 
@@ -243,17 +213,10 @@ function calculateScores(deal) {
             const weight = deal.assessment[type].weights[cat.id] || 0;
             totalWeightedScore += avg * weight;
 
-            catScores.push({
-                id: cat.id,
-                label: cat.label,
-                avg: avg
-            });
+            catScores.push({ id: cat.id, label: cat.label, avg: avg });
         });
 
-        return { 
-            score: Math.round(totalWeightedScore / 5), 
-            catScores 
-        };
+        return { score: Math.round(totalWeightedScore / 5), catScores };
     };
 
     const bizData = calcSection('biz');
@@ -278,10 +241,7 @@ function calculateScores(deal) {
         bizScore: bizData.score, 
         techScore: techData.score, 
         lowItems,
-        categoryScores: {
-            biz: bizData.catScores,
-            tech: techData.catScores
-        }
+        categoryScores: { biz: bizData.catScores, tech: techData.catScores }
     };
 }
 
@@ -289,45 +249,82 @@ function renderAIContent(result) {
     const container = document.getElementById('summary-ai-content');
     if (!container) return;
 
-    const formatText = (text) => {
+    const formatDesc = (text) => {
         if (!text) return '';
         let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
         formatted = formatted.replace(/(^|\n)[-]\s+/g, '$1• ');
         return formatted;
     };
 
+    const renderCard = (title, desc, colorClass) => `
+        <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
+            <h5 class="text-sm font-bold ${colorClass} mb-2">${title}</h5>
+            <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line flex-grow">${formatDesc(desc)}</div>
+        </div>
+    `;
+
     container.innerHTML = `
-        <div class="flex flex-col gap-10">
-            <!-- Executive Summary -->
-            <div class="w-full">
-                <h4 class="text-xl font-bold text-gray-900 mb-4">요약</h4>
-                <div class="bg-white border border-gray-200 p-8 rounded-lg shadow-sm text-gray-800 leading-relaxed text-xl whitespace-pre-line font-medium">
-                    ${result.executiveSummary || '요약이 생성되지 않았습니다.'}
+        <div class="space-y-10">
+            <!-- 1. Top 3 Strategic Priorities -->
+            <div>
+                <h4 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                    <i class="fa-solid fa-crown text-yellow-500"></i> Top 3 핵심 전략 (Priority)
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    ${result.top3 ? result.top3.map((item, idx) => `
+                        <div class="bg-gray-900 text-white rounded-xl p-6 shadow-lg relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110"></div>
+                            <div class="relative z-10">
+                                <div class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Strategy 0${idx+1}</div>
+                                <h5 class="text-lg font-bold text-white mb-3 leading-tight">${item.title}</h5>
+                                <div class="text-sm text-gray-300 leading-relaxed whitespace-pre-line">${formatDesc(item.desc)}</div>
+                            </div>
+                        </div>
+                    `).join('') : '<div class="text-gray-400">데이터 없음</div>'}
                 </div>
             </div>
-            
-            <!-- Action Plan -->
-            <div class="w-full">
-                <h4 class="text-xl font-bold text-gray-900 mb-4">전략적 제언</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    ${result.actions ? result.actions.map(act => {
-                        let icon = 'fa-check';
-                        let bgClass = 'bg-white border-gray-200';
-                        if (act.type === 'strategic') { icon = 'fa-chess'; bgClass = 'bg-indigo-50 border-indigo-100 text-indigo-900'; }
-                        if (act.type === 'risk') { icon = 'fa-shield-halved'; bgClass = 'bg-amber-50 border-amber-100 text-amber-900'; }
-                        
-                        return `
-                            <div class="${bgClass} border p-6 rounded-lg shadow-sm hover:shadow-md transition-all h-full">
-                                <div class="flex items-start gap-3">
-                                    <div class="mt-1 flex-shrink-0"><i class="fa-solid ${icon} text-sm opacity-70"></i></div>
-                                    <div class="w-full">
-                                        <div class="text-base font-bold mb-3 text-gray-900">${act.title}</div>
-                                        <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line pl-1">${formatText(act.desc)}</div>
-                                    </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 2. Opportunity Strategies -->
+                <div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                        <i class="fa-solid fa-rocket text-blue-600"></i> 기회 활용 전략 (Opportunity)
+                    </h4>
+                    <div class="space-y-4">
+                        ${result.opportunities ? result.opportunities.map(item => renderCard(item.title, item.desc, 'text-blue-700')).join('') : ''}
+                    </div>
+                </div>
+
+                <!-- 3. Risk Mitigation -->
+                <div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-red-600"></i> 리스크 완화 전략 (Risk)
+                    </h4>
+                    <div class="space-y-4">
+                        ${result.risks ? result.risks.map(item => renderCard(item.title, item.desc, 'text-red-700')).join('') : ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Differentiation Messages -->
+            <div>
+                <h4 class="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-purple-600"></i> 차별화 메시지 (Differentiation)
+                </h4>
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 md:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${result.differentiation ? result.differentiation.map(item => `
+                            <div class="flex gap-4">
+                                <div class="mt-1 flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-quote-left text-sm"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-900 text-base mb-1">${item.title}</h5>
+                                    <p class="text-gray-700 text-sm leading-relaxed">${formatDesc(item.desc)}</p>
                                 </div>
                             </div>
-                        `;
-                    }).join('') : '<div class="text-gray-400 text-sm col-span-2">추천 액션이 없습니다.</div>'}
+                        `).join('') : ''}
+                    </div>
                 </div>
             </div>
         </div>
@@ -337,18 +334,16 @@ function renderAIContent(result) {
 async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
     const container = document.getElementById('summary-ai-content');
     
+    // Skeleton UI
     container.innerHTML = `
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-pulse">
-            <div class="lg:col-span-2 space-y-4">
-                <div class="h-40 bg-gray-200 rounded-lg w-full"></div>
-            </div>
-            <div class="space-y-4">
-                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
-                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
-                <div class="h-10 bg-gray-200 rounded-lg w-full"></div>
+        <div class="space-y-8 animate-pulse">
+            <div class="h-40 bg-gray-200 rounded-lg w-full"></div>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="h-40 bg-gray-200 rounded-lg"></div>
+                <div class="h-40 bg-gray-200 rounded-lg"></div>
             </div>
         </div>
-        <p class="text-center text-xs text-gray-400 mt-6 font-medium">AI 전략 분석 중...</p>
+        <p class="text-center text-xs text-gray-400 mt-6 font-medium">5단계 추론 엔진 가동 중... (약 5-10초 소요)</p>
     `;
 
     try {
@@ -357,31 +352,56 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
             .map(s => s.result.evidenceSummary)
             .join(' ');
 
+        const jtbd = Object.values(deal.discovery)
+            .filter(s => s.result && s.result.jtbd)
+            .flatMap(s => s.result.jtbd)
+            .join(', ');
+
         const lowItemsText = lowItems.map(i => `- ${i.catLabel} (${i.label}): ${i.val}점`).join('\n');
 
         const prompt = `
-            Role: Senior Sales Strategist.
-            Task: Write a final executive summary for a sales deal.
-            Language: Korean (Professional Report Style).
-            
-            Deal Context:
+            [SYSTEM]
+            Role: Competitive Strategy Generator for B2B Sales.
+            Goal: Generate deal-specific competitive strategies using a 5-Layer Strategy Engine.
+            Language: Korean (Professional Business Tone).
+
+            [INTERNAL ENGINE LOGIC - DO NOT OUTPUT THIS PART]
+            1. Demand Signal Layer: Analyze Behavior, Emotion, Pain, JTBD to find urgency & political signals.
+            2. Fit Matrix Layer: Analyze Biz/Tech scores to define Strengths/Weaknesses.
+            3. Strategic Tension Layer: Combine Opportunity/Threat with Strength/Weakness -> Derive SO, ST, WO, WT strategies.
+            4. Value Narrative Layer: Create differentiation messages based on JTBD.
+            5. Action Playbook Layer: Generate specific actions for [AE], [PreSales], [CSM].
+
+            [DATA INPUT]
             - Client: ${deal.clientName}
             - Deal: ${deal.dealName}
-            - Biz Score: ${bizScore} / 100
-            - Tech Score: ${techScore} / 100
-            - Risk Factors:
+            - Biz Score: ${bizScore}/100, Tech Score: ${techScore}/100
+            - Weak Points (Risk):
             ${lowItemsText}
-            
-            Key Evidence from Discovery:
-            ${evidence}
-            
-            JSON Requirements:
+            - Discovery Evidence: ${evidence}
+            - Customer JTBD: ${jtbd}
+
+            [OUTPUT REQUIREMENT]
+            Return a SINGLE JSON object. 
+            Prefix specific actions with role tags like [AE], [PreSales], [CSM] where applicable in the description.
+
             {
-                "executiveSummary": "A comprehensive summary diagnosing the deal's health, main strengths, and critical weaknesses. Split into 2-3 paragraphs separated by line breaks(\\n\\n). Be direct and professional.",
-                "actions": [
-                    { "type": "strategic", "title": "Action Title", "desc": "Detailed explanation. Use bullet points (- ) and line breaks if there are multiple steps." },
-                    { "type": "tactical", "title": "Action Title", "desc": "Detailed explanation. Use bullet points (- ) and line breaks if there are multiple steps." },
-                    { "type": "risk", "title": "Action Title", "desc": "Detailed explanation. Use bullet points (- ) and line breaks if there are multiple steps." }
+                "top3": [ 
+                    { "title": "Strategy Title", "desc": "Actionable strategy description with Role tag." },
+                    { "title": "Strategy Title", "desc": "..." },
+                    { "title": "Strategy Title", "desc": "..." }
+                ],
+                "opportunities": [
+                    { "title": "Opportunity Strategy 1", "desc": "Offensive strategy based on SO/WO." },
+                    { "title": "Opportunity Strategy 2", "desc": "..." }
+                ],
+                "risks": [
+                    { "title": "Risk Mitigation 1", "desc": "Defensive strategy based on ST/WT & Fit Risks." },
+                    { "title": "Risk Mitigation 2", "desc": "..." }
+                ],
+                "differentiation": [
+                    { "title": "Value Message 1", "desc": "Key differentiator against competitors." },
+                    { "title": "Value Message 2", "desc": "..." }
                 ]
             }
         `;
@@ -399,7 +419,7 @@ async function generateSummaryAI(deal, bizScore, techScore, lowItems) {
             <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center">
                 <i class="fa-solid fa-circle-exclamation text-red-500 text-2xl mb-3"></i>
                 <p class="text-red-700 font-bold text-sm">전략 보고서 생성 실패</p>
-                <p class="text-red-500 text-xs mt-1">네트워크 상태를 확인하고 다시 시도해주세요.</p>
+                <p class="text-red-500 text-xs mt-1">AI 엔진 응답 오류. 다시 시도해주세요.</p>
             </div>
         `;
     }

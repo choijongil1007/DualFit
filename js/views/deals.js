@@ -346,8 +346,10 @@ function attachEvents() {
             e.stopPropagation();
             e.preventDefault();
             const card = btn.closest('.deal-card');
-            deleteTargetId = card.dataset.id;
-            toggleDeleteModal(true);
+            if (card) {
+                deleteTargetId = card.dataset.id;
+                toggleDeleteModal(true);
+            }
         });
     });
 
