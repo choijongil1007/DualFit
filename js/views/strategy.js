@@ -1,4 +1,5 @@
 
+
 import { Store } from '../store.js';
 import { callGemini } from '../api.js';
 import { ASSESSMENT_CONFIG } from '../config.js';
@@ -101,8 +102,8 @@ export function renderStrategy(container, dealId, isTab = false) {
 
                 <!-- Dashboard -->
                  <div class="p-10 md:p-12 border-b border-gray-100">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-                         <!-- Left Column: Quadrant & Trend -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-12">
+                         <!-- Left Column: Quadrant Only -->
                         <div class="lg:col-span-5 flex flex-col items-center space-y-8">
                             <!-- Section Title -->
                             <div class="w-full">
@@ -135,16 +136,6 @@ export function renderStrategy(container, dealId, isTab = false) {
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- New: Win Probability Trend Chart -->
-                            <div class="w-full">
-                                <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
-                                    Win Probability 추이
-                                </h3>
-                                <div class="w-full bg-white border border-gray-200 rounded-lg p-4 shadow-sm relative">
-                                    ${renderTrendChart(deal.strategyReport?.winProbabilityTrend)}
-                                </div>
-                            </div>
                         </div>
                         
                         <!-- Breakdown -->
@@ -174,6 +165,16 @@ export function renderStrategy(container, dealId, isTab = false) {
                                     </div>
                                 </div>
                              </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Width Trend Chart -->
+                    <div class="pt-10 border-t border-gray-100">
+                        <h3 class="w-full text-lg font-bold text-gray-900 border-l-4 border-gray-900 pl-4 mb-6">
+                            Win Probability 추이
+                        </h3>
+                        <div class="w-full bg-white border border-gray-200 rounded-lg p-8 shadow-sm relative h-auto">
+                            ${renderTrendChart(deal.strategyReport?.winProbabilityTrend)}
                         </div>
                     </div>
                  </div>
@@ -312,15 +313,16 @@ function renderScoreBars(catScores) {
 
 function renderTrendChart(trendData) {
     if (!trendData || !Array.isArray(trendData)) {
-        return `<div class="h-[350px] flex items-center justify-center text-gray-400 text-sm bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
+        return `<div class="h-[400px] flex items-center justify-center text-gray-400 text-sm bg-gray-50/50 rounded-lg">추이 데이터가 없습니다. 전략을 재생성해주세요.</div>`;
     }
 
-    const width = 600;
-    const height = 350;
-    const padding = 50;
+    // Increased width and height for larger visualization
+    const width = 1200; 
+    const height = 400;
+    const padding = 70; // Increased padding for larger labels
     
     // Stages: Awareness(0), Consideration(1), Evaluation(2), Purchase(3)
-    const stages = ['인식', '고려', '평가', '구매'];
+    const stages = ['1. 인식 (Awareness)', '2. 고려 (Consideration)', '3. 평가 (Evaluation)', '4. 구매 (Purchase)'];
     
     // Helper to scale points
     const getX = (index) => padding + (index * (width - 2 * padding) / 3);
@@ -343,41 +345,41 @@ function renderTrendChart(trendData) {
         // Biz
         const yBiz = getY(data.bizScore || 0);
         pathBiz += (index === 0 || !trendData[index-1]) ? `M ${x} ${yBiz}` : ` L ${x} ${yBiz}`;
-        pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="6" fill="#9333ea" stroke="white" stroke-width="2" />`;
+        pointsBiz += `<circle cx="${x}" cy="${yBiz}" r="8" fill="#9333ea" stroke="white" stroke-width="3" />`;
 
         // Tech
         const yTech = getY(data.techScore || 0);
         pathTech += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTech}` : ` L ${x} ${yTech}`;
-        pointsTech += `<circle cx="${x}" cy="${yTech}" r="6" fill="#2563eb" stroke="white" stroke-width="2" />`;
+        pointsTech += `<circle cx="${x}" cy="${yTech}" r="8" fill="#2563eb" stroke="white" stroke-width="3" />`;
 
         // Total
         const yTotal = getY(data.totalScore || 0);
         pathTotal += (index === 0 || !trendData[index-1]) ? `M ${x} ${yTotal}` : ` L ${x} ${yTotal}`;
-        pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="7" fill="#059669" stroke="white" stroke-width="3" />`;
+        pointsTotal += `<circle cx="${x}" cy="${yTotal}" r="10" fill="#059669" stroke="white" stroke-width="4" />`;
     });
 
     return `
-        <div class="relative w-full h-[350px] overflow-hidden">
-            <svg viewBox="0 0 ${width} ${height}" class="w-full h-full">
+        <div class="relative w-full h-auto overflow-hidden">
+            <svg viewBox="0 0 ${width} ${height}" class="w-full h-auto" style="min-height: 350px;">
                 <!-- Grid Lines -->
                 <line x1="${padding}" y1="${getY(0)}" x2="${width-padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" />
-                <line x1="${padding}" y1="${getY(50)}" x2="${width-padding}" y2="${getY(50)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4 4" />
+                <line x1="${padding}" y1="${getY(50)}" x2="${width-padding}" y2="${getY(50)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="6 6" />
                 <line x1="${padding}" y1="${getY(100)}" x2="${width-padding}" y2="${getY(100)}" stroke="#e5e7eb" stroke-width="1" />
                 
-                <!-- Y Axis Labels -->
-                <text x="${padding-10}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="12" fill="#9ca3af">0</text>
-                <text x="${padding-10}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="12" fill="#9ca3af">50</text>
-                <text x="${padding-10}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="12" fill="#9ca3af">100</text>
+                <!-- Y Axis Labels (Larger Text) -->
+                <text x="${padding-15}" y="${getY(0)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">0</text>
+                <text x="${padding-15}" y="${getY(50)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">50</text>
+                <text x="${padding-15}" y="${getY(100)}" text-anchor="end" alignment-baseline="middle" font-size="14" font-weight="500" fill="#9ca3af">100</text>
 
-                <!-- X Axis Labels -->
+                <!-- X Axis Labels (Larger Text) -->
                 ${stages.map((label, i) => `
-                    <text x="${getX(i)}" y="${height - 15}" text-anchor="middle" font-size="13" font-weight="bold" fill="#4b5563">${label}</text>
+                    <text x="${getX(i)}" y="${height - 20}" text-anchor="middle" font-size="15" font-weight="bold" fill="#374151">${label}</text>
                 `).join('')}
 
-                <!-- Lines -->
-                <path d="${pathBiz}" fill="none" stroke="#9333ea" stroke-width="3" opacity="0.6" />
-                <path d="${pathTech}" fill="none" stroke="#2563eb" stroke-width="3" opacity="0.6" />
-                <path d="${pathTotal}" fill="none" stroke="#059669" stroke-width="4" />
+                <!-- Lines (Thicker) -->
+                <path d="${pathBiz}" fill="none" stroke="#9333ea" stroke-width="4" opacity="0.5" />
+                <path d="${pathTech}" fill="none" stroke="#2563eb" stroke-width="4" opacity="0.5" />
+                <path d="${pathTotal}" fill="none" stroke="#059669" stroke-width="6" />
 
                 <!-- Points -->
                 ${pointsBiz}
@@ -386,10 +388,10 @@ function renderTrendChart(trendData) {
             </svg>
             
             <!-- Legend overlay -->
-            <div class="absolute top-2 right-2 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-100 shadow-sm flex gap-4 text-xs">
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>Biz</div>
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>Tech</div>
-                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600 border border-emerald-700"></span>Win Prob</div>
+            <div class="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-xl border border-gray-200 shadow-sm flex gap-6 text-sm">
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-600 opacity-60"></span>Biz Fit</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-600 opacity-60"></span>Tech Fit</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-600 border-2 border-emerald-700"></span>Win Prob</div>
             </div>
         </div>
     `;
